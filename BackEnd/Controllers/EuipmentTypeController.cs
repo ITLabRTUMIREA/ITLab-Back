@@ -1,6 +1,8 @@
-﻿using BackEnd.DataBase;
+﻿using System.Linq;
+using BackEnd.DataBase;
 using Microsoft.AspNetCore.Mvc;
-using static Models.PublicAPI.Response;
+using Microsoft.Extensions.Logging;
+using Models.PublicAPI.Responses;
 
 namespace BackEnd.Controllers
 {
@@ -10,15 +12,21 @@ namespace BackEnd.Controllers
     {
         private readonly DataBaseContext dbContext;
 
-        public EuipmentTypeController(DataBaseContext dbContext)
+        private readonly ILogger<EuipmentTypeController> logger;
+
+        public EuipmentTypeController(
+            DataBaseContext dbContext,
+            ILogger<EuipmentTypeController> logger)
         {
+            this.logger = logger;
             this.dbContext = dbContext;
         }
 
-        // GET: api/EuipmentType
-        public Base Get()
+        [HttpGet("{a}/{b}")]
+        public ResponseBase Get(int a, int b)
         {
-            return new Base(Models.PublicAPI.Response.StatusCode.OK);
+            logger.LogDebug((a / b).ToString());
+            return new ResponseBase(ResponseStatusCode.OK);
         }
 
         // GET: api/EuipmentType/5

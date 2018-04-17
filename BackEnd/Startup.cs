@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BackEnd.DataBase;
+using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,8 @@ namespace BackEnd
                 app.UseDeveloperExceptionPage();
             }
 
+
+            app.UseMiddlewareClassTemplate();
             app.UseMvc();
         }
     }

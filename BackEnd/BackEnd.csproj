@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Models.PublicAPI\Models.PublicAPI.fsproj" />
     <ProjectReference Include="..\Models\Models.fsproj" />
+    <ProjectReference Include="..\Models.PublicAPI\Models.PublicAPI.csproj" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
