@@ -7,7 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
+using Extensions;
 namespace BackEnd
 {
     public class Program
@@ -19,7 +19,7 @@ namespace BackEnd
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(config => config.AddJsonFile("appsettings.Secret.json", false))
+                .UseConfigFile("appsettings.Secret.json")
                 .UseStartup<Startup>()
                 .Build();
     }

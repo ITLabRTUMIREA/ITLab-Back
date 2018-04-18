@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Extensions\Extensions.csproj" />
     <ProjectReference Include="..\Models\Models.fsproj" />
     <ProjectReference Include="..\Models.PublicAPI\Models.PublicAPI.csproj" />
   </ItemGroup>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Models.PublicAPI.Responses;
 using Newtonsoft.Json;
 
 namespace BackEnd.Exceptions
@@ -36,9 +37,9 @@ namespace BackEnd.Exceptions
         {
             switch (ex){
                 case ApiLogicException api:
-                    return JsonConvert.SerializeObject(api);
+                    return api.ResponseModel;
                 default:
-                    return new UnknownException(ex.Message);
+                    return new ResponseBase(ResponseStatusCode.Unknown);
             }
         }
 

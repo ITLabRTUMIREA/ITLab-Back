@@ -3,13 +3,15 @@ using Models.PublicAPI.Responses;
 
 namespace BackEnd.Exceptions
 {
-    public abstract class ApiLogicException : Exception, IResponse
+    public abstract class ApiLogicException : Exception
     {
-        public ResponseStatusCode StatusCode { get; set; }
-        protected ApiLogicException(ResponseStatusCode statusCode, string message = null)
+        public ExceptionResponse ResponseModel { get; }
+
+        protected ApiLogicException(ExceptionResponse responseBase, string message = null)
             : base(message)
         {
-            StatusCode = statusCode;
+            ResponseModel = responseBase;
         }
+
     }
 }

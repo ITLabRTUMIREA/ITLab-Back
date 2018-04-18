@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Models.PublicAPI.Responses
 {
-    public class ResponseBase : IResponse
+    public class ResponseBase
     {
         public ResponseStatusCode StatusCode { get; }
 
