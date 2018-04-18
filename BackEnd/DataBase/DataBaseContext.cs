@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Models.Equipments;
-using static Models.Equipments.Equipments;
 
 namespace BackEnd.DataBase
 {
@@ -13,6 +12,6 @@ namespace BackEnd.DataBase
         public DataBaseContext(DbContextOptions options): base(options)
         {
         }
-        public DbSet<EquipmetType> EquipmentTypes { get; set; }
+        public DbSet<EquipmentType> EquipmentTypes { get; set; }
     }
 }
