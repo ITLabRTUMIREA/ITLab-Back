@@ -12,9 +12,9 @@ namespace Extensions
                 return builder
                     .ConfigureAppConfiguration(config => config.AddJsonFile(fileName, false));
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception($"Please, add JSON file {fileName} in project folder");
+                throw new Exception($"Please, add JSON file {fileName} in project folder", ex);
             }
         }
     }
