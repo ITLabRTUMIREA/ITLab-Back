@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
+using BackEnd.Formatting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +30,11 @@ namespace BackEnd
         {
             services.AddDbContext<DataBaseContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultDatabase")));
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                // options.InputFormatters.Insert(0, new InputJsonFormatter());
+            });
+            services.AddAutoMapper();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

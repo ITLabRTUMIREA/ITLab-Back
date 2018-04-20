@@ -13,7 +13,10 @@ namespace BackEnd.Exceptions
     public class ApiLogicExceptionsHandlerMiddleware
     {
         private readonly RequestDelegate _next;
-
+        private readonly JsonSerializerSettings jsonSerializeSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore
+        };
         public ApiLogicExceptionsHandlerMiddleware(RequestDelegate next)
         {
             _next = next;
@@ -21,9 +24,12 @@ namespace BackEnd.Exceptions
 
         public async Task Invoke(HttpContext context)
         {
-            try{
+            try
+            {
                 await _next(context);
-            } catch (Exception ex){
+            }
+            catch (Exception ex)
+            {
                 context.Response.Clear();
                 context.Response.StatusCode = StatusCodes.Status200OK;
                 context.Response.ContentType = "application/json";
@@ -32,10 +38,11 @@ namespace BackEnd.Exceptions
             }
         }
         private string Content(Exception ex)
-            => JsonConvert.SerializeObject(GetData(ex));
+            => JsonConvert.SerializeObject(GetData(ex), jsonSerializeSettings);
         private object GetData(Exception ex)
         {
-            switch (ex){
+            switch (ex)
+            {
                 case ApiLogicException api:
                     return api.ResponseModel;
                 default:

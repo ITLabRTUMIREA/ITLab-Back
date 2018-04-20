@@ -6,6 +6,8 @@ namespace Models.PublicAPI.Responses
     {
         Unknown,
         OK,
-        NotAuthorize
+        FieldExist,
+        NotFound,
+        IncorrectRequestData
     }
 }
