@@ -8,6 +8,7 @@ namespace Models.PublicAPI.Responses
         OK,
         FieldExist,
         NotFound,
-        IncorrectRequestData
+        IncorrectRequestData,
+        NotImplenment
     }
 }

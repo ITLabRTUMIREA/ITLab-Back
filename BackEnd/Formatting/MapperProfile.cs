@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Models.Equipments;
 using Models.PublicAPI.Requests.Equipment;
+using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using System;
 using System.Collections.Generic;
 using System.Linq;

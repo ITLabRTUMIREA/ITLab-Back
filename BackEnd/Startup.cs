@@ -30,7 +30,10 @@ namespace BackEnd
         {
             services.AddDbContext<DataBaseContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultDatabase")));
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add<ValidateModelAttribute>();
+            });
             services.AddAutoMapper();
         }
 

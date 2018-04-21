@@ -9,13 +9,14 @@ using Newtonsoft.Json;
 
 namespace BackEnd.Exceptions
 {
-    // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
+
     public class ApiLogicExceptionsHandlerMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly JsonSerializerSettings jsonSerializeSettings = new JsonSerializerSettings
         {
-            NullValueHandling = NullValueHandling.Ignore
+            NullValueHandling = NullValueHandling.Ignore,
+            //TypeNameHandling = TypeNameHandling.All
         };
         public ApiLogicExceptionsHandlerMiddleware(RequestDelegate next)
         {
@@ -38,13 +39,15 @@ namespace BackEnd.Exceptions
             }
         }
         private string Content(Exception ex)
-            => JsonConvert.SerializeObject(GetData(ex), jsonSerializeSettings);
+            => JsonConvert.SerializeObject(GetData(ex), Newtonsoft.Json.Formatting.Indented, jsonSerializeSettings);
         private object GetData(Exception ex)
         {
             switch (ex)
             {
                 case ApiLogicException api:
                     return api.ResponseModel;
+                case NotImplementedException nie:
+                    return new ResponseBase(ResponseStatusCode.NotImplenment);
                 default:
                     return new ResponseBase(ResponseStatusCode.Unknown);
             }
