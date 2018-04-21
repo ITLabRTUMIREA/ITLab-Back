@@ -1,5 +1,6 @@
 ﻿using System;
 using Models.PublicAPI.Responses;
+using Models.PublicAPI.Responses.Exceptions;
 
 namespace BackEnd.Exceptions
 {

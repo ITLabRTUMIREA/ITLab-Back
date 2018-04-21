@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
+using BackEnd.Formatting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Models.Equipments;
@@ -16,6 +17,7 @@ namespace BackEnd.Controllers
 {
     [Produces("application/json")]
     [Route("api/EuipmentType")]
+    [ValidateModel]
     public class EuipmentTypeController : Controller
     {
         private readonly DataBaseContext dbContext;

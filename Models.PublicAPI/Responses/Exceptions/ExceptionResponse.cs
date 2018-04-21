@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Models.PublicAPI.Responses
+namespace Models.PublicAPI.Responses.Exceptions
 {
     public class ExceptionResponse : ResponseBase
     {

@@ -30,10 +30,7 @@ namespace BackEnd
         {
             services.AddDbContext<DataBaseContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultDatabase")));
-            services.AddMvc(options =>
-            {
-                // options.InputFormatters.Insert(0, new InputJsonFormatter());
-            });
+            services.AddMvc();
             services.AddAutoMapper();
         }
 
