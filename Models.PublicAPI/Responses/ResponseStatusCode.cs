@@ -9,6 +9,7 @@ namespace Models.PublicAPI.Responses
         FieldExist,
         NotFound,
         IncorrectRequestData,
-        NotImplenment
+        NotImplenment,
+        EquipmentTypeNotFound
     }
 }

@@ -35,7 +35,7 @@ namespace BackEnd.Controllers
         }
         [HttpGet]
         public ListResponse<Equipment> Get()
-            => 
+            =>
             ListResponse<Equipment>.Create(dbContext.Equipments);
 
         [HttpGet("{id}")]
@@ -44,12 +44,21 @@ namespace BackEnd.Controllers
             OneObjectResponse<Equipment>.Create(
                 await dbContext.Equipments.FindAsync(id)
                 ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound));
-        
+
         // POST: api/Equipment
         [HttpPost]
-        public OneObjectResponse<Equipment> Post([FromBody]EquipmentCreateRequest value)
+        public async Task<OneObjectResponse<Equipment>> PostAsync([FromBody]EquipmentCreateRequest value)
         {
-            throw new NotImplementedException();
+            var type = dbContext.EquipmentTypes.FirstOrDefault(eqt => eqt.Id == value.EquipmentTypeId)
+                ?? throw ApiLogicException.Create(ResponseStatusCode.EquipmentTypeNotFound);
+            var now = dbContext.Equipments.FirstOrDefault(eq => eq.SerialNumber == value.SerialNumber);
+            if (now != null)
+                throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
+
+            var newEquipment = mapper.Map<Equipment>(value);
+            await dbContext.Equipments.AddAsync(newEquipment);
+            await dbContext.SaveChangesAsync();
+            return OneObjectResponse<Equipment>.Create(newEquipment);
         }
 
         // PUT: api/Equipment/5

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Models.Equipments;
 using Models.PublicAPI.Requests.Equipment;
+using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace BackEnd.Formating
         public MapperProfile()
         {
             CreateMap<EquipmentTypeCreateRequest, EquipmentType>();
+            CreateMap<EquipmentCreateRequest, Equipment>();
         }
     }
 }

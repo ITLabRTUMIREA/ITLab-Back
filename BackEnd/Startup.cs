@@ -29,7 +29,7 @@ namespace BackEnd
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataBaseContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultDatabase")));
+                options.UseSqlServer(Configuration.GetConnectionString("LocalDatabase")));
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
