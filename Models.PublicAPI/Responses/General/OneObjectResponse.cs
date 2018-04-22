@@ -15,5 +15,8 @@ namespace Models.PublicAPI.Responses.General
         }
         public static OneObjectResponse<T> Create(T data)
             => new OneObjectResponse<T>(ResponseStatusCode.OK, data);
+
+        public static implicit operator OneObjectResponse<T>(T value)
+            => Create(value);
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models.Equipments;
+using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Equipment;
@@ -58,7 +59,7 @@ namespace BackEnd.Controllers
             return OneObjectResponse<EquipmentPresent>.Create(mapper.Map<EquipmentPresent>(newEquipment));
         }
 
-        [HttpPut()]
+        [HttpPut]
         public async Task<OneObjectResponse<EquipmentPresent>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
         {
             var toEdit = await CheckAndGetEquipmentAsync(request.Id);
@@ -73,11 +74,13 @@ namespace BackEnd.Controllers
             return OneObjectResponse<EquipmentPresent>.Create(mapper.Map<EquipmentPresent>(toEdit));
         }
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete]
+        public async Task<OneObjectResponse<Guid>> DeleteAsync([FromBody]IdRequest request)
         {
-            throw new NotImplementedException();
+            var toDelete = await CheckAndGetEquipmentAsync(request.Id);
+            dbContext.Equipments.Remove(toDelete);
+            await dbContext.SaveChangesAsync();
+            return request.Id;
         }
 
         private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
