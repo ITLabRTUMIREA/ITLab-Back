@@ -45,7 +45,7 @@ namespace BackEnd.Controllers
                 await dbContext.Equipments.FindAsync(id)
                 ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound));
 
-        // POST: api/Equipment
+
         [HttpPost]
         public async Task<OneObjectResponse<Equipment>> PostAsync([FromBody]EquipmentCreateRequest value)
         {

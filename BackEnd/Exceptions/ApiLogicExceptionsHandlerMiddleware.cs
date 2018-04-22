@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Models.PublicAPI.Responses;
 using Newtonsoft.Json;
 
@@ -13,14 +14,14 @@ namespace BackEnd.Exceptions
     public class ApiLogicExceptionsHandlerMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly JsonSerializerSettings jsonSerializeSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            //TypeNameHandling = TypeNameHandling.All
-        };
-        public ApiLogicExceptionsHandlerMiddleware(RequestDelegate next)
+        private readonly JsonSerializerSettings jsonSerializerSettings;
+
+        public ApiLogicExceptionsHandlerMiddleware(
+            RequestDelegate next,
+            IOptions<JsonSerializerSettings> jsonSerializerSettings)
         {
             _next = next;
+            this.jsonSerializerSettings = jsonSerializerSettings.Value;
         }
 
         public async Task Invoke(HttpContext context)
@@ -39,7 +40,7 @@ namespace BackEnd.Exceptions
             }
         }
         private string Content(Exception ex)
-            => JsonConvert.SerializeObject(GetData(ex), Newtonsoft.Json.Formatting.Indented, jsonSerializeSettings);
+            => JsonConvert.SerializeObject(GetData(ex), Newtonsoft.Json.Formatting.Indented, jsonSerializerSettings);
         private object GetData(Exception ex)
         {
             switch (ex)
