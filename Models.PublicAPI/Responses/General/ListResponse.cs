@@ -15,5 +15,8 @@ namespace Models.PublicAPI.Responses.General
         }
         public static ListResponse<T> Create(IEnumerable<T> data)
             => new ListResponse<T>(ResponseStatusCode.OK, data);
+
+        public static implicit operator ListResponse<T>(List<T> value)
+            => Create(value);
     }
 }

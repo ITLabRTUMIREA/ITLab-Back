@@ -37,14 +37,12 @@ namespace BackEnd.Controllers
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public ListResponse<Equipment> Get()
-            =>
-            ListResponse<Equipment>.Create(dbContext.Equipments);
+        public async Task<ListResponse<Equipment>> Get()
+            => await dbContext.Equipments.ToListAsync();
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<Equipment>> GetAsync(Guid id)
-            =>
-            OneObjectResponse<Equipment>.Create(await CheckAndGetEquipmentAsync(id));
+            => await CheckAndGetEquipmentAsync(id);
 
 
         [HttpPost]
@@ -56,7 +54,7 @@ namespace BackEnd.Controllers
             var newEquipment = mapper.Map<Equipment>(request);
             await dbContext.Equipments.AddAsync(newEquipment);
             await dbContext.SaveChangesAsync();
-            return OneObjectResponse<EquipmentPresent>.Create(mapper.Map<EquipmentPresent>(newEquipment));
+            return mapper.Map<EquipmentPresent>(newEquipment);
         }
 
         [HttpPut]
@@ -71,7 +69,7 @@ namespace BackEnd.Controllers
 
             await dbContext.SaveChangesAsync();
 
-            return OneObjectResponse<EquipmentPresent>.Create(mapper.Map<EquipmentPresent>(toEdit));
+            return mapper.Map<EquipmentPresent>(toEdit);
         }
 
         [HttpDelete]
