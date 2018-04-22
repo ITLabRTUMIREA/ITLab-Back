@@ -3,6 +3,7 @@ using Models.Equipments;
 using Models.PublicAPI.Requests.Equipment;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
+using Models.PublicAPI.Responses.Equipment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace BackEnd.Formating
         {
             CreateMap<EquipmentTypeCreateRequest, EquipmentType>();
             CreateMap<EquipmentCreateRequest, Equipment>();
+            CreateMap<Equipment, EquipmentPresent>();
         }
     }
 }

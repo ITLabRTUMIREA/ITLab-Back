@@ -7,10 +7,12 @@ using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models.Equipments;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses;
+using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.General;
 
 namespace BackEnd.Controllers
@@ -41,31 +43,34 @@ namespace BackEnd.Controllers
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<Equipment>> GetAsync(Guid id)
             =>
-            OneObjectResponse<Equipment>.Create(
-                await dbContext.Equipments.FindAsync(id)
-                ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound));
+            OneObjectResponse<Equipment>.Create(await CheckAndGetEquipmentAsync(id));
 
 
         [HttpPost]
-        public async Task<OneObjectResponse<Equipment>> PostAsync([FromBody]EquipmentCreateRequest value)
+        public async Task<OneObjectResponse<EquipmentPresent>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
-            var type = dbContext.EquipmentTypes.FirstOrDefault(eqt => eqt.Id == value.EquipmentTypeId)
-                ?? throw ApiLogicException.Create(ResponseStatusCode.EquipmentTypeNotFound);
-            var now = dbContext.Equipments.FirstOrDefault(eq => eq.SerialNumber == value.SerialNumber);
-            if (now != null)
-                throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
+            var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
+            await CheckNotExst(request.SerialNumber);
 
-            var newEquipment = mapper.Map<Equipment>(value);
+            var newEquipment = mapper.Map<Equipment>(request);
             await dbContext.Equipments.AddAsync(newEquipment);
             await dbContext.SaveChangesAsync();
-            return OneObjectResponse<Equipment>.Create(newEquipment);
+            return OneObjectResponse<EquipmentPresent>.Create(mapper.Map<EquipmentPresent>(newEquipment));
         }
 
-        // PUT: api/Equipment/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        [HttpPut()]
+        public async Task<OneObjectResponse<EquipmentPresent>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
         {
-            throw new NotImplementedException();
+            var toEdit = await CheckAndGetEquipmentAsync(request.Id);
+            var targetType = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
+            await CheckNotExst(request.SerialNumber);
+
+            toEdit.EquipmentType = targetType;
+            toEdit.SerialNumber = request.SerialNumber;
+
+            await dbContext.SaveChangesAsync();
+
+            return OneObjectResponse<EquipmentPresent>.Create(mapper.Map<EquipmentPresent>(toEdit));
         }
 
         // DELETE: api/ApiWithActions/5
@@ -74,5 +79,21 @@ namespace BackEnd.Controllers
         {
             throw new NotImplementedException();
         }
+
+        private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
+            => await dbContext.Equipments.FindAsync(id)
+              ?? throw ApiLogicException.Create(ResponseStatusCode.EquipmentTypeNotFound);
+
+        private async Task CheckNotExst(string serialNumber)
+        {
+            var now = await dbContext.Equipments.FirstOrDefaultAsync(eq => eq.SerialNumber == serialNumber);
+            if (now != null)
+                throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
+        }
+
+        private async Task<EquipmentType> CheckAndGetEquipmentTypeAsync(Guid typeId)
+            => await dbContext.EquipmentTypes.FindAsync(typeId)
+                ?? throw ApiLogicException.Create(ResponseStatusCode.EquipmentTypeNotFound);
+
     }
 }
