@@ -42,6 +42,11 @@ namespace BackEnd
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultDatabase")));
             services.AddMvc();
 
+            services.AddAutoMapper();
+
+            services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
+
+
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 
             services.AddSingleton<IJwtFactory, JwtFactory>();
