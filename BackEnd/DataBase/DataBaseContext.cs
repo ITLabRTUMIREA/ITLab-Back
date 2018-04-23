@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Models.Equipments;
 using Models.Events;
+using Models;
 
 namespace BackEnd.DataBase
 {

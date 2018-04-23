@@ -16,7 +16,7 @@ using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.General;
 
-namespace BackEnd.Controllers
+namespace BackEnd.Controllers.Equipments
 {
     [Produces("application/json")]
     [Route("api/Equipment")]

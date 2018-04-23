@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BackEnd.Controllers
+namespace BackEnd.Controllers.Events
 {
     [Produces("application/json")]
     [Route("api/EventType")]

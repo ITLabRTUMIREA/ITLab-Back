@@ -41,7 +41,12 @@ namespace BackEnd
         {
             services.AddDbContext<DataBaseContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("LocalDatabase")));
-            services.AddMvc();
+            services.AddMvc(options => options.Filters.Add<ValidateModelAttribute>());
+
+            services.AddAutoMapper();
+
+            services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
+
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 

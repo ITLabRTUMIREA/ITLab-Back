@@ -15,7 +15,7 @@ using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 
-namespace BackEnd.Controllers
+namespace BackEnd.Controllers.Equipments
 {
     [Produces("application/json")]
     [Route("api/EquipmentType")]
