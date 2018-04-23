@@ -9,7 +9,6 @@ using BackEnd.Authorize;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using BackEnd.Formatting;
-using BackEnd.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,6 +22,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Models;
 using Newtonsoft.Json;
+using BackEnd.Services.Interfaces;
+using BackEnd.Services;
 
 namespace BackEnd
 {
@@ -39,7 +40,7 @@ namespace BackEnd
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataBaseContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultDatabase")));
+                options.UseSqlServer(Configuration.GetConnectionString("LocalDatabase")));
             services.AddMvc();
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
@@ -84,12 +85,6 @@ namespace BackEnd
                 configureOptions.SaveToken = true;
             });
 
-            // api user claim policy
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("ApiUSer", policy => policy.RequireClaim(Constants.JwtClaimIdentifiers.Rol, Constants.JwtClaims.ApiAccess));
-            });
-
             // add identity
             services.AddIdentity<User, IdentityRole<Guid>>(identityOptions =>
             {
@@ -102,6 +97,8 @@ namespace BackEnd
             })
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();
+
+            services.AddTransient<IEmailSender, EmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -116,42 +113,42 @@ namespace BackEnd
             app.UseAuthentication();
             app.UseMvc();
 
-            //CreateRoles(serviceProvider).Wait();
+            CreateRoles(serviceProvider).Wait();
         }
-        //public async Task CreateRoles(IServiceProvider serviceProvider)
-        //{
-        //    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-        //    var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-        //    string[] roles = { "Admin", "User", "Zuev))0)" };
-        //    IdentityResult roleResult;
+        public async Task CreateRoles(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
+            string[] roles = { "Admin", "User", "Zuev))0)" };
+            IdentityResult roleResult;
 
-        //    foreach (var role in roles)
-        //    {
-        //        var roleExist = await roleManager.RoleExistsAsync(role);
-        //        if (!roleExist)
-        //        {
-        //            var identityRole = new IdentityRole<Guid> { Name = role };
-        //            roleResult = await roleManager.CreateAsync(identityRole);
-        //        }
-        //    }
-        //    var config = Configuration.GetSection("UserSettings");
-        //    var waitRoles = config.GetSection("Roles")
-        //        .AsEnumerable()
-        //        .Select(KVP => KVP.Value)
-        //        .Where(V => V != null)
-        //        .ToList();
-        //    if (config["UserEmail"] == null || waitRoles.Count == 0)
-        //        return;
+            foreach (var role in roles)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(role);
+                if (!roleExist)
+                {
+                    var identityRole = new IdentityRole<Guid> { Name = role };
+                    roleResult = await roleManager.CreateAsync(identityRole);
+                }
+            }
+            var config = Configuration.GetSection("UserSettings");
+            var waitRoles = config.GetSection("Roles")
+                .AsEnumerable()
+                .Select(KVP => KVP.Value)
+                .Where(V => V != null)
+                .ToList();
+            if (config["UserEmail"] == null || waitRoles.Count == 0)
+                return;
 
-        //    var powerUser = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
-        //    if (powerUser == null)
-        //        return;
+            var powerUser = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
+            if (powerUser == null)
+                return;
 
-        //    foreach (var role in waitRoles)
-        //    {
-        //        if (!await userManager.IsInRoleAsync(powerUser, role))
-        //            await userManager.AddToRoleAsync(powerUser, role);
-        //    }
-        //}
+            foreach (var role in waitRoles)
+            {
+                if (!await userManager.IsInRoleAsync(powerUser, role))
+                    await userManager.AddToRoleAsync(powerUser, role);
+            }
+        }
     }
 }

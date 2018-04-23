@@ -15,5 +15,7 @@ namespace Models.PublicAPI.Responses
 #endif
 
         }
+        public static implicit operator ResponseBase(ResponseStatusCode statusCode)
+            => new ResponseBase(statusCode);
     }
 }
