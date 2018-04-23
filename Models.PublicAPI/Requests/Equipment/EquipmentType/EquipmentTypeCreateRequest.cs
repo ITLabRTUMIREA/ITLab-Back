@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Models.PublicAPI.Requests.Equipment.EquipmentType
+﻿namespace Models.PublicAPI.Requests.Equipment.EquipmentType
 {
     public class EquipmentTypeCreateRequest
     {

@@ -49,7 +49,7 @@ namespace BackEnd.Controllers
         public async Task<OneObjectResponse<EquipmentPresent>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
             var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
-            await CheckNotExst(request.SerialNumber);
+            await CheckNotExist(request.SerialNumber);
 
             var newEquipment = mapper.Map<Equipment>(request);
             await dbContext.Equipments.AddAsync(newEquipment);
@@ -62,7 +62,7 @@ namespace BackEnd.Controllers
         {
             var toEdit = await CheckAndGetEquipmentAsync(request.Id);
             var targetType = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
-            await CheckNotExst(request.SerialNumber);
+            await CheckNotExist(request.SerialNumber);
 
             toEdit.EquipmentType = targetType;
             toEdit.SerialNumber = request.SerialNumber;
@@ -83,9 +83,9 @@ namespace BackEnd.Controllers
 
         private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
             => await dbContext.Equipments.FindAsync(id)
-              ?? throw ApiLogicException.Create(ResponseStatusCode.EquipmentTypeNotFound);
+              ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
-        private async Task CheckNotExst(string serialNumber)
+        private async Task CheckNotExist(string serialNumber)
         {
             var now = await dbContext.Equipments.FirstOrDefaultAsync(eq => eq.SerialNumber == serialNumber);
             if (now != null)
