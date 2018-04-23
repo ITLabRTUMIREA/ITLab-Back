@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Models.PublicAPI.Requests.Equipment
+namespace Models.PublicAPI.Requests.Events.EventType
 {
-    public class EquipmentTypeCreateRequest
+    public class EventTypeEditRequest : IdRequest
     {
         public string Title { get; set; }
     }

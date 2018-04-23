@@ -6,28 +6,29 @@ using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using BackEnd.Formatting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models.Equipments;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Equipment;
+using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 
 namespace BackEnd.Controllers
 {
     [Produces("application/json")]
-    [Route("api/EuipmentType")]
-    [ValidateModel]
-    public class EuipmentTypeController : Controller
+    [Route("api/EquipmentType")]
+    public class EquipmentTypeController : Controller
     {
         private readonly DataBaseContext dbContext;
 
-        private readonly ILogger<EuipmentTypeController> logger;
+        private readonly ILogger<EquipmentTypeController> logger;
         private readonly IMapper mapper;
 
-        public EuipmentTypeController(
+        public EquipmentTypeController(
             DataBaseContext dbContext,
-            ILogger<EuipmentTypeController> logger,
+            ILogger<EquipmentTypeController> logger,
             IMapper mapper)
         {
             this.logger = logger;
@@ -35,17 +36,14 @@ namespace BackEnd.Controllers
             this.dbContext = dbContext;
         }
 
-        public ListResponse<EquipmentType> Get()
-        {
-            return ListResponse<EquipmentType>.Create(dbContext.EquipmentTypes);
-        }
+        public async Task<ListResponse<EquipmentType>> GetAsync()
+            => await dbContext.EquipmentTypes.ToListAsync();
 
-        
+
         [HttpGet("{id}")]
-        public OneObjectResponse<EquipmentType> Get(Guid id)
-        {
-            return OneObjectResponse<EquipmentType>.Create(dbContext.EquipmentTypes.FirstOrDefault(et => et.Id == id));
-        }
+        public async Task<OneObjectResponse<EquipmentType>> GetAsync(Guid id)
+            => await dbContext.EquipmentTypes.FindAsync(id)
+                ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentType>> Post([FromBody]EquipmentTypeCreateRequest request)
@@ -56,17 +54,17 @@ namespace BackEnd.Controllers
                 throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
             var added = await dbContext.EquipmentTypes.AddAsync(equipmentType);
             await dbContext.SaveChangesAsync();
-            return OneObjectResponse<EquipmentType>.Create(added.Entity);
+            return added.Entity;
         }
 
 
         [HttpPut]
         public async Task<OneObjectResponse<EquipmentType>> Put([FromBody]EquipmentTypeEditRequest request)
         {
-            var now = await dbContext.EquipmentTypes.FindAsync(request?.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+            var now = await dbContext.EquipmentTypes.FindAsync(request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
             now.Title = request.Title;
             await dbContext.SaveChangesAsync();
-            return OneObjectResponse<EquipmentType>.Create(now);
+            return now;
         }
 
         [HttpDelete]
@@ -75,7 +73,7 @@ namespace BackEnd.Controllers
             var now = await dbContext.EquipmentTypes.FindAsync(request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
             dbContext.Remove(now);
             await dbContext.SaveChangesAsync();
-            return OneObjectResponse<Guid>.Create(now.Id);
+            return now.Id;
         }
     }
 }

@@ -4,22 +4,28 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Models.PublicAPI.Responses;
 using Newtonsoft.Json;
 
 namespace BackEnd.Exceptions
 {
-    // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
+
     public class ApiLogicExceptionsHandlerMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly JsonSerializerSettings jsonSerializeSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Ignore
-        };
-        public ApiLogicExceptionsHandlerMiddleware(RequestDelegate next)
+        private readonly ILogger<ApiLogicExceptionsHandlerMiddleware> logger;
+        private readonly JsonSerializerSettings jsonSerializerSettings;
+
+        public ApiLogicExceptionsHandlerMiddleware(
+            RequestDelegate next,
+            IOptions<JsonSerializerSettings> jsonSerializerSettings,
+            ILogger<ApiLogicExceptionsHandlerMiddleware> logger)
         {
             _next = next;
+            this.logger = logger;
+            this.jsonSerializerSettings = jsonSerializerSettings.Value;
         }
 
         public async Task Invoke(HttpContext context)
@@ -38,14 +44,19 @@ namespace BackEnd.Exceptions
             }
         }
         private string Content(Exception ex)
-            => JsonConvert.SerializeObject(GetData(ex), jsonSerializeSettings);
+            => JsonConvert.SerializeObject(GetData(ex), Newtonsoft.Json.Formatting.Indented, jsonSerializerSettings);
         private object GetData(Exception ex)
         {
             switch (ex)
             {
                 case ApiLogicException api:
+                    logger.LogInformation(ex, "exception in controller");
                     return api.ResponseModel;
+                case NotImplementedException nie:
+                    logger.LogWarning(ex, "Not implement");
+                    return new ResponseBase(ResponseStatusCode.NotImplenment);
                 default:
+                    logger.LogWarning(ex, "Unknown exception");
                     return new ResponseBase(ResponseStatusCode.Unknown);
             }
         }
