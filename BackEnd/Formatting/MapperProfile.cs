@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Models;
 using Models.Equipments;
 using Models.Events;
+using Models.PublicAPI.Requests.Account;
 using Models.PublicAPI.Requests.Equipment;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
@@ -8,6 +10,7 @@ using Models.PublicAPI.Requests.Events.Event;
 using Models.PublicAPI.Requests.Events.EventType;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.Event;
+using Models.PublicAPI.Responses.Login;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +25,8 @@ namespace BackEnd.Formating
             CreateMap<EquipmentTypeCreateRequest, EquipmentType>();
             CreateMap<EquipmentCreateRequest, Equipment>();
             CreateMap<Equipment, EquipmentPresent>();
+            CreateMap<AccountCreateRequest, User>().ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
+            CreateMap<User, LoginResponse>();
 
             CreateMap<EqiupmentEditRequest, Equipment>()
                .ForAllMembers(opt => opt.Condition(a =>

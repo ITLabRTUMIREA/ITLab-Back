@@ -17,7 +17,7 @@ using Models.PublicAPI.Responses;
 namespace BackEnd.Controllers
 {
     [Produces("application/json")]
-    [Route("api/Account")]
+    [Route("api/account")]
     public class AccountController : Controller
     {
         private readonly IMapper mapper;
@@ -55,14 +55,14 @@ namespace BackEnd.Controllers
         [HttpPost]
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {
-
-            User user = mapper.Map<User>(account);
+            
+            var user = mapper.Map<User>(account);
             var result = await userManager.CreateAsync(user, account.Password);
-            result = await userManager.AddToRoleAsync(user, "User");
 
-            var token = userManager.GenerateEmailConfirmationTokenAsync(user);
-            var url = $"http://localhost:5000/api/Account/{user.Id}/{token}";
-            await emailSender.SendEmailConfirm(account.Email, url);
+            //result = await userManager.AddToRoleAsync(user, "User");
+            //var token = userManager.GenerateEmailConfirmationTokenAsync(user);
+            //var url = $"http://localhost:5000/api/Account/{user.Id}/{token}";
+            //await emailSender.SendEmailConfirm(account.Email, url);
 
             return ResponseStatusCode.OK;
         }

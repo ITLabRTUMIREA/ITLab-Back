@@ -46,15 +46,15 @@ namespace BackEnd.Authorize
           => (long)Math.Round((date.ToUniversalTime() -
                                new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
                               .TotalSeconds);
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id, string[] roles)
+        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id /*string[] roles*/)
         {
-            var claims = new Claim[roles.Length + 1];
-            for (int i = 0; i < roles.Length; i++)
-            {
-                claims[i] = new Claim(ClaimTypes.Role, roles[i]);
-            }
-            claims[claims.Length - 1] = new Claim(ClaimTypes.NameIdentifier, id);
-            return new ClaimsIdentity(new GenericIdentity(userName, "Token"), claims);
+            //var claims = new Claim[roles.Length + 1];
+            //for (int i = 0; i < roles.Length; i++)
+            //{
+            //    claims[i] = new Claim(ClaimTypes.Role, roles[i]);
+            //}
+            //claims[claims.Length - 1] = new Claim(ClaimTypes.NameIdentifier, id);
+            return new ClaimsIdentity(new GenericIdentity(userName, "Token")/*, claims*/);
         }
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)
         {

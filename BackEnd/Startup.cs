@@ -118,7 +118,7 @@ namespace BackEnd
             app.UseAuthentication();
             app.UseMvc();
 
-            CreateRoles(serviceProvider).Wait();
+            //CreateRoles(serviceProvider).Wait();
         }
         public async Task CreateRoles(IServiceProvider serviceProvider)
         {
