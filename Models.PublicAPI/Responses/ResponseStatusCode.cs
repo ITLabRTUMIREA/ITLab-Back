@@ -10,6 +10,7 @@ namespace Models.PublicAPI.Responses
         NotFound,
         IncorrectRequestData,
         NotImplenment,
-        EquipmentTypeNotFound
+        EquipmentTypeNotFound,
+        EventTypeNotFound
     }
 }

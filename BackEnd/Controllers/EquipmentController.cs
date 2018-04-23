@@ -61,12 +61,12 @@ namespace BackEnd.Controllers
         public async Task<OneObjectResponse<EquipmentPresent>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
         {
             var toEdit = await CheckAndGetEquipmentAsync(request.Id);
-            var targetType = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
-            await CheckNotExist(request.SerialNumber);
+            if (request.EquipmentTypeId.HasValue)
+                await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId.Value);
+            if (string.IsNullOrEmpty(request.SerialNumber))
+                await CheckNotExist(request.SerialNumber);
 
-            toEdit.EquipmentType = targetType;
-            toEdit.SerialNumber = request.SerialNumber;
-
+            mapper.Map(request, toEdit);
             await dbContext.SaveChangesAsync();
 
             return mapper.Map<EquipmentPresent>(toEdit);
