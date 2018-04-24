@@ -8,6 +8,7 @@ using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Models.DataBaseLinks;
 using Models.Events;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event;
@@ -38,8 +39,13 @@ namespace BackEnd.Controllers.Events
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<Event>> Get()
-            => await dbContext.Events.ToListAsync();
+        public async Task<ListResponse<EventPresent>> Get()
+            => (await dbContext
+            .Events
+            .Include(e => e.EventEquipments)
+            .ToListAsync())
+            .Select(e => mapper.Map<EventPresent>(e))
+            .ToList();
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<Event>> GetAsync(Guid id)
@@ -56,6 +62,39 @@ namespace BackEnd.Controllers.Events
             await dbContext.SaveChangesAsync();
             return mapper.Map<EventPresent>(newEvent);
         }
+
+        [HttpPut("addequipment")]
+        public async Task<OneObjectResponse<EventPresent>> AddEquipments([FromBody]ChangeEquipmentRequest request)
+        {
+            var targetEvent = await dbContext
+                .Events
+                .Include(e => e.EventEquipments)
+                .FirstOrDefaultAsync(e => e.Id == request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+
+            var targetEquipment = await dbContext
+                .Equipments 
+                .Where(eq => request.EquipmentIds.Contains(eq.Id))
+                .Where(eq => !dbContext
+                    .Events
+                    .Where(e => e.EndTime > targetEvent.BeginTime && e.BeginTime < targetEvent.EndTime)
+                    .Any(e => e.EventEquipments.Any(eveq => eq.Id == eveq.EquipmentId)))
+                .ToListAsync();
+
+            if (targetEquipment.Count != request.EquipmentIds.Count)
+                throw ApiLogicException.Create(ResponseStatusCode.IncorrectEquipmentIds);
+
+            targetEvent
+                .EventEquipments
+                .AddRange
+                    (targetEquipment
+                    .Where(te => !targetEvent.EventEquipments.Select(et => et.EquipmentId).Contains(te.Id))
+                     .Select(eq => EventEquipment.Create(targetEvent, eq))
+                    );
+
+            dbContext.SaveChanges();
+            return mapper.Map<EventPresent>(targetEvent);
+        }
+
 
         [HttpPut]
         public async Task<OneObjectResponse<EventPresent>> PutAsync(int id, [FromBody]EqiupmentEditRequest request)

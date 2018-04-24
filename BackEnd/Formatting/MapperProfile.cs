@@ -35,10 +35,11 @@ namespace BackEnd.Formating
 
             CreateMap<EventTypeCreateRequest, EventType>();
             CreateMap<EventCreateRequest, Event>();
-            CreateMap<Event, EventPresent>();
+            CreateMap<Event, EventPresent>()
+                .AfterMap((e, ep, ctxt) => ep.EquipmentIds = e.EventEquipments?.Select(local => local.EquipmentId)?.ToList());
             CreateMap<EqiupmentEditRequest, Event>()
-                .ForAllMembers(opt => opt.Condition(a =>
-                  a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+                  .ForAllMembers(opt => opt.Condition(a =>
+                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.PublicAPI.Responses.Equipment;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,5 +13,6 @@ namespace Models.PublicAPI.Responses.Event
         public string Address { get; set; }
 
         public Guid EventTypeId { get; set; }
+        public List<Guid> EquipmentIds { get; set; }
     }
 }

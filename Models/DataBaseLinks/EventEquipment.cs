@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BackEnd.DataBase
+namespace Models.DataBaseLinks
 {
     public class EventEquipment
     {
@@ -14,5 +14,14 @@ namespace BackEnd.DataBase
 
         public Guid EquipmentId { get; set; }
         public Equipment Equipment { get; set; }
+
+        public static EventEquipment Create(Event ev, Equipment eq)
+            => new EventEquipment
+            {
+                EventId = ev.Id,
+                Event = ev,
+                EquipmentId = eq.Id,
+                Equipment = eq
+            };
     }
 }

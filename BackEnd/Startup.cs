@@ -24,6 +24,7 @@ using Models;
 using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using BackEnd.Services;
+using Microsoft.CodeAnalysis.Options;
 
 namespace BackEnd
 {
@@ -41,11 +42,20 @@ namespace BackEnd
         {
             services.AddDbContext<DataBaseContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("LocalDatabase")));
-            services.AddMvc(options => options.Filters.Add<ValidateModelAttribute>());
+            services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
+            services.AddMvc(options =>
+            {
+                options.Filters.Add<ValidateModelAttribute>();
+                // TODO WorkAround for property names!
+                options.OutputFormatters.Insert(0, new JsonOutputFormatter(
+                    services
+                    .BuildServiceProvider()
+                    .GetService<IOptions<JsonSerializerSettings>>()
+                    .Value, ArrayPool<char>.Shared));
+            });
 
             services.AddAutoMapper();
 
-            services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
 
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
