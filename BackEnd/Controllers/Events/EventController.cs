@@ -69,7 +69,7 @@ namespace BackEnd.Controllers.Events
             var targetEvent = await dbContext
                 .Events
                 .Include(e => e.EventEquipments)
-                .FirstOrDefaultAsync(e => e.Id == request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+                .FirstOrDefaultAsync(e => e.Id == request.Id) ?? throw (ApiLogicException)ResponseStatusCode.NotFound;
 
             var targetEquipment = await dbContext
                 .Equipments 

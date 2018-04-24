@@ -6,16 +6,19 @@ namespace Models.PublicAPI.Responses.Exceptions
 {
     public class InputParameterIncorrectResponse : ExceptionResponse
     {
-        public List<string> IncorrectFields { get; }
+        public List<IncorrectingInfo> IncorrectFields { get; }
 
         public InputParameterIncorrectResponse(
-            ResponseStatusCode statusCode,
-            List<string> incorrectFields,
+            List<IncorrectingInfo> incorrectFields,
             string message = null
-            ) : base(statusCode, message)
+            ) : base(ResponseStatusCode.IncorrectRequestData, message)
         {
             IncorrectFields = incorrectFields;
         }
-
     }
+        public class IncorrectingInfo
+        {
+            public string Fieldname { get; set; }
+            public string Message { get; set; }
+        }
 }

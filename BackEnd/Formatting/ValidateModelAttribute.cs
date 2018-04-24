@@ -19,7 +19,12 @@ namespace BackEnd.Formatting
             {
                 
                 throw ApiLogicException.Create(
-                    new InputParameterIncorrectResponse(ResponseStatusCode.IncorrectRequestData, modelState.Keys.ToList()));
+                    new InputParameterIncorrectResponse(modelState.Select(kvp => new IncorrectingInfo
+                    {
+                        Fieldname = kvp.Key,
+                        // TODO
+                        Message = kvp.Value.
+                    })));
             }
         }
     }

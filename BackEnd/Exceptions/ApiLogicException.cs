@@ -19,5 +19,7 @@ namespace BackEnd.Exceptions
         public static ApiLogicException Create(ResponseStatusCode statusCode, string message = null) =>
             new ApiLogicException(new ExceptionResponse(statusCode, message));
 
+        public static implicit operator ApiLogicException(ResponseStatusCode statusCode)
+            => Create(statusCode);
     }
 }
