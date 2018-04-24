@@ -26,19 +26,16 @@ namespace BackEnd.Controllers
         private readonly IJwtFactory jwtFactory;
         private readonly IOptions<JwtIssuerOptions> jwtOptions;
         private readonly IMapper mapper;
-        private readonly DataBaseContext context;
 
         public AuthenticationController(UserManager<User> userManager,
             IJwtFactory jwtFactory,
             IOptions<JwtIssuerOptions> jwtOptions,
-            IMapper mapper,
-            DataBaseContext context)
+            IMapper mapper)
         {
             this.userManager = userManager;
             this.jwtFactory = jwtFactory;
             this.jwtOptions = jwtOptions;
             this.mapper = mapper;
-            this.context = context;
         }
 
         [HttpPost]
@@ -54,17 +51,17 @@ namespace BackEnd.Controllers
             {
                 throw ApiLogicException.Create(ResponseStatusCode.WrongPassword);
             }
-            return GenerateResponse(user);
+            return GenerateResponseAsync(user);
         }
 
-        private LoginResponse GenerateResponse(User user, string token = "")
+        private LoginResponse GenerateResponseAsync(User user, string token = "")
         {
             var loginInfo = mapper.Map<LoginResponse>(user);
             loginInfo.Token = token;
 
             var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString()/*, userManager.GetRolesAsync(user).Result.ToArray()*/);
 
-            loginInfo.Token = Tokens.GenerateJwt(identity, jwtFactory, user.UserName).Result;
+            loginInfo.Token = jwtFactory.GenerateEncodedToken(user.UserName, identity);
             return loginInfo;
         }
     }

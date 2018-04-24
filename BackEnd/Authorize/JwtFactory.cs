@@ -19,11 +19,11 @@ namespace BackEnd.Authorize
             this.jwtOptions = jwtOptions.Value;
             ThrowIfInvalidOptions(this.jwtOptions);
         }
-        public async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity)
+        public string GenerateEncodedToken(string userName, ClaimsIdentity identity)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Jti, await jwtOptions.JtiGenerator()),
+                new Claim(JwtRegisteredClaimNames.Jti, jwtOptions.JtiGenerator()),
                 new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64)
             }.Concat(identity.Claims).ToArray();
 

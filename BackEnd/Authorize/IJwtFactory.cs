@@ -8,7 +8,7 @@ namespace BackEnd.Authorize
 {
     public interface IJwtFactory
     {
-        Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity);
+        string GenerateEncodedToken(string userName, ClaimsIdentity identity);
         ClaimsIdentity GenerateClaimsIdentity(string userName, string id/*string[] roles*/);
     }
 }

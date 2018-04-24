@@ -22,17 +22,14 @@ namespace BackEnd.Controllers
     {
         private readonly IMapper mapper;
         private readonly UserManager<User> userManager;
-        private readonly DataBaseContext dataBase;
         private readonly IEmailSender emailSender;
 
         public AccountController(IMapper mapper, 
             UserManager<User> userManager, 
-            DataBaseContext dataBase, 
             IEmailSender emailSender)
         {
             this.mapper = mapper;
             this.userManager = userManager;
-            this.dataBase = dataBase;
             this.emailSender = emailSender;
         }
 
