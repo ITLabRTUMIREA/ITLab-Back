@@ -19,6 +19,6 @@ namespace Models.PublicAPI.Responses.Exceptions
         public class IncorrectingInfo
         {
             public string Fieldname { get; set; }
-            public string Message { get; set; }
+            public List<string> Messages { get; set; }
         }
 }

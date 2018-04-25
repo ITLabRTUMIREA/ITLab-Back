@@ -29,7 +29,7 @@ namespace System.ComponentModel.DataAnnotations
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            ErrorMessage = ErrorMessageString;
+            ErrorMessage = $"value must be {criterion.ToString()} than {_comparisonProperty}";
             var currentValue = (IComparable)value;
 
             var property = validationContext.ObjectType.GetProperty(_comparisonProperty);

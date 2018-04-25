@@ -17,14 +17,14 @@ namespace BackEnd.Formatting
 
             if (!modelState.IsValid)
             {
-                
+
                 throw ApiLogicException.Create(
                     new InputParameterIncorrectResponse(modelState.Select(kvp => new IncorrectingInfo
                     {
                         Fieldname = kvp.Key,
-                        // TODO
-                        Message = kvp.Value.
-                    })));
+                        Messages = kvp.Value.Errors.Select(E => E.ErrorMessage).ToList()
+                    }).ToList()
+                    ));
             }
         }
     }
