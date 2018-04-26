@@ -54,7 +54,9 @@ namespace BackEnd.Authorize
             //    claims[i] = new Claim(ClaimTypes.Role, roles[i]);
             //}
             //claims[claims.Length - 1] = new Claim(ClaimTypes.NameIdentifier, id);
-            return new ClaimsIdentity(new GenericIdentity(userName, "Token")/*, claims*/);
+            var identity = new ClaimsIdentity();
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id));
+            return identity;
         }
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)
         {

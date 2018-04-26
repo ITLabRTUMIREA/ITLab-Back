@@ -33,6 +33,8 @@ namespace BackEnd.Exceptions
             try
             {
                 await _next(context);
+                if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+                    throw ApiLogicException.Create(ResponseStatusCode.Unauthorized);
             }
             catch (Exception ex)
             {

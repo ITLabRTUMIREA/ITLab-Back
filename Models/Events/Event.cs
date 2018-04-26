@@ -13,6 +13,7 @@ namespace Models.Events
         public string Address { get; set; }
 
         public List<EventEquipment> EventEquipments { get; set; }
+        public List<EventUser> EventUsers { get; set; }
 
         public Guid EventTypeId {get; set;}
         public EventType EventType { get; set; }

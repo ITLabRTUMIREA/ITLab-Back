@@ -6,9 +6,11 @@ using AutoMapper;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Models;
 using Models.Equipments;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Equipment.Equipment;
@@ -20,7 +22,7 @@ namespace BackEnd.Controllers.Equipments
 {
     [Produces("application/json")]
     [Route("api/Equipment")]
-    public class EquipmentController : Controller
+    public class EquipmentController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;
 
@@ -30,7 +32,8 @@ namespace BackEnd.Controllers.Equipments
         public EquipmentController(
             DataBaseContext dbContext,
             ILogger<EquipmentTypeController> logger,
-            IMapper mapper)
+            IMapper mapper,
+            UserManager<User> userManager) : base(userManager)
         {
             this.logger = logger;
             this.mapper = mapper;

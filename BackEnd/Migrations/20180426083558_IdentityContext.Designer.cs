@@ -11,9 +11,10 @@ using System;
 namespace BackEnd.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180426083558_IdentityContext")]
+    partial class IdentityContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,23 +137,6 @@ namespace BackEnd.Migrations
                     b.HasIndex("EventId");
 
                     b.ToTable("EventEquipment");
-                });
-
-            modelBuilder.Entity("Models.DataBaseLinks.EventUser", b =>
-                {
-                    b.Property<Guid>("UserId");
-
-                    b.Property<Guid>("EventId");
-
-                    b.Property<Guid?>("EquipmentId");
-
-                    b.HasKey("UserId", "EventId");
-
-                    b.HasIndex("EquipmentId");
-
-                    b.HasIndex("EventId");
-
-                    b.ToTable("EventUser");
                 });
 
             modelBuilder.Entity("Models.Equipments.Equipment", b =>
@@ -327,23 +311,6 @@ namespace BackEnd.Migrations
                     b.HasOne("Models.Events.Event", "Event")
                         .WithMany("EventEquipments")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Models.DataBaseLinks.EventUser", b =>
-                {
-                    b.HasOne("Models.Equipments.Equipment")
-                        .WithMany("EventUsers")
-                        .HasForeignKey("EquipmentId");
-
-                    b.HasOne("Models.Events.Event", "Event")
-                        .WithMany("EventUsers")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Models.User", "User")
-                        .WithMany("EventUsers")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

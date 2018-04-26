@@ -15,6 +15,7 @@ namespace Models.PublicAPI.Responses
         InvalidToken,
         UserNotFound,
         WrongPassword,
-        IncorrectEquipmentIds
+        IncorrectEquipmentIds,
+        Unauthorized
     }
 }
