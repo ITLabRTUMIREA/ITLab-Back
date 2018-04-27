@@ -70,6 +70,17 @@ namespace BackEnd.Services
         {
             var type = await CheckAndGetEventTypeAsync(request.EventTypeId);
             var newEvent = mapper.Map<Event>(request);
+            if (request.ParticipantsIds.Any())
+                if (await dbContext
+                        .Users
+                        .Where(u => request.ParticipantsIds.Contains(u.Id)).CountAsync() == request.ParticipantsIds.Count)
+                {
+                    var role = await dbContext.Roles.FirstOrDefaultAsync(r => r.NormalizedName == "PARTICIPANT");
+                    newEvent.EventUsers = request.ParticipantsIds.Select(userId => new EventUserRole { Event = newEvent, UserId = userId, Role = role }).ToList();
+                }
+                else
+                    throw ResponseStatusCode.IncorrectUserIds.ToApiException();
+
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
             return newEvent;
@@ -106,6 +117,6 @@ namespace BackEnd.Services
            => await dbContext.Events.FindAsync(id)
              ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
-        
+
     }
 }

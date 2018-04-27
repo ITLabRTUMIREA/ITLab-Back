@@ -38,7 +38,8 @@ namespace BackEnd.Formating
             CreateMap<EventTypeCreateRequest, EventType>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventPresent>()
-                .ForMember(ep => ep.EquipmentIds, conf => conf.MapFrom(e => e.EventEquipments.Select(ee => ee.EquipmentId)));
+                .ForMember(ep => ep.EquipmentIds, conf => conf.MapFrom(e => e.EventEquipments.Select(ee => ee.EquipmentId)))
+                .ForMember(ep => ep.ParticipantsIds, conf => conf.MapFrom(e => e.EventUsers.Select(ee => ee.UserId)));
             CreateMap<EventEditRequest, Event>()
                   .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));

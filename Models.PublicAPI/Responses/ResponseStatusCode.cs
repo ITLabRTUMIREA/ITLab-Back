@@ -17,6 +17,7 @@ namespace Models.PublicAPI.Responses
         WrongPassword,
         IncorrectEquipmentIds,
         Unauthorized,
-        DeleteRoleError
+        DeleteRoleError,
+        IncorrectUserIds
     }
 }

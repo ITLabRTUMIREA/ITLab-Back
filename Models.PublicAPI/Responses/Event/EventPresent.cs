@@ -14,5 +14,6 @@ namespace Models.PublicAPI.Responses.Event
 
         public Guid EventTypeId { get; set; }
         public List<Guid> EquipmentIds { get; set; }
+        public List<Guid> ParticipantsIds { get; set; }
     }
 }
