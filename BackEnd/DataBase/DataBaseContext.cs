@@ -9,10 +9,11 @@ using Models;
 using Models.DataBaseLinks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Models.People;
 
 namespace BackEnd.DataBase
 {
-    public class DataBaseContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+    public class DataBaseContext : IdentityDbContext<User, Role, Guid>
     {
         public DbSet<EquipmentType> EquipmentTypes { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
@@ -40,18 +41,26 @@ namespace BackEnd.DataBase
                 .WithMany(eq => eq.EventEquipments)
                 .HasForeignKey(ee => ee.EquipmentId);
 
-            modelBuilder.Entity<EventUser>()
+
+
+
+            modelBuilder.Entity<EventUserRole>()
                 .HasKey(t => new { t.UserId, t.EventId });
 
-            modelBuilder.Entity<EventUser>()
-                .HasOne(ee => ee.Event)
+            modelBuilder.Entity<EventUserRole>()
+                .HasOne(eur => eur.Event)
                 .WithMany(ev => ev.EventUsers)
-                .HasForeignKey(ee => ee.EventId);
+                .HasForeignKey(eur => eur.EventId);
 
-            modelBuilder.Entity<EventUser>()
-                .HasOne(ee => ee.User)
-                .WithMany(eq => eq.EventUsers)
-                .HasForeignKey(ee => ee.UserId);
+            modelBuilder.Entity<EventUserRole>()
+                .HasOne(eur => eur.User)
+                .WithMany(u => u.EventUsers)
+                .HasForeignKey(eur => eur.UserId);
+
+            modelBuilder.Entity<EventUserRole>()
+                .HasOne(eur => eur.Role)
+                .WithMany(r => r.EventUserRoles)
+                .HasForeignKey(eur => eur.RoleId);
         }
     }
 }

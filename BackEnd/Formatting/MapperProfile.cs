@@ -2,12 +2,14 @@
 using Models;
 using Models.Equipments;
 using Models.Events;
+using Models.People;
 using Models.PublicAPI.Requests.Account;
 using Models.PublicAPI.Requests.Equipment;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Requests.Events.Event;
 using Models.PublicAPI.Requests.Events.EventType;
+using Models.PublicAPI.Requests.Roles;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.Login;
@@ -40,6 +42,9 @@ namespace BackEnd.Formating
             CreateMap<EqiupmentEditRequest, Event>()
                   .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+
+
+            CreateMap<RoleCreateRequest, Role>();
 
         }
     }

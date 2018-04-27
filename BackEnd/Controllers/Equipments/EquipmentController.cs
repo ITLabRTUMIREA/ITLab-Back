@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models;
 using Models.Equipments;
+using Models.People;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses;

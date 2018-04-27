@@ -13,6 +13,7 @@ using Models;
 using Models.PublicAPI.Requests.Account;
 using Microsoft.Azure.KeyVault.Models;
 using Models.PublicAPI.Responses;
+using Models.People;
 
 namespace BackEnd.Controllers
 {

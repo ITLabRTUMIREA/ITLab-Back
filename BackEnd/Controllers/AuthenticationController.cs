@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Models;
+using Models.People;
 using Models.PublicAPI.Requests.Account;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;

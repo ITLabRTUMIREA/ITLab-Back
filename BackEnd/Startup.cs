@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using BackEnd.Services;
 using Microsoft.CodeAnalysis.Options;
+using Models.People;
 
 namespace BackEnd
 {
@@ -101,7 +102,7 @@ namespace BackEnd
             });
 
             // add identity
-            services.AddIdentity<User, IdentityRole<Guid>>(identityOptions =>
+            services.AddIdentity<User, Role>(identityOptions =>
             {
                 // configure identity options
                 identityOptions.Password.RequireDigit = false;
@@ -132,7 +133,7 @@ namespace BackEnd
         }
         public async Task CreateRoles(IServiceProvider serviceProvider)
         {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
             string[] roles = { "Admin", "User", "Zuev))0)" };
             IdentityResult roleResult;
@@ -142,7 +143,7 @@ namespace BackEnd
                 var roleExist = await roleManager.RoleExistsAsync(role);
                 if (!roleExist)
                 {
-                    var identityRole = new IdentityRole<Guid> { Name = role };
+                    var identityRole = new Role { Name = role };
                     roleResult = await roleManager.CreateAsync(identityRole);
                 }
             }
