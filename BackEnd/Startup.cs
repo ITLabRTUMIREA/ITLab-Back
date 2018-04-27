@@ -115,6 +115,7 @@ namespace BackEnd
              .AddDefaultTokenProviders();
 
             services.AddTransient<IEmailSender, EmailService>();
+            services.AddTransient<IEventsManager, EventsManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

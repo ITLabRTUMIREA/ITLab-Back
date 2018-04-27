@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Models.PublicAPI.Requests.Events.Event
 {
-    public class EqiupmentEditRequest : IdRequest
+    public class EventEditRequest : IdRequest
     {
         [CompareWith(nameof(EndTime), Criterion.LessOrEqual)]
         public DateTime? BeginTime { get; set; }

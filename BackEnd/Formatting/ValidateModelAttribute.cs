@@ -1,4 +1,5 @@
 ﻿using BackEnd.Exceptions;
+using BackEnd.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Exceptions;
@@ -18,13 +19,13 @@ namespace BackEnd.Formatting
             if (!modelState.IsValid)
             {
 
-                throw ApiLogicException.Create(
-                    new InputParameterIncorrectResponse(modelState.Select(kvp => new IncorrectingInfo
+                throw new InputParameterIncorrectResponse(modelState.Select(kvp => new IncorrectingInfo
                     {
                         Fieldname = kvp.Key,
                         Messages = kvp.Value.Errors.Select(E => E.ErrorMessage).ToList()
                     }).ToList()
-                    ));
+                    ).ToApiException
+                    ();
             }
         }
     }

@@ -30,7 +30,7 @@ namespace BackEnd.Formating
             CreateMap<AccountCreateRequest, User>().ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
             CreateMap<User, LoginResponse>();
 
-            CreateMap<EqiupmentEditRequest, Equipment>()
+            CreateMap<EquipmentEditRequest, Equipment>()
                .ForAllMembers(opt => opt.Condition(a =>
                  a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
@@ -38,8 +38,8 @@ namespace BackEnd.Formating
             CreateMap<EventTypeCreateRequest, EventType>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventPresent>()
-                .AfterMap((e, ep, ctxt) => ep.EquipmentIds = e.EventEquipments?.Select(local => local.EquipmentId)?.ToList());
-            CreateMap<EqiupmentEditRequest, Event>()
+                .ForMember(ep => ep.EquipmentIds, conf => conf.MapFrom(e => e.EventEquipments.Select(ee => ee.EquipmentId)));
+            CreateMap<EventEditRequest, Event>()
                   .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 

@@ -38,6 +38,7 @@ namespace System.ComponentModel.DataAnnotations
                 throw new ArgumentException("Property with this name not found");
 
             var comparisonValue = (IComparable)property.GetValue(validationContext.ObjectInstance);
+            if (currentValue == null || comparisonValue == null) return ValidationResult.Success;
             var result = currentValue.CompareTo(comparisonValue);
             return comparingFuncs[criterion](result) ? ValidationResult.Success : new ValidationResult(ErrorMessage);
         }
