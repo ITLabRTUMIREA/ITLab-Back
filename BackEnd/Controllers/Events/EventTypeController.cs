@@ -34,7 +34,7 @@ namespace BackEnd.Controllers.Events
             this.mapper = mapper;
             this.dbContext = dbContext;
         }
-
+        [HttpGet]
         public async Task<ListResponse<EventType>> GetAsync()
            => await dbContext.EventTypes.ToListAsync();
 

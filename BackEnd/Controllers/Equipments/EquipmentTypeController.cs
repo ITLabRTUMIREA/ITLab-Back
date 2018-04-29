@@ -35,7 +35,7 @@ namespace BackEnd.Controllers.Equipments
             this.mapper = mapper;
             this.dbContext = dbContext;
         }
-
+        [HttpGet]
         public async Task<ListResponse<EquipmentType>> GetAsync()
             => await dbContext.EquipmentTypes.ToListAsync();
 
