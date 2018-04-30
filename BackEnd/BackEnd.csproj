@@ -7,7 +7,6 @@
   <ItemGroup>
     <Folder Include="wwwroot\" />
     <Folder Include="Exceptions\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,10 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Migrations\20180416164215_FirstType.cs" />
-    <Compile Remove="Migrations\DataBaseContextModelSnapshot.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".DS_Store" />

@@ -9,7 +9,6 @@ namespace Models.People
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string StudentID { get; set; }
         public List<EventUserRole> EventUsers { get; set; }
     }
 }

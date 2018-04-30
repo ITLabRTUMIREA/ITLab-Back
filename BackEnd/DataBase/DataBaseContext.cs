@@ -17,7 +17,6 @@ namespace BackEnd.DataBase
     {
         public DbSet<EquipmentType> EquipmentTypes { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
-
         public DbSet<EventType> EventTypes { get; set; }
         public DbSet<Event> Events { get; set; }
 
@@ -28,6 +27,13 @@ namespace BackEnd.DataBase
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+            modelBuilder.Entity<User>()
+                .HasDiscriminator<int>("UserType")
+                .HasValue<User>(0)
+                .HasValue<Student>(1);
+
             modelBuilder.Entity<EventEquipment>()
                 .HasKey(t => new { t.EquipmentId, t.EventId });
 

@@ -14,6 +14,7 @@ using Models.PublicAPI.Requests.Account;
 using Microsoft.Azure.KeyVault.Models;
 using Models.PublicAPI.Responses;
 using Models.People;
+using BackEnd.Extensions;
 
 namespace BackEnd.Controllers
 {
@@ -53,8 +54,18 @@ namespace BackEnd.Controllers
         [HttpPost]
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {
-            
-            var user = mapper.Map<User>(account);
+            User user;
+            switch (account.UserType)
+            {
+                case Models.PublicAPI.UserType.SimpleUser:
+                    user = mapper.Map<User>(account);
+                    break;
+                case Models.PublicAPI.UserType.Student:
+                    user = mapper.Map<Student>(account);
+                    break;
+                default:
+                    throw ResponseStatusCode.Unknown.ToApiException();
+            }
             var result = await userManager.CreateAsync(user, account.Password);
 
             //result = await userManager.AddToRoleAsync(user, "User");
