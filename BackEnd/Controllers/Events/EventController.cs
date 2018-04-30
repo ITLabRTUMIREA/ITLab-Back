@@ -47,8 +47,9 @@ namespace BackEnd.Controllers.Events
             .ToListAsync();
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<Event>> GetAsync(Guid id)
-            => await eventsManager.FindAsync(id);
+        public async Task<OneObjectResponse<EventPresent>> GetAsync(Guid id)
+            => mapper.Map<EventPresent>(await eventsManager
+                .FindAsync(id));
 
 
         [HttpPost]
