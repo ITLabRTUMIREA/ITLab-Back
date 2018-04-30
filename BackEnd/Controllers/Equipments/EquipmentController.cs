@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Http;
@@ -41,12 +42,15 @@ namespace BackEnd.Controllers.Equipments
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<Equipment>> Get()
-            => await dbContext.Equipments.ToListAsync();
+        public async Task<ListResponse<EquipmentPresent>> Get()
+            => await dbContext
+                .Equipments
+                .ProjectTo<EquipmentPresent>()
+                .ToListAsync();
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<Equipment>> GetAsync(Guid id)
-            => await CheckAndGetEquipmentAsync(id);
+        public async Task<OneObjectResponse<EquipmentPresent>> GetAsync(Guid id)
+            => mapper.Map<EquipmentPresent>(await CheckAndGetEquipmentAsync(id));
 
 
         [HttpPost]

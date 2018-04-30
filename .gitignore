@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 BackEnd/appsettings.Secret.json
+BackEnd/Migrations/*

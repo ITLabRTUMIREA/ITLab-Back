@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.People;
 using Models.PublicAPI.Responses.General;
+using Models.PublicAPI.Responses.People;
 
 namespace BackEnd.Controllers
 {
@@ -22,7 +24,10 @@ namespace BackEnd.Controllers
             this.userManager = userManager;
         }
         [HttpGet]
-        public async Task<ListResponse<User>> GetAsync()
-            => await userManager.Users.ToListAsync();
+        public async Task<ListResponse<UserPresent>> GetAsync()
+            => await userManager
+                .Users
+                .ProjectTo<UserPresent>()
+                .ToListAsync();
     }
 }

@@ -13,6 +13,7 @@ using Models.PublicAPI.Requests.Roles;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.Login;
+using Models.PublicAPI.Responses.People;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,7 @@ namespace BackEnd.Formating
 
             CreateMap<RoleCreateRequest, Role>();
 
+            CreateMap<User, UserPresent>();
         }
     }
 }
