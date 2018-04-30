@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Extensions;
 namespace BackEnd.Services
 {
     public class EventsManager : IEventsManager
@@ -70,13 +70,31 @@ namespace BackEnd.Services
         {
             var type = await CheckAndGetEventTypeAsync(request.EventTypeId);
             var newEvent = mapper.Map<Event>(request);
-            if (request.ParticipantsIds.Any())
+            request.Participants.ForEach(pwr =>
+            {
+                if (pwr.BeginWork == null || pwr.EndWork == null)
+                {
+                    pwr.BeginWork = newEvent.BeginTime;
+                    pwr.EndWork = newEvent.EndTime;
+                    return;
+                }
+                if (pwr.BeginWork > newEvent.BeginTime || pwr.EndWork < newEvent.BeginTime)
+                    throw ResponseStatusCode.IncorrectRequestData.ToApiException();
+            });
+            if (request.Participants.Any())
                 if (await dbContext
                         .Users
-                        .Where(u => request.ParticipantsIds.Contains(u.Id)).CountAsync() == request.ParticipantsIds.Count)
+                        .CountAsync(u => request.Participants.Any(p => p.Id == u.Id)) == request.Participants.Count)
                 {
                     var role = await dbContext.Roles.FirstOrDefaultAsync(r => r.NormalizedName == "PARTICIPANT");
-                    newEvent.EventUsers = request.ParticipantsIds.Select(userId => new EventUserRole { Event = newEvent, UserId = userId, Role = role }).ToList();
+                    newEvent.EventUsers = request.Participants.Select(userInfo => new EventUserRole
+                    {
+                        Event = newEvent,
+                        UserId = userInfo.Id,
+                        Role = role,
+                        BeginWork = userInfo.BeginWork.Value,
+                        EndWork = userInfo.EndWork.Value
+                    }).ToList();
                 }
                 else
                     throw ResponseStatusCode.IncorrectUserIds.ToApiException();

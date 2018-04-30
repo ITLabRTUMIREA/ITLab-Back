@@ -3,6 +3,7 @@ using Models.Events;
 using Models.People;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Models.DataBaseLinks
@@ -17,6 +18,10 @@ namespace Models.DataBaseLinks
 
         public Guid RoleId { get; set; }
         public Role Role { get; set; }
+
+
+        public DateTime BeginWork { get; set; }
+        public DateTime EndWork { get; set; }
 
 
         public static EventUserRole Create(Event ev, User eq, Role role)

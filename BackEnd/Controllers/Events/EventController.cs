@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using BackEnd.DataBase;
-using BackEnd.Exceptions;
 using BackEnd.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Models.DataBaseLinks;
-using Models.Events;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event;
-using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.General;
 using AutoMapper.QueryableExtensions;
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BackEnd.Controllers.Events
 {

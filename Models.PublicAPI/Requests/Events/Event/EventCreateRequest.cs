@@ -15,7 +15,7 @@ namespace Models.PublicAPI.Requests.Events.Event
         public DateTime EndTime { get; set; }
         [Required]
         public string Address { get; set; }
-        public List<Guid> ParticipantsIds { get; set; }
+        public List<PersonWorkRequest> Participants { get; set; }
         [Required]
         public Guid EventTypeId { get; set; }
     }
