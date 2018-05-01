@@ -43,19 +43,21 @@ namespace BackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+#if DEBUG
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
                 services
                     .AddDbContext<DataBaseContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("LocalDBDataBase")));
-            }
             else
-            {
                 services
                     .AddEntityFrameworkNpgsql()
                     .AddDbContext<DataBaseContext>(options =>
                     options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
-            }
+#else
+            services
+                    .AddDbContext<DataBaseContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
+#endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.AddMvc(options =>
             {
