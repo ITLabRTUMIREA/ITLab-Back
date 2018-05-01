@@ -26,8 +26,8 @@ using BackEnd.Services.Interfaces;
 using BackEnd.Services;
 using Microsoft.CodeAnalysis.Options;
 using Models.People;
-using Swashbuckle.AspNetCore.Swagger;
 using System.Runtime.InteropServices;
+using BackEnd.Extensions;
 
 namespace BackEnd
 {
@@ -59,6 +59,7 @@ namespace BackEnd
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
+            services.Configure<DBInitialize>(Configuration.GetSection(nameof(DBInitialize)));
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
@@ -131,67 +132,22 @@ namespace BackEnd
 
             services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
-            });
+            services.AddTransient<DataBaseFiller>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+                serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
             app.UseMiddlewareClassTemplate();
             app.UseAuthentication();
             app.UseMvc();
-
-            //CreateRoles(serviceProvider).Wait();
-        }
-        public async Task CreateRoles(IServiceProvider serviceProvider)
-        {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-            string[] roles = { "Admin", "User", "Zuev))0)" };
-            IdentityResult roleResult;
-
-            foreach (var role in roles)
-            {
-                var roleExist = await roleManager.RoleExistsAsync(role);
-                if (!roleExist)
-                {
-                    var identityRole = new Role { Name = role };
-                    roleResult = await roleManager.CreateAsync(identityRole);
-                }
-            }
-            var config = Configuration.GetSection("UserSettings");
-            var waitRoles = config.GetSection("Roles")
-                .AsEnumerable()
-                .Select(KVP => KVP.Value)
-                .Where(V => V != null)
-                .ToList();
-            if (config["UserEmail"] == null || waitRoles.Count == 0)
-                return;
-
-            var powerUser = await userManager.FindByEmailAsync(Configuration.GetSection("UserSettings")["UserEmail"]);
-            if (powerUser == null)
-                return;
-
-            foreach (var role in waitRoles)
-            {
-                if (!await userManager.IsInRoleAsync(powerUser, role))
-                    await userManager.AddToRoleAsync(powerUser, role);
-            }
         }
     }
 }

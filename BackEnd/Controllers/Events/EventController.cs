@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.Services.Interfaces;
@@ -31,13 +32,17 @@ namespace BackEnd.Controllers.Events
             this.mapper = mapper;
             this.eventsManager = eventManager;
         }
-        [HttpGet]
-        public async Task<ListResponse<EventPresent>> Get()
-            => await eventsManager
-            .Events
-            .ProjectTo<EventPresent>()
-            .ToListAsync();
-
+        [HttpGet("{begin?}/{end?}")]
+        public async Task<ListResponse<EventPresent>> Get(DateTime begin, DateTime end)
+        {
+            end = end == DateTime.MinValue ? DateTime.MaxValue : end;
+            return await eventsManager
+             .Events
+             .Where(e => e.BeginTime >= begin)
+             .Where(e => e.BeginTime <= end)
+             .ProjectTo<EventPresent>()
+             .ToListAsync();
+        }
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EventPresent>> GetAsync(Guid id)
             => mapper.Map<EventPresent>(await eventsManager

@@ -70,7 +70,7 @@ namespace BackEnd.Services
         {
             var type = await CheckAndGetEventTypeAsync(request.EventTypeId);
             var newEvent = mapper.Map<Event>(request);
-            request.Participants.ForEach(pwr =>
+            request.Participants?.ForEach(pwr =>
             {
                 if (pwr.BeginWork == null || pwr.EndWork == null)
                 {
@@ -81,7 +81,7 @@ namespace BackEnd.Services
                 if (pwr.BeginWork > newEvent.BeginTime || pwr.EndWork < newEvent.BeginTime)
                     throw ResponseStatusCode.IncorrectRequestData.ToApiException();
             });
-            if (request.Participants.Any())
+            if (request.Participants?.Any() == true)
                 if (await dbContext
                         .Users
                         .CountAsync(u => request.Participants.Any(p => p.Id == u.Id)) == request.Participants.Count)
