@@ -136,8 +136,9 @@ namespace BackEnd
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
+            if (Configuration.GetValue<bool>("DBInitialize:Need"))
+                using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+                    serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
 
             if (env.IsDevelopment())
             {
