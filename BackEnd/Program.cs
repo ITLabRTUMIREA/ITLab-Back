@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Extensions;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Extensions.Configuration.AzureKeyVault;
+
 namespace BackEnd
 {
     public class Program
@@ -17,10 +21,31 @@ namespace BackEnd
             BuildWebHost(args).Run();
         }
 
+        private static Task<string> Func(string a, string b, string c)
+        {
+            Console.WriteLine(a);
+            Console.WriteLine(b);
+            Console.WriteLine(c);
+            return Task.FromResult(c);
+        }
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseConfigFile("appsettings.Secret.json")
+                 .ConfigureAppConfiguration((ctx, builder) =>
+                 {
+                     var keyVaultEndpoint = GetKeyVaultEndpoint();
+                     if (!string.IsNullOrEmpty(keyVaultEndpoint))
+                     {
+                         var azureServiceTokenProvider = new AzureServiceTokenProvider();
+                         var keyVaultClient = new KeyVaultClient(
+                             new KeyVaultClient.AuthenticationCallback(
+                                 azureServiceTokenProvider.KeyVaultTokenCallback));
+                         builder.AddAzureKeyVault(
+                         keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
+                     }
+                 })
                 .UseStartup<Startup>()
                 .Build();
+
+        private static string GetKeyVaultEndpoint() => Environment.GetEnvironmentVariable("KEYVAULT_ENDPOINT");
     }
 }

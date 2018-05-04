@@ -73,8 +73,6 @@ namespace BackEnd
 
             services.AddAutoMapper();
 
-
-
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 
             services.AddSingleton<IJwtFactory, JwtFactory>();

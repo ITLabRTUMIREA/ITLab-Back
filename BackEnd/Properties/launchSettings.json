@@ -19,7 +19,8 @@
     "BackEnd": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "KEYVAULT_ENDPOINT": "https://labworkkeys.vault.azure.net/"
       },
       "applicationUrl": "http://localhost:5000/"
     }
