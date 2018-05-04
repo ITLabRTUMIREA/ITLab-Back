@@ -31,7 +31,7 @@ namespace BackEnd.DataBase
                 {
                     await roleManager.CreateAsync(new Role { Name = roleName });
                 }
-            if (options.NeededStandartRoles != null)
+            if (options.WantedRoles != null)
                 foreach (var wantPair in options.WantedRoles)
                 {
                     var targetUser = await userManager.FindByEmailAsync(wantPair.Email);

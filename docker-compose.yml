@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  backend:
+    image: backend
+    build:
+      context: .
+      dockerfile: BackEnd/Dockerfile
+    ports:
+      - "8080:80"
