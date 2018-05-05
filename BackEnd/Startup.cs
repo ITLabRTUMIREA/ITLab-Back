@@ -56,7 +56,7 @@ namespace BackEnd
 #else
             services
                     .AddDbContext<DataBaseContext>(options =>
-                    options.UseSqlServer("Server=tcp:labworksqlserver.database.windows.net,1433;Initial Catalog=labworkcontroldb;Persist Security Info=False;User ID=realityshift;Password=RedAlert5;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
+                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.Configure<DBInitialize>(Configuration.GetSection(nameof(DBInitialize)));
