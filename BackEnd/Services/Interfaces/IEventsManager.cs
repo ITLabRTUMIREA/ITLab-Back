@@ -16,7 +16,7 @@ namespace BackEnd.Services.Interfaces
 
         Task DeleteAsync(Guid id);
 
-        Task<Event> AddEquipmentAsync(ChangeEquipmentRequest ev);
+        Task<Event> EditEquipmentAsync(ChangeEquipmentRequest ev);
         Task<Event> AddPeople(Event ev);
 
     }

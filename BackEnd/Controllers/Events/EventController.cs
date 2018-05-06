@@ -56,10 +56,10 @@ namespace BackEnd.Controllers.Events
             return mapper.Map<EventPresent>(newEvent);
         }
 
-        [HttpPut("addequipment")]
-        public async Task<OneObjectResponse<EventPresent>> AddEquipments([FromBody]ChangeEquipmentRequest request)
+        [HttpPut("editequipment")]
+        public async Task<OneObjectResponse<EventPresent>> EditEquipment([FromBody]ChangeEquipmentRequest request)
         {
-            var targetEvent = await eventsManager.AddEquipmentAsync(request);
+            var targetEvent = await eventsManager.EditEquipmentAsync(request);
             return mapper.Map<EventPresent>(targetEvent);
         }
 

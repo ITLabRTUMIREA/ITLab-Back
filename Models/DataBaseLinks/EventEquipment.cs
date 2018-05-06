@@ -23,5 +23,12 @@ namespace Models.DataBaseLinks
                 EquipmentId = eq.Id,
                 Equipment = eq
             };
+        public static EventEquipment Create(Event ev, Guid eqId)
+            => new EventEquipment
+            {
+                EventId = ev.Id,
+                Event = ev,
+                EquipmentId = eqId,
+            };
     }
 }

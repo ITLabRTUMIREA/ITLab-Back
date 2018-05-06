@@ -20,32 +20,10 @@ namespace BackEnd
         {
             BuildWebHost(args).Run();
         }
-
-        private static Task<string> Func(string a, string b, string c)
-        {
-            Console.WriteLine(a);
-            Console.WriteLine(b);
-            Console.WriteLine(c);
-            return Task.FromResult(c);
-        }
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                 .ConfigureAppConfiguration((ctx, builder) =>
-                 {
-                     var keyVaultEndpoint = GetKeyVaultEndpoint();
-                     if (!string.IsNullOrEmpty(keyVaultEndpoint))
-                     {
-                         var azureServiceTokenProvider = new AzureServiceTokenProvider();
-                         var keyVaultClient = new KeyVaultClient(
-                             new KeyVaultClient.AuthenticationCallback(
-                                 azureServiceTokenProvider.KeyVaultTokenCallback));
-                         builder.AddAzureKeyVault(
-                         keyVaultEndpoint, keyVaultClient, new DefaultKeyVaultSecretManager());
-                     }
-                 })
+                .UseConfigFile("appsettings.Secret.json")
                 .UseStartup<Startup>()
                 .Build();
-
-        private static string GetKeyVaultEndpoint() => Environment.GetEnvironmentVariable("KEYVAULT_ENDPOINT");
     }
 }

@@ -18,4 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Requests\Edit\" />
+  </ItemGroup>
 </Project>

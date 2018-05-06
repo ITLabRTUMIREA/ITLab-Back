@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions;
+using Models.PublicAPI.Requests.Edit;
+
 namespace BackEnd.Services
 {
     public class EventsManager : IEventsManager
@@ -35,32 +37,35 @@ namespace BackEnd.Services
             .Include(e => e.EventEquipments);
         public Task<Event> FindAsync(Guid id)
             => CheckAndGetEventAsync(id);
-        public async Task<Event> AddEquipmentAsync(ChangeEquipmentRequest request)
+        public async Task<Event> EditEquipmentAsync(ChangeEquipmentRequest request)
         {
             var targetEvent = await dbContext
                 .Events
                 .Include(e => e.EventEquipments)
                 .FirstOrDefaultAsync(e => e.Id == request.Id) ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-            var targetEquipment = await dbContext
+            var targetEquipmentIds = await dbContext
                 .Equipments
-                .Where(eq => request.EquipmentIds.Contains(eq.Id))
+                .Where(eq => request.EquipmentEditPack
+                       .Where(p => p.EditAction == EditAction.Add)
+                       .Select(e => e.Id).Contains(eq.Id))
                 .Where(eq => !dbContext
                     .Events
                     .Where(e => e.EndTime > targetEvent.BeginTime && e.BeginTime < targetEvent.EndTime)
                     .Any(e => e.EventEquipments.Any(eveq => eq.Id == eveq.EquipmentId)))
+                .Select(eq => eq.Id)
                 .ToListAsync();
 
-            if (targetEquipment.Count != request.EquipmentIds.Count)
+            if (targetEquipmentIds.Count != request.EquipmentEditPack.Count)
                 throw ApiLogicException.Create(ResponseStatusCode.IncorrectEquipmentIds);
+            var addsAndRemoves = targetEquipmentIds
+                .ToLookup(g => request.EquipmentEditPack.First(ep => ep.Id == g).EditAction);
 
-            targetEvent
-                .EventEquipments
-                .AddRange
-                    (targetEquipment
-                    .Where(te => !targetEvent.EventEquipments.Select(et => et.EquipmentId).Contains(te.Id))
-                     .Select(eq => EventEquipment.Create(targetEvent, eq))
-                    );
+            targetEvent.EventEquipments = (targetEvent
+                .EventEquipments ?? Enumerable.Empty<EventEquipment>())
+                .Where(eeq => !addsAndRemoves[EditAction.Remove].Contains(eeq.EquipmentId))
+                .Union(addsAndRemoves[EditAction.Add].Select(id => EventEquipment.Create(targetEvent, id)))
+                .ToList();
 
             dbContext.SaveChanges();
             return targetEvent;
