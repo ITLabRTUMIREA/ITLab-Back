@@ -5,15 +5,18 @@ using System.Linq;
 using MimeKit;
 using MailKit.Net.Smtp;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace BackEnd.Services
 {
     public class EmailService : IEmailSender
     {
+        public IConfiguration Configuration { get; }
         public async Task SendEmailAsync(string email, string subject, string message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("Администрация сайта", "olympiad-it@yandex.ru"));
+            emailMessage.From.Add(new MailboxAddress("Администрация сайта", 
+                Configuration.GetSection("EmailSettings")["Email"]));
             emailMessage.To.Add(new MailboxAddress("", email));
             emailMessage.Subject = subject;
 
@@ -25,7 +28,8 @@ namespace BackEnd.Services
             using (var admin = new SmtpClient())
             {
                 await admin.ConnectAsync("smtp.yandex.ru", 465, true);
-                await admin.AuthenticateAsync("olympiad-it@yandex.ru", "AwesomePassword432");
+                await admin.AuthenticateAsync(Configuration.GetSection("EmailSettings")["Email"],
+                    Configuration.GetSection("EmailSettings")["Password"]);
                 await admin.SendAsync(emailMessage);
                 await admin.DisconnectAsync(true);
             }

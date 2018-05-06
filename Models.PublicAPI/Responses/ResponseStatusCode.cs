@@ -11,10 +11,9 @@ namespace Models.PublicAPI.Responses
         IncorrectRequestData,
         NotImplenment,
         EquipmentTypeNotFound,
-        EventTypeNotFound, 
+        EventTypeNotFound,
         InvalidToken,
-        UserNotFound,
-        WrongPassword,
+        WrongLoginOrPassword,
         IncorrectEquipmentIds
     }
 }
