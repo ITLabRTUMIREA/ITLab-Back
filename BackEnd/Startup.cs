@@ -63,12 +63,6 @@ namespace BackEnd
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
-                // TODO WorkAround for property names!
-                options.OutputFormatters.Insert(0, new JsonOutputFormatter(
-                    services
-                    .BuildServiceProvider()
-                    .GetService<IOptions<JsonSerializerSettings>>()
-                    .Value, ArrayPool<char>.Shared));
             });
 
             services.AddAutoMapper();
@@ -128,6 +122,9 @@ namespace BackEnd
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();
 
+            services.AddCors();
+
+
             services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddTransient<DataBaseFiller>();
@@ -140,6 +137,11 @@ namespace BackEnd
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
 
+            app.UseCors(config =>
+                config.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin()
+                    .AllowCredentials());
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
