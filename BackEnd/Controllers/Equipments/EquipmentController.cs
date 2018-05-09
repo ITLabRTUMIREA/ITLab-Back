@@ -52,11 +52,14 @@ namespace BackEnd.Controllers.Equipments
             [FromQuery] Guid? eventId,
             [FromQuery] Guid? equipmentTypeId,
             [FromQuery] string equipmentTypeName
-        ){
+        )
+        {
             IQueryable<Equipment> equipments = dbContext.Equipments;
             if (eventId.HasValue)
             {
-                            }
+                equipments = equipments
+                    .Where(eq => eq.EventEquipments.Any(eveq => eveq.EventId == eventId.Value));
+            }
             if (equipmentTypeId.HasValue)
                 equipments = equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId);
             if (!string.IsNullOrEmpty(equipmentTypeName))
