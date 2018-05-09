@@ -40,11 +40,9 @@ namespace BackEnd.Exceptions
             }
             catch (Exception ex)
             {
-                context.Response.Clear();
                 context.Response.StatusCode = StatusCodes.Status200OK;
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(Content(ex));
-
             }
         }
         private string Content(Exception ex)
