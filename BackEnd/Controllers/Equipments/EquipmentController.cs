@@ -41,17 +41,31 @@ namespace BackEnd.Controllers.Equipments
             this.mapper = mapper;
             this.dbContext = dbContext;
         }
-        [HttpGet]
-        public async Task<ListResponse<EquipmentPresent>> Get()
-            => await dbContext
-                .Equipments
-                .ProjectTo<EquipmentPresent>()
-                .ToListAsync();
+
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EquipmentPresent>> GetAsync(Guid id)
             => mapper.Map<EquipmentPresent>(await CheckAndGetEquipmentAsync(id));
 
+        [HttpGet]
+        public async Task<ListResponse<EquipmentPresent>> GetAsync(
+            [FromQuery] Guid? eventId,
+            [FromQuery] Guid? equipmentTypeId,
+            [FromQuery] string equipmentTypeName
+        )
+        {
+            IQueryable<Equipment> equipments = dbContext.Equipments;
+            if (eventId.HasValue)
+            {
+                equipments = equipments
+                    .Where(eq => eq.EventEquipments.Any(eveq => eveq.EventId == eventId.Value));
+            }
+            if (equipmentTypeId.HasValue)
+                equipments = equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId);
+            if (!string.IsNullOrEmpty(equipmentTypeName))
+                equipments = equipments.Where(eq => eq.EquipmentType.Title == equipmentTypeName);
+            return await equipments.ProjectTo<EquipmentPresent>().ToListAsync();
+        }
 
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentPresent>> PostAsync([FromBody]EquipmentCreateRequest request)

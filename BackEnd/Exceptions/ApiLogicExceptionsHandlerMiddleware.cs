@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.PublicAPI.Responses;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace BackEnd.Exceptions
 {
@@ -26,6 +27,7 @@ namespace BackEnd.Exceptions
             _next = next;
             this.logger = logger;
             this.jsonSerializerSettings = jsonSerializerSettings.Value;
+            this.jsonSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
         }
 
         public async Task Invoke(HttpContext context)
@@ -38,11 +40,9 @@ namespace BackEnd.Exceptions
             }
             catch (Exception ex)
             {
-                context.Response.Clear();
                 context.Response.StatusCode = StatusCodes.Status200OK;
                 context.Response.ContentType = "application/json";
                 await context.Response.WriteAsync(Content(ex));
-
             }
         }
         private string Content(Exception ex)
