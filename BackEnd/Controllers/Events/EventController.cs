@@ -11,6 +11,7 @@ using Models.PublicAPI.Requests.Events.Event;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.General;
 using AutoMapper.QueryableExtensions;
+using Extensions;
 
 namespace BackEnd.Controllers.Events
 {
@@ -32,14 +33,14 @@ namespace BackEnd.Controllers.Events
             this.mapper = mapper;
             this.eventsManager = eventManager;
         }
-        [HttpGet("{begin?}/{end?}")]
-        public async Task<ListResponse<EventPresent>> Get(DateTime begin, DateTime end)
+        [HttpGet]
+        public async Task<ListResponse<EventPresent>> Get(DateTime? begin, DateTime? end)
         {
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
              .Events
-             .Where(e => e.BeginTime >= begin)
-             .Where(e => e.BeginTime <= end)
+			 .IfNotNull(begin, evnts => evnts.Where(e => e.BeginTime >= begin))
+			 .IfNotNull(end, evnts => evnts.Where(e => e.BeginTime <= end))
              .ProjectTo<EventPresent>()
              .ToListAsync();
         }
