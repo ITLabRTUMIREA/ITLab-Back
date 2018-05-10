@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions;
-using Models.PublicAPI.Requests.Edit;
 
 namespace BackEnd.Services
 {
@@ -37,39 +36,6 @@ namespace BackEnd.Services
             .Include(e => e.EventEquipments);
         public Task<Event> FindAsync(Guid id)
             => CheckAndGetEventAsync(id);
-        public async Task<Event> EditEquipmentAsync(ChangeEquipmentRequest request)
-        {
-            var targetEvent = await dbContext
-                .Events
-                .Include(e => e.EventEquipments)
-                .FirstOrDefaultAsync(e => e.Id == request.Id) ?? throw ResponseStatusCode.NotFound.ToApiException();
-
-            var targetEquipmentIds = await dbContext
-                .Equipments
-                .Where(eq => request.EquipmentEditPack
-                       .Where(p => p.EditAction == EditAction.Add)
-                       .Select(e => e.Id).Contains(eq.Id))
-                .Where(eq => !dbContext
-                    .Events
-                    .Where(e => e.EndTime > targetEvent.BeginTime && e.BeginTime < targetEvent.EndTime)
-                    .Any(e => e.EventEquipments.Any(eveq => eq.Id == eveq.EquipmentId)))
-                .Select(eq => eq.Id)
-                .ToListAsync();
-
-            if (targetEquipmentIds.Count != request.EquipmentEditPack.Count)
-                throw ApiLogicException.Create(ResponseStatusCode.IncorrectEquipmentIds);
-            var addsAndRemoves = targetEquipmentIds
-                .ToLookup(g => request.EquipmentEditPack.First(ep => ep.Id == g).EditAction);
-
-            targetEvent.EventEquipments = (targetEvent
-                .EventEquipments ?? Enumerable.Empty<EventEquipment>())
-                .Where(eeq => !addsAndRemoves[EditAction.Remove].Contains(eeq.EquipmentId))
-                .Union(addsAndRemoves[EditAction.Add].Select(id => EventEquipment.Create(targetEvent, id)))
-                .ToList();
-
-            dbContext.SaveChanges();
-            return targetEvent;
-        }
 
         public async Task<Event> AddAsync(EventCreateRequest request)
         {
@@ -103,10 +69,36 @@ namespace BackEnd.Services
                 }
                 else
                     throw ResponseStatusCode.IncorrectUserIds.ToApiException();
-
+            await UpdateEventEquipmentAsync(newEvent, request.Equipment);
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
             return newEvent;
+        }
+        private async Task UpdateEventEquipmentAsync(
+            Event ev,
+            List<Guid> add) => await UpdateEventEquipmentAsync(ev, add, new List<Guid>());
+        private async Task UpdateEventEquipmentAsync(
+            Event ev,
+            List<Guid> add,
+            List<Guid> remove)
+        {
+            add = add ?? new List<Guid>();
+            remove = remove ?? new List<Guid>();
+            var list = ev.EventEquipments ?? new List<EventEquipment>();
+            var targetEquipmentIds = await dbContext
+                .Equipments
+                .Where(eq => add.Contains(eq.Id))
+                .Where(eq => !dbContext
+                    .Events
+                    .Where(e => e.EndTime > ev.BeginTime && e.BeginTime < ev.EndTime)
+                    .Any(e => e.EventEquipments.Any(eveq => eq.Id == eveq.EquipmentId)))
+                .Select(eq => eq.Id)
+                .ToListAsync();
+            if (targetEquipmentIds.Count != add.Count)
+                throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
+            list.AddRange(add.Where(g => !list.Any(eeq => eeq.EquipmentId == g)).Select(id => EventEquipment.Create(ev, id)));
+            list.RemoveAll(eeq => remove.Contains(eeq.EquipmentId));
+            ev.EventEquipments = list;
         }
 
         public Task<Event> AddPeople(Event ev)
@@ -121,6 +113,10 @@ namespace BackEnd.Services
                 await CheckAndGetEventTypeAsync(request.EventTypeId.Value);
 
             mapper.Map(request, toEdit);
+
+            await UpdateEventEquipmentAsync(toEdit, 
+                request.AddEquipment,
+                request.RemoveEquipment);
             await dbContext.SaveChangesAsync();
             return toEdit;
         }
@@ -137,7 +133,9 @@ namespace BackEnd.Services
                 ?? throw ApiLogicException.Create(ResponseStatusCode.EventTypeNotFound);
 
         private async Task<Event> CheckAndGetEventAsync(Guid id)
-           => await dbContext.Events.FindAsync(id)
+           => await dbContext.Events
+                .Include(e => e.EventEquipments)
+                .FirstOrDefaultAsync(e => e.Id == id)
              ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
 

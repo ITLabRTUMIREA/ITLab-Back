@@ -56,14 +56,6 @@ namespace BackEnd.Controllers.Events
             return mapper.Map<EventPresent>(newEvent);
         }
 
-        [HttpPut("editequipment")]
-        public async Task<OneObjectResponse<EventPresent>> EditEquipment([FromBody]ChangeEquipmentRequest request)
-        {
-            var targetEvent = await eventsManager.EditEquipmentAsync(request);
-            return mapper.Map<EventPresent>(targetEvent);
-        }
-
-
         [HttpPut]
         public async Task<OneObjectResponse<EventPresent>> PutAsync([FromBody]EventEditRequest request)
         {

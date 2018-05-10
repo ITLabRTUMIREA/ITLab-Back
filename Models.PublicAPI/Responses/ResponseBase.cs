@@ -5,13 +5,13 @@ namespace Models.PublicAPI.Responses
     {
         public ResponseStatusCode StatusCode { get; }
 # if DEBUG
-        public string StatusCodeText { get; }
+        public string OnlyDebugStatusCodeText { get; }
 #endif
         public ResponseBase(ResponseStatusCode statusCode)
         {
             StatusCode = statusCode;
 # if DEBUG
-            StatusCodeText = statusCode.ToString();
+            OnlyDebugStatusCodeText = statusCode.ToString();
 #endif
 
         }

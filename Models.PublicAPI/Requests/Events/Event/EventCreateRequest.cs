@@ -16,6 +16,7 @@ namespace Models.PublicAPI.Requests.Events.Event
         [Required]
         public string Address { get; set; }
         public List<PersonWorkRequest> Participants { get; set; }
+        public List<Guid> Equipment { get; set; }
         [Required]
         public Guid EventTypeId { get; set; }
     }
