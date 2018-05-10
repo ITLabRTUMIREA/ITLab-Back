@@ -19,5 +19,8 @@ namespace Models.PublicAPI.Requests.Events.Event
         public List<Guid> Equipment { get; set; }
         [Required]
         public Guid EventTypeId { get; set; }
+        public string Description { get; set; }
+        public int NeededParticipantsCount { get; set; }
+
     }
 }

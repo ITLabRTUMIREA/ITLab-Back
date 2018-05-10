@@ -77,30 +77,7 @@ namespace BackEnd.Services
         private async Task UpdateEventEquipmentAsync(
             Event ev,
             List<Guid> add) => await UpdateEventEquipmentAsync(ev, add, new List<Guid>());
-        private async Task UpdateEventEquipmentAsync(
-            Event ev,
-            List<Guid> add,
-            List<Guid> remove)
-        {
-            add = add ?? new List<Guid>();
-            remove = remove ?? new List<Guid>();
-            var list = ev.EventEquipments ?? new List<EventEquipment>();
-            var targetEquipmentIds = await dbContext
-                .Equipments
-                .Where(eq => add.Contains(eq.Id))
-                .Where(eq => !dbContext
-                    .Events
-                    .Where(e => e.EndTime > ev.BeginTime && e.BeginTime < ev.EndTime)
-                    .Any(e => e.EventEquipments.Any(eveq => eq.Id == eveq.EquipmentId)))
-                .Select(eq => eq.Id)
-                .ToListAsync();
-            if (targetEquipmentIds.Count != add.Count)
-                throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
-            list.AddRange(add.Where(g => !list.Any(eeq => eeq.EquipmentId == g)).Select(id => EventEquipment.Create(ev, id)));
-            list.RemoveAll(eeq => remove.Contains(eeq.EquipmentId));
-            ev.EventEquipments = list;
-        }
-
+        
         public Task<Event> AddPeople(Event ev)
         {
             throw new NotImplementedException();
@@ -126,6 +103,30 @@ namespace BackEnd.Services
             var toDelete = await CheckAndGetEventAsync(id);
             dbContext.Events.Remove(toDelete);
             await dbContext.SaveChangesAsync();
+        }
+
+        private async Task UpdateEventEquipmentAsync(
+            Event ev,
+            List<Guid> add,
+            List<Guid> remove)
+        {
+            add = add ?? new List<Guid>();
+            remove = remove ?? new List<Guid>();
+            var list = ev.EventEquipments ?? new List<EventEquipment>();
+            var targetEquipmentIds = await dbContext
+                .Equipments
+                .Where(eq => add.Contains(eq.Id))
+                .Where(eq => !dbContext
+                    .Events
+                    .Where(e => e.EndTime > ev.BeginTime && e.BeginTime < ev.EndTime)
+                    .Any(e => e.EventEquipments.Any(eveq => eq.Id == eveq.EquipmentId)))
+                .Select(eq => eq.Id)
+                .ToListAsync();
+            if (targetEquipmentIds.Count != add.Count)
+                throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
+            list.AddRange(add.Where(g => !list.Any(eeq => eeq.EquipmentId == g)).Select(id => EventEquipment.Create(ev, id)));
+            list.RemoveAll(eeq => remove.Contains(eeq.EquipmentId));
+            ev.EventEquipments = list;
         }
 
         private async Task<EventType> CheckAndGetEventTypeAsync(Guid typeId)

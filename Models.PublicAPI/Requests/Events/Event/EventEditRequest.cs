@@ -17,5 +17,7 @@ namespace Models.PublicAPI.Requests.Events.Event
         public List<Guid> AddEquipment { get; set; }
         [NotIntersect(nameof(AddEquipment))]
         public List<Guid> RemoveEquipment { get; set; }
+        public string Description { get; set; }
+        public int NeededParticipantsCount { get; set; }
     }
 }

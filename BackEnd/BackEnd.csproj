@@ -32,4 +32,5 @@
   <ItemGroup>
     <None Remove=".DS_Store" />
   </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.SecretsShema.json" /></VisualStudio></ProjectExtensions>
 </Project>
