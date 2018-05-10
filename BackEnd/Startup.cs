@@ -28,8 +28,6 @@ using Microsoft.CodeAnalysis.Options;
 using Models.People;
 using System.Runtime.InteropServices;
 using BackEnd.Extensions;
-using NLog.Web;
-using NLog.Extensions.Logging;
 
 namespace BackEnd
 {
@@ -141,18 +139,7 @@ namespace BackEnd
             if (Configuration.GetValue<bool>("DBInitialize:Need"))
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
-			Console.WriteLine(Configuration.GetValue<string>("LogentriesToken"));
-			Environment.SetEnvironmentVariable(
-				"LOGENTRIES_TOKEN",
-				Configuration.GetValue<string>("LogentriesToken"),
-				EnvironmentVariableTarget.Process
-			);
-			env.ConfigureNLog("nlog.config");
-            // make sure Chinese chars don't fk up
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            
-            //add NLog to ASP.NET Core
-            loggerFactory.AddNLog();
+			
             app.UseCors(config =>
                 config.AllowAnyHeader()
                     .AllowAnyMethod()

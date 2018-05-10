@@ -11,8 +11,6 @@ using Extensions;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
-using NLog.Web;
-
 namespace BackEnd
 {
     public class Program
@@ -25,7 +23,6 @@ namespace BackEnd
             WebHost.CreateDefaultBuilder(args)
                 .UseConfigFile("appsettings.Secret.json")
                 .UseStartup<Startup>()
-                .UseNLog()
                 .Build();
     }
 }
