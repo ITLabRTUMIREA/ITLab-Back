@@ -21,7 +21,6 @@ namespace BackEnd
         }
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://0.0.0.0:5000")
                 .UseConfigFile("appsettings.Secret.json")
                 .UseStartup<Startup>()
                 .Build();
