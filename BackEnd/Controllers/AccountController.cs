@@ -15,6 +15,7 @@ using Microsoft.Azure.KeyVault.Models;
 using Models.PublicAPI.Responses;
 using Models.People;
 using BackEnd.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackEnd.Controllers
 {
@@ -34,7 +35,7 @@ namespace BackEnd.Controllers
             this.userManager = userManager;
             this.emailSender = emailSender;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("{id}/{*token}")]
         public async Task<ResponseBase> Get(string id, string token)
@@ -51,6 +52,7 @@ namespace BackEnd.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {

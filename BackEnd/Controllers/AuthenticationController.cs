@@ -6,6 +6,7 @@ using AutoMapper;
 using BackEnd.Authorize;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,7 @@ namespace BackEnd.Controllers
 
         [HttpPost]
         [Route("login")]
+        [AllowAnonymous]
         public async Task<OneObjectResponse<LoginResponse>> Login([FromBody] AccountLoginRequest loginData)
         {
             var user = await userManager.FindByNameAsync(loginData.Username);

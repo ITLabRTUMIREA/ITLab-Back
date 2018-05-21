@@ -11,7 +11,6 @@ using Models.People;
 
 namespace BackEnd.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
     public class AuthorizeController : Controller
     {
         private readonly UserManager<User> userManager;
