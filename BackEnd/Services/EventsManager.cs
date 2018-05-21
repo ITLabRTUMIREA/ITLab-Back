@@ -33,7 +33,9 @@ namespace BackEnd.Services
         public IQueryable<Event> Events =>
             dbContext
             .Events
+            .OrderBy(e => e.BeginTime)
             .Include(e => e.EventEquipments);
+        
         public Task<Event> FindAsync(Guid id)
             => CheckAndGetEventAsync(id);
 
@@ -77,11 +79,6 @@ namespace BackEnd.Services
         private async Task UpdateEventEquipmentAsync(
             Event ev,
             List<Guid> add) => await UpdateEventEquipmentAsync(ev, add, new List<Guid>());
-        
-        public Task<Event> AddPeople(Event ev)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<Event> EditAsync(EventEditRequest request)
         {

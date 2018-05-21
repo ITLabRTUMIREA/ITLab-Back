@@ -13,9 +13,7 @@ namespace BackEnd.Services.Interfaces
         Task<Event> FindAsync(Guid id);
         Task<Event> AddAsync(EventCreateRequest request);
         Task<Event> EditAsync(EventEditRequest ev);
-
         Task DeleteAsync(Guid id);
-        Task<Event> AddPeople(Event ev);
 
     }
 }
