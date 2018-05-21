@@ -28,6 +28,8 @@ using Microsoft.CodeAnalysis.Options;
 using Models.People;
 using System.Runtime.InteropServices;
 using BackEnd.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace BackEnd
 {
@@ -63,6 +65,11 @@ namespace BackEnd
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
+                var policy = new AuthorizationPolicyBuilder()
+                     .RequireAuthenticatedUser()
+                     .AddAuthenticationSchemes("Bearer")
+                     .Build();
+                options.Filters.Add(new AuthorizeFilter(policy));
             });
 
             services.AddAutoMapper();
