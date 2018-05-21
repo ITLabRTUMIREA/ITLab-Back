@@ -28,7 +28,6 @@ namespace BackEnd.DataBase
         {
             base.OnModelCreating(modelBuilder);
 
-
             modelBuilder.Entity<User>()
                 .HasDiscriminator<int>("UserType")
                 .HasValue<User>(0)
