@@ -13,10 +13,13 @@ namespace Models.PublicAPI.Requests.Events.Event
         public DateTime? EndTime { get; set; }
         public string Address { get; set; }
         public Guid? EventTypeId { get; set; }
+
         [NotIntersect(nameof(RemoveEquipment))]
         public List<Guid> AddEquipment { get; set; }
         [NotIntersect(nameof(AddEquipment))]
         public List<Guid> RemoveEquipment { get; set; }
+
+        public string Title { get; set; }
         public string Description { get; set; }
         public int NeededParticipantsCount { get; set; }
     }

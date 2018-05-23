@@ -12,7 +12,7 @@ using System;
 namespace BackEnd.DataBase.Migrations.Production
 {
     [DbContext(typeof(DataBaseContext))]
-    [Migration("20180523154127_FirstMigration")]
+    [Migration("20180523161157_FirstMigration")]
     partial class FirstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

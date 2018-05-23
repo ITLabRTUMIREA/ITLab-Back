@@ -12,6 +12,7 @@ namespace Models.Events
         public DateTime EndTime { get; set; }
         public string Address { get; set; }
         public int NeededParticipantsCount { get; set; }
+        public string Title { get; set; }
         public string Description { get; set; }
 
         public List<EventEquipment> EventEquipments { get; set; }

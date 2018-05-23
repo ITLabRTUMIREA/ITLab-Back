@@ -19,6 +19,8 @@ namespace System.ComponentModel.DataAnnotations
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             ErrorMessage = $"{validationContext.MemberName} must not intersect with {_comparisonProperty}";
+            if (value == null)
+                return ValidationResult.Success;
             var currentValue = value as IEnumerable?? 
                 throw new ArgumentException("property must be IEnumebrable");
 
@@ -26,8 +28,11 @@ namespace System.ComponentModel.DataAnnotations
 
             if (property == null)
                 throw new ArgumentException("Property with this name not found");
+            var handleValue = property.GetValue(validationContext.ObjectInstance);
 
-            var comparisonValue = property.GetValue(validationContext.ObjectInstance) as IEnumerable ??
+            if (handleValue == null)
+                return ValidationResult.Success;
+            var comparisonValue = handleValue as IEnumerable ??
                     throw new ArgumentException("property must be IEnumebrable");
 
             if (!IsIntersect(currentValue, comparisonValue))
