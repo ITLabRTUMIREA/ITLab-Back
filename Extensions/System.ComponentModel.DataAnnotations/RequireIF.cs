@@ -20,12 +20,11 @@ namespace System.ComponentModel.DataAnnotations
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             ErrorMessage = $"{validationContext.MemberName} require when {_comparisonProperty} is {criterion}";
-            var currentValue = value;
 
             var property = validationContext.ObjectType.GetProperty(_comparisonProperty);
 
             if (property == null)
-                throw new ArgumentException("Property with this name not found");
+                throw new ArgumentException($"Property with {_comparisonProperty} name was not found");
 
             var comparisonValue = (IComparable)property.GetValue(validationContext.ObjectInstance);
             if (comparisonValue?.CompareTo(criterion) != 0)
