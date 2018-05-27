@@ -58,6 +58,8 @@ namespace BackEnd
 #else
             services
                     .AddDbContext<ProductionDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")))
+                    .AddDbContext<DataBaseContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
