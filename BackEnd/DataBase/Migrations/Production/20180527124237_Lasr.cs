@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace BackEnd.DataBase.Migrations.Production
 {
-    public partial class FirstMigration : Migration
+    public partial class Lasr : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -213,7 +213,8 @@ namespace BackEnd.DataBase.Migrations.Production
                     Description = table.Column<string>(nullable: true),
                     EndTime = table.Column<DateTime>(nullable: false),
                     EventTypeId = table.Column<Guid>(nullable: false),
-                    NeededParticipantsCount = table.Column<int>(nullable: false)
+                    NeededParticipantsCount = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

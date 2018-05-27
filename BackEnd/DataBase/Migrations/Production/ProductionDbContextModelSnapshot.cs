@@ -11,11 +11,10 @@ using System;
 
 namespace BackEnd.DataBase.Migrations.Production
 {
-    [DbContext(typeof(DataBaseContext))]
-    [Migration("20180523161157_FirstMigration")]
-    partial class FirstMigration
+    [DbContext(typeof(ProductionDbContext))]
+    partial class ProductionDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,6 +182,8 @@ namespace BackEnd.DataBase.Migrations.Production
                     b.Property<Guid>("EventTypeId");
 
                     b.Property<int>("NeededParticipantsCount");
+
+                    b.Property<string>("Title");
 
                     b.HasKey("Id");
 
@@ -386,7 +387,7 @@ namespace BackEnd.DataBase.Migrations.Production
             modelBuilder.Entity("Models.Events.Event", b =>
                 {
                     b.HasOne("Models.Events.EventType", "EventType")
-                        .WithMany()
+                        .WithMany("Events")
                         .HasForeignKey("EventTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
