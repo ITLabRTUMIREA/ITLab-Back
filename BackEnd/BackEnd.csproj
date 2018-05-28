@@ -5,6 +5,8 @@
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <RuntimeIdentifiers>osx-x64</RuntimeIdentifiers>
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Exceptions\" />
