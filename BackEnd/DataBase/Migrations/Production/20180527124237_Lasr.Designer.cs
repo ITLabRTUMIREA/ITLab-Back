@@ -11,9 +11,9 @@ using System;
 
 namespace BackEnd.DataBase.Migrations.Production
 {
-    [DbContext(typeof(DataBaseContext))]
-    [Migration("20180523161824_AddTitleToEvent")]
-    partial class AddTitleToEvent
+    [DbContext(typeof(ProductionDbContext))]
+    [Migration("20180527124237_Lasr")]
+    partial class Lasr
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -388,7 +388,7 @@ namespace BackEnd.DataBase.Migrations.Production
             modelBuilder.Entity("Models.Events.Event", b =>
                 {
                     b.HasOne("Models.Events.EventType", "EventType")
-                        .WithMany()
+                        .WithMany("Events")
                         .HasForeignKey("EventTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

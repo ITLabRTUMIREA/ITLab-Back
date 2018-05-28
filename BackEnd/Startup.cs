@@ -57,7 +57,7 @@ namespace BackEnd
                     options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
 #else
             services
-                    .AddDbContext<DataBaseContext>(options =>
+                    .AddDbContext<ProductionDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));

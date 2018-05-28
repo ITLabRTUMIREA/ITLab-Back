@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Extensions;
 namespace BackEnd.Controllers.Events
 {
     [Produces("application/json")]
@@ -35,8 +35,14 @@ namespace BackEnd.Controllers.Events
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<EventType>> GetAsync()
-           => await dbContext.EventTypes.ToListAsync();
+        public async Task<ListResponse<EventType>> GetAsync(string match, bool all = false)
+           => await dbContext
+                .EventTypes
+                .OrderBy(et => et.Events.Count)
+                .If(!all, evtypes => evtypes.Take(5))
+                .IfNotNull(match, evtypes => 
+                    evtypes.Where(et => et.Title.ToUpper().Contains(match.ToUpper())))
+                .ToListAsync();
 
 
         [HttpGet("{id}")]
