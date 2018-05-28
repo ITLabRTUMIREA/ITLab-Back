@@ -39,9 +39,9 @@ namespace BackEnd.Controllers.Events
            => await dbContext
                 .EventTypes
                 .OrderBy(et => et.Events.Count)
-                .If(!all, evtypes => evtypes.Take(5))
                 .IfNotNull(match, evtypes => 
                     evtypes.Where(et => et.Title.ToUpper().Contains(match.ToUpper())))
+                .If(!all, evtypes => evtypes.Take(5))
                 .ToListAsync();
 
 
