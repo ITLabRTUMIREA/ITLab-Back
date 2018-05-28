@@ -66,7 +66,7 @@ namespace BackEnd.Controllers.Events
         public async Task<OneObjectResponse<EventType>> Put([FromBody]EventTypeEditRequest request)
         {
             var now = await CheckAndGetEquipmentTypeAsync(request.Id);
-            now.Title = request.Title;
+            mapper.Map(request, now);
             await dbContext.SaveChangesAsync();
             return now;
         }

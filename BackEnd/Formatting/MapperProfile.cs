@@ -26,6 +26,10 @@ namespace BackEnd.Formating
         public MapperProfile()
         {
             CreateMap<EquipmentTypeCreateRequest, EquipmentType>();
+            CreateMap<EventTypeEditRequest, EventType>()
+                  .ForAllMembers(opt => opt.Condition(a =>
+                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+
             CreateMap<EquipmentCreateRequest, Equipment>();
             CreateMap<Equipment, EquipmentPresent>();
             CreateMap<AccountCreateRequest, User>()
