@@ -19,6 +19,7 @@ namespace BackEnd.DataBase
         public DbSet<Equipment> Equipments { get; set; }
         public DbSet<EventType> EventTypes { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<UserSetting> UserSettings { get; set; }
 
         public DataBaseContext(DbContextOptions options) : base(options)
         {

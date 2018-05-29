@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
+using BackEnd.DataBase;
 using BackEnd.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -12,18 +13,21 @@ using Models.People;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.People;
+using Extensions;
+using Newtonsoft.Json;
 
-namespace BackEnd.Controllers
+namespace BackEnd.Controllers.Users
 {
     [Produces("application/json")]
     [Route("api/User")]
-    public class UserController : Controller
+    public class UserController : AuthorizeController
     {
-        private readonly UserManager<User> userManager;
+        private readonly DataBaseContext dbContext;
 
-        public UserController(UserManager<User> userManager)
+        public UserController(UserManager<User> userManager,
+                              DataBaseContext dbContext) : base(userManager)
         {
-            this.userManager = userManager;
+            this.dbContext = dbContext;
         }
         [HttpGet]
         public async Task<ListResponse<UserPresent>> GetAsync()
@@ -31,7 +35,7 @@ namespace BackEnd.Controllers
                 .Users
                 .ProjectTo<UserPresent>()
                 .ToListAsync();
-        
+
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<UserPresent>> GetAsync(Guid id)
         => await userManager
@@ -39,6 +43,5 @@ namespace BackEnd.Controllers
             .ProjectTo<UserPresent>()
             .FirstOrDefaultAsync(u => u.Id == id)
             ?? throw ResponseStatusCode.NotFound.ToApiException();
-
     }
 }

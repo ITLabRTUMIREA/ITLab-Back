@@ -13,12 +13,14 @@ namespace BackEnd.Controllers
 {
     public class AuthorizeController : Controller
     {
-        private readonly UserManager<User> userManager;
+        protected readonly UserManager<User> userManager;
 
         public AuthorizeController(UserManager<User> userManager)
         {
             this.userManager = userManager;
         }
         protected Guid UserId => Guid.Parse(userManager.GetUserId(User));
+        protected async Task<User> GetCurrentUser()
+            => await userManager.FindByIdAsync(userManager.GetUserId(User));
     }
 }
