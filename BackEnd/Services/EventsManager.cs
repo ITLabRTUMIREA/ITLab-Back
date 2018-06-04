@@ -33,6 +33,7 @@ namespace BackEnd.Services
         public IQueryable<Event> Events =>
             dbContext
             .Events
+            .Include(e => e.EventType)
             .OrderBy(e => e.BeginTime)
             .Include(e => e.EventEquipments);
         

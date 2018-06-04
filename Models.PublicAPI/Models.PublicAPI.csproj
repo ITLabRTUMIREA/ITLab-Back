@@ -8,6 +8,7 @@
     <Compile Remove="Responses\Equipment\EquipmentType\**" />
     <EmbeddedResource Remove="Responses\Equipment\EquipmentType\**" />
     <None Remove="Responses\Equipment\EquipmentType\**" />
+    <None Remove="Responses\Event\EventTypePresent.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,5 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Responses\Event\EventTypePresent.cs" />
   </ItemGroup>
 </Project>

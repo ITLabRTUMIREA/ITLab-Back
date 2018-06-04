@@ -14,7 +14,7 @@ namespace Models.PublicAPI.Responses.Event
         public DateTime EndTime { get; set; }
         public string Address { get; set; }
         public int NeededParticipantsCount { get; set; }
-        public Guid EventTypeId { get; set; }
+        public EventTypePresent EventType { get; set; }
         public List<Guid> EquipmentIds { get; set; }
         public List<Guid> ParticipantsIds { get; set; }
     }
