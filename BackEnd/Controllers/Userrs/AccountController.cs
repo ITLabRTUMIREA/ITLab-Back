@@ -17,7 +17,7 @@ using Models.People;
 using BackEnd.Extensions;
 using Microsoft.AspNetCore.Authorization;
 
-namespace BackEnd.Controllers
+namespace BackEnd.Controllers.Users
 {
     [Produces("application/json")]
     [Route("api/account")]
