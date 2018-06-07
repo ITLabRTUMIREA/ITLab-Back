@@ -30,6 +30,7 @@ using System.Runtime.InteropServices;
 using BackEnd.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Newtonsoft.Json.Serialization;
 
 namespace BackEnd
 {
@@ -72,6 +73,16 @@ namespace BackEnd
                      .AddAuthenticationSchemes("Bearer")
                      .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
+                options.OutputFormatters.RemoveType<JsonOutputFormatter>();
+                options.OutputFormatters.Add(new JsonOutputFormatter(new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    }
+                }, ArrayPool<char>.Shared));
+
             });
 
             services.AddAutoMapper();
@@ -148,7 +159,7 @@ namespace BackEnd
             if (Configuration.GetValue<bool>("DBInitialize:Need"))
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
-			
+
             app.UseCors(config =>
                 config.AllowAnyHeader()
                     .AllowAnyMethod()

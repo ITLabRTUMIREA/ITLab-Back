@@ -44,6 +44,7 @@ namespace BackEnd.Formating
 
 
             CreateMap<EventTypeCreateRequest, EventType>();
+            CreateMap<EventType, EventTypePresent>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventPresent>()
                 .ForMember(ep => ep.EquipmentIds, conf => conf.MapFrom(e => e.EventEquipments.Select(ee => ee.EquipmentId)))
