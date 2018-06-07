@@ -2,11 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>ITLab.Extensions</PackageId>
+    <Authors>CAPCHIK</Authors>
+    <PackageProjectUrl>https://github.com/ITLabRTUMIREA/ITLab-Back</PackageProjectUrl>
+    <Title>ITLab.Extensions</Title>
+    <Description>Extensions library with cool features</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
+    <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
   </ItemGroup>
 </Project>
