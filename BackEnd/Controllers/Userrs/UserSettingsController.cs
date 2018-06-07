@@ -12,6 +12,8 @@ using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 using Newtonsoft.Json;
 using Extensions;
+using Models.PublicAPI.Responses.People;
+using AutoMapper.QueryableExtensions;
 
 namespace BackEnd.Controllers.Users
 {
@@ -26,10 +28,11 @@ namespace BackEnd.Controllers.Users
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<UserSetting>> GetSettingsAsync()
+        public async Task<ListResponse<UserSettingPresent>> GetSettingsAsync()
         => await dbContext
                 .UserSettings
                 .Where(s => s.UserId == UserId)
+                .ProjectTo<UserSettingPresent>()
                 .ToListAsync();
 
         [HttpGet("{settingName}")]
@@ -69,11 +72,8 @@ namespace BackEnd.Controllers.Users
                   .UserSettings
                   .Where(s => s.UserId == UserId)
                   .Where(s => s.Title == settingName)
-                  .SingleOrDefaultAsync();
-            if (current == null)
-            {
-                return null;
-            }
+                  .SingleOrDefaultAsync()
+                  ?? throw ResponseStatusCode.NotFound.ToApiException();
             dbContext.UserSettings.Remove(current);
             await dbContext.SaveChangesAsync();
             return current.Value;

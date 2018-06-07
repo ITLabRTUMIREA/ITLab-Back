@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Extensions;
 
 namespace BackEnd.Formating
 {
@@ -57,6 +58,8 @@ namespace BackEnd.Formating
 
             CreateMap<User, UserPresent>();
             CreateMap<Student, UserPresent>();
+            CreateMap<UserSetting, UserSettingPresent>()
+                .ForMember(usp => usp.Value, map => map.MapFrom(us => us.Value.ParseToJson()));
         }
     }
 }
