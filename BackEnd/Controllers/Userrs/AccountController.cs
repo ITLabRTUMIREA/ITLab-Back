@@ -57,17 +57,7 @@ namespace BackEnd.Controllers.Users
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {
             User user;
-            switch (account.UserType)
-            {
-                case Models.PublicAPI.UserType.SimpleUser:
-                    user = mapper.Map<User>(account);
-                    break;
-                case Models.PublicAPI.UserType.Student:
-                    user = mapper.Map<Student>(account);
-                    break;
-                default:
-                    throw ResponseStatusCode.Unknown.ToApiException();
-            }
+            user = mapper.Map<User>(account);
             var result = await userManager.CreateAsync(user, account.Password);
 
             //result = await userManager.AddToRoleAsync(user, "User");

@@ -35,8 +35,6 @@ namespace BackEnd.Formating
             CreateMap<Equipment, EquipmentPresent>();
             CreateMap<AccountCreateRequest, User>()
                 .ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
-            CreateMap<AccountCreateRequest, Student>()
-                .ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
             CreateMap<User, LoginResponse>();
 
             CreateMap<EquipmentEditRequest, Equipment>()
@@ -58,7 +56,6 @@ namespace BackEnd.Formating
             CreateMap<RoleCreateRequest, Role>();
 
             CreateMap<User, UserPresent>();
-            CreateMap<Student, UserPresent>();
             CreateMap<UserSetting, UserSettingPresent>()
                 .ForMember(usp => usp.Value, map => map.MapFrom(us => us.Value.ParseToJson()));
         }

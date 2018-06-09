@@ -29,11 +29,6 @@ namespace BackEnd.DataBase
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>()
-                .HasDiscriminator<int>("UserType")
-                .HasValue<User>(0)
-                .HasValue<Student>(1);
-
             modelBuilder.Entity<EventEquipment>()
                 .HasKey(t => new { t.EquipmentId, t.EventId });
 

@@ -12,14 +12,9 @@ namespace Models.PublicAPI.Requests.Account
         [Required]
         public string LastName { get; set; }
         [Required]
-        [CorrectEnum(typeof(UserType))]
-        public UserType UserType { get; set; }
-        [Required]
         public string Password { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-        [RequiredIF(nameof(UserType), UserType.Student)]
-        public string StudentID { get; set; }
     }
 }
