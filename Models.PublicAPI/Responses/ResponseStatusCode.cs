@@ -18,6 +18,7 @@ namespace Models.PublicAPI.Responses
         IncorrectEquipmentIds,
         Unauthorized,
         DeleteRoleError,
-        IncorrectUserIds
+        IncorrectUserIds,
+        EquipmentReserved
     }
 }

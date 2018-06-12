@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Models.People;
 
 namespace Models.Equipments
 {
@@ -15,5 +16,8 @@ namespace Models.Equipments
 
         public Guid EquipmentTypeId { get; set; }
         public EquipmentType EquipmentType { get; set; }
+
+        public Guid? OwnerId { get; set; }
+        public User Owner { get; set; }
     }
 }
