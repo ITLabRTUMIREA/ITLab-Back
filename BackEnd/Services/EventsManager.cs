@@ -133,6 +133,7 @@ namespace BackEnd.Services
 
         private async Task<Event> CheckAndGetEventAsync(Guid id)
            => await dbContext.Events
+                .Include(e => e.EventType)
                 .Include(e => e.EventEquipments)
                 .FirstOrDefaultAsync(e => e.Id == id)
              ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
