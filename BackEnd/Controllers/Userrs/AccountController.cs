@@ -40,11 +40,11 @@ namespace BackEnd.Controllers.Users
         }
         [AllowAnonymous]
         [HttpGet]
-        [Route("{id}/{*token}")]
-        public async Task<ResponseBase> Get(string id, string token)
+        [Route("{id}/{*emailToken}")]
+        public async Task<ResponseBase> Get(string id, string emailToken)
         {
             var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.ConfirmEmailAsync(user, token);
+            var result = await userManager.ConfirmEmailAsync(user, emailToken);
             if (result.Succeeded)
             {
                 return ResponseStatusCode.OK;

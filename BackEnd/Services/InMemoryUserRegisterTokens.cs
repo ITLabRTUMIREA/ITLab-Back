@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions;
+using Microsoft.Extensions.Options;
+using BackEnd.Models;
 
 namespace BackEnd.Services
 {
@@ -12,6 +14,13 @@ namespace BackEnd.Services
         private const string availableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private static readonly Random random = new Random();
         private readonly Dictionary<string, string> tokensStorage = new Dictionary<string, string>();
+        public InMemoryUserRegisterTokens(IOptions<List<RegisterTokenPair>> defaults)
+        {
+            if (defaults.Value == null)
+                return;
+            foreach (var pair in defaults.Value) 
+                tokensStorage[pair.Email] = pair.Token;
+        }
         public string AddRegisterToken(string email)
         {
             var randString = RandomString(20);
