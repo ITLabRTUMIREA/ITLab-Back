@@ -10,5 +10,6 @@ namespace Models.PublicAPI.Responses.Equipment
         public string SerialNumber { get; set; }
 
         public Guid EquipmentTypeId { get; set; }
+        public Guid? OwnerId { get; set; }
     }
 }
