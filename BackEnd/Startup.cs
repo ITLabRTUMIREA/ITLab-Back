@@ -82,7 +82,8 @@ namespace BackEnd
                     ContractResolver = new DefaultContractResolver
                     {
                         NamingStrategy = new CamelCaseNamingStrategy()
-                    }
+                    },
+                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
                 }, ArrayPool<char>.Shared));
 
             });
