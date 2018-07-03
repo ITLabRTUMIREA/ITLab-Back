@@ -14,6 +14,7 @@ using Models.PublicAPI.Requests.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
+using Extensions;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -36,8 +37,13 @@ namespace BackEnd.Controllers.Equipments
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<EquipmentType>> GetAsync()
-            => await dbContext.EquipmentTypes.ToListAsync();
+        public async Task<ListResponse<EquipmentType>> GetAsync(string match, bool all = false)
+            => await dbContext
+                .EquipmentTypes
+                .IfNotNull(match, eqtypes => 
+                    eqtypes.Where(eq => eq.Title.ToUpper().Contains(match.ToUpper())))
+                .If (!all, eqtypes => eqtypes.Take(5))
+                .ToListAsync();
 
 
         [HttpGet("{id}")]
