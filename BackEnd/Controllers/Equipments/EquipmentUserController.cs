@@ -38,28 +38,28 @@ namespace BackEnd.Controllers.Equipments
         }
 
         [HttpGet("free")]
-        public async Task<ListResponse<EquipmentPresent>> Get()
+        public async Task<ListResponse<EquipmentView>> Get()
         {
             return await dataBaseContext
                 .Equipments
                 .Where(e => e.OwnerId == null)
-                .ProjectTo<EquipmentPresent>()
+                .ProjectTo<EquipmentView>()
                 .ToListAsync();
         }
 
         [HttpGet("{userId?}")]
-        public async Task<ListResponse<EquipmentPresent>> Get(Guid? userId)
+        public async Task<ListResponse<EquipmentView>> Get(Guid? userId)
         {
             var uId = await GetUserId(userId);
             return await dataBaseContext
                 .Equipments
                 .Where(e => e.OwnerId == uId)
-                .ProjectTo<EquipmentPresent>()
+                .ProjectTo<EquipmentView>()
                 .ToListAsync();
         }
 
         [HttpPost("{userId?}")]
-        public async Task<OneObjectResponse<EquipmentPresent>> Post(
+        public async Task<OneObjectResponse<EquipmentView>> Post(
             [FromRoute]Guid? userId,
             [FromBody] IdRequest equimentIdRequest)
         {
@@ -74,11 +74,11 @@ namespace BackEnd.Controllers.Equipments
 
             targerEquipment.OwnerId = uId;
             await dataBaseContext.SaveChangesAsync();
-            return mapper.Map<EquipmentPresent>(targerEquipment);
+            return mapper.Map<EquipmentView>(targerEquipment);
         }
 
         [HttpDelete("{userId?}")]
-        public async Task<OneObjectResponse<EquipmentPresent>> Delete(
+        public async Task<OneObjectResponse<EquipmentView>> Delete(
             [FromRoute]Guid? userId,
             [FromBody] IdRequest equimentIdRequest)
         {
@@ -91,7 +91,7 @@ namespace BackEnd.Controllers.Equipments
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
             targerEquipment.OwnerId = null;
             await dataBaseContext.SaveChangesAsync();
-            return mapper.Map<EquipmentPresent>(targerEquipment);
+            return mapper.Map<EquipmentView>(targerEquipment);
         }
         private async Task<Guid> GetUserId(Guid? targetId)
         {

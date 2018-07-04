@@ -44,11 +44,11 @@ namespace BackEnd.Controllers.Equipments
 
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<EquipmentPresent>> GetAsync(Guid id)
-            => mapper.Map<EquipmentPresent>(await CheckAndGetEquipmentAsync(id));
+        public async Task<OneObjectResponse<EquipmentView>> GetAsync(Guid id)
+            => mapper.Map<EquipmentView>(await CheckAndGetEquipmentAsync(id));
 
         [HttpGet]
-        public async Task<ListResponse<EquipmentPresent>> GetAsync(
+        public async Task<ListResponse<EquipmentView>> GetAsync(
             [FromQuery] Guid? eventId,
             [FromQuery] Guid? equipmentTypeId,
             [FromQuery] string equipmentTypeName
@@ -64,11 +64,11 @@ namespace BackEnd.Controllers.Equipments
                 equipments = equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId);
             if (!string.IsNullOrEmpty(equipmentTypeName))
                 equipments = equipments.Where(eq => eq.EquipmentType.Title == equipmentTypeName);
-            return await equipments.ProjectTo<EquipmentPresent>().ToListAsync();
+            return await equipments.ProjectTo<EquipmentView>().ToListAsync();
         }
 
         [HttpPost]
-        public async Task<OneObjectResponse<EquipmentPresent>> PostAsync([FromBody]EquipmentCreateRequest request)
+        public async Task<OneObjectResponse<EquipmentView>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
             var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
             await CheckNotExist(request.SerialNumber);
@@ -76,11 +76,11 @@ namespace BackEnd.Controllers.Equipments
             var newEquipment = mapper.Map<Equipment>(request);
             await dbContext.Equipments.AddAsync(newEquipment);
             await dbContext.SaveChangesAsync();
-            return mapper.Map<EquipmentPresent>(newEquipment);
+            return mapper.Map<EquipmentView>(newEquipment);
         }
 
         [HttpPut]
-        public async Task<OneObjectResponse<EquipmentPresent>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
+        public async Task<OneObjectResponse<EquipmentView>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
         {
             var toEdit = await CheckAndGetEquipmentAsync(request.Id);
             if (request.EquipmentTypeId.HasValue)
@@ -91,7 +91,7 @@ namespace BackEnd.Controllers.Equipments
             mapper.Map(request, toEdit);
             await dbContext.SaveChangesAsync();
 
-            return mapper.Map<EquipmentPresent>(toEdit);
+            return mapper.Map<EquipmentView>(toEdit);
         }
 
         [HttpDelete]
@@ -104,7 +104,7 @@ namespace BackEnd.Controllers.Equipments
         }
 
         private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
-            => await dbContext.Equipments.FindAsync(id)
+            => await dbContext.Equipments.Include(eq => eq.EquipmentType).FirstOrDefaultAsync(eq => eq.Id == id)
               ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
         private async Task CheckNotExist(string serialNumber)
