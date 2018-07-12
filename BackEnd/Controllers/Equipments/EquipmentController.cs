@@ -58,7 +58,7 @@ namespace BackEnd.Controllers.Equipments
             if (eventId.HasValue)
             {
                 equipments = equipments
-                    .Where(eq => eq.EventEquipments.Any(eveq => eveq.EventId == eventId.Value));
+                    .Where(eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId));
             }
             if (equipmentTypeId.HasValue)
                 equipments = equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId);

@@ -9,6 +9,7 @@
 
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="DataBase\Migrations\Production\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Controllers\Userrs\" />
   </ItemGroup>
@@ -38,5 +39,5 @@
   <ItemGroup>
     <None Remove=".DS_Store" />
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.SecretsShema.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Shema.json" /></VisualStudio></ProjectExtensions>
 </Project>

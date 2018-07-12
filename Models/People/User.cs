@@ -10,8 +10,8 @@ namespace Models.People
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public List<EventUserRole> EventUsers { get; set; }
         public List<UserSetting> UserSettings { get; set; }
         public List<Equipment> Equipment  { get; set; }
+        public List<PlaceUserRole> PlaceUserRoles { get; set; }
     }
 }

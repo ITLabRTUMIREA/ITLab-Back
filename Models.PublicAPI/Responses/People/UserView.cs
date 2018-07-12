@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Models.PublicAPI.Responses.People
 {
-    public class UserPresent
+    public class UserView
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; }

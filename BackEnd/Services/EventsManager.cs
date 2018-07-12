@@ -32,11 +32,10 @@ namespace BackEnd.Services
 
         public IQueryable<Event> Events =>
             dbContext
-            .Events
-            .Include(e => e.EventType)
-            .OrderBy(e => e.BeginTime)
-            .Include(e => e.EventEquipments);
-        
+                .Events
+                .Include(e => e.EventType)
+                .OrderBy(e => e.Shifts.Min(c => c.BeginTime));
+
         public Task<Event> FindAsync(Guid id)
             => CheckAndGetEventAsync(id);
 
@@ -89,7 +88,7 @@ namespace BackEnd.Services
 
             mapper.Map(request, toEdit);
 
-            await UpdateEventEquipmentAsync(toEdit, 
+            await UpdateEventEquipmentAsync(toEdit,
                 request.AddEquipment,
                 request.RemoveEquipment);
             await dbContext.SaveChangesAsync();

@@ -7,9 +7,6 @@ namespace Models.PublicAPI.Requests.Events.Event
 {
     public class PersonWorkRequest : IdRequest
     {
-        [CompareWith(nameof(EndWork), Criterion.LessOrEqual)]
-        public DateTime? BeginWork { get; set; }
-        [CompareWith(nameof(BeginWork), Criterion.MoreOrEqual)]
-        public DateTime? EndWork { get; set; }
+        public string Role { get; set; }
     }
 }

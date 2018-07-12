@@ -29,39 +29,37 @@ namespace BackEnd.DataBase
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<EventEquipment>()
-                .HasKey(t => new { t.EquipmentId, t.EventId });
+            modelBuilder.Entity<PlaceEquipment>()
+                .HasKey(t => new { t.EquipmentId, t.PlaceId });
 
-            modelBuilder.Entity<EventEquipment>()
-                .HasOne(ee => ee.Event)
-                .WithMany(ev => ev.EventEquipments)
-                .HasForeignKey(ee => ee.EventId);
+            modelBuilder.Entity<PlaceEquipment>()
+                .HasOne(pe => pe.Place)
+                .WithMany(pl => pl.PlaceEquipments)
+                .HasForeignKey(pl => pl.PlaceId);
 
-            modelBuilder.Entity<EventEquipment>()
-                .HasOne(ee => ee.Equipment)
-                .WithMany(eq => eq.EventEquipments)
-                .HasForeignKey(ee => ee.EquipmentId);
-
-
+            modelBuilder.Entity<PlaceEquipment>()
+                .HasOne(pe => pe.Equipment)
+                .WithMany(eq => eq.PlaceEquipments)
+                .HasForeignKey(pe => pe.EquipmentId);
 
 
-            modelBuilder.Entity<EventUserRole>()
-                .HasKey(t => new { t.UserId, t.EventId });
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasKey(t => new { t.UserId, t.PlaceId });
 
-            modelBuilder.Entity<EventUserRole>()
-                .HasOne(eur => eur.Event)
-                .WithMany(ev => ev.EventUsers)
-                .HasForeignKey(eur => eur.EventId);
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasOne(pur => pur.Place)
+                .WithMany(ev => ev.PlaceUserRoles)
+                .HasForeignKey(pur => pur.PlaceId);
 
-            modelBuilder.Entity<EventUserRole>()
-                .HasOne(eur => eur.User)
-                .WithMany(u => u.EventUsers)
-                .HasForeignKey(eur => eur.UserId);
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasOne(pur => pur.User)
+                .WithMany(u => u.PlaceUserRoles)
+                .HasForeignKey(pur => pur.UserId);
 
-            modelBuilder.Entity<EventUserRole>()
-                .HasOne(eur => eur.Role)
-                .WithMany(r => r.EventUserRoles)
-                .HasForeignKey(eur => eur.RoleId);
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasOne(pur => pur.Role)
+                .WithMany(r => r.PlaceUserRoles)
+                .HasForeignKey(pur => pur.RoleId);
         }
     }
 }

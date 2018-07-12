@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Models.PublicAPI.Responses.Event
 {
-    public class EventPresent
+    public class EventView
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
@@ -15,7 +15,6 @@ namespace Models.PublicAPI.Responses.Event
         public string Address { get; set; }
         public int NeededParticipantsCount { get; set; }
         public EventTypePresent EventType { get; set; }
-        public List<Guid> EquipmentIds { get; set; }
-        public List<Guid> ParticipantsIds { get; set; }
+        public List<ShiftView> Changes { get; set; }
     }
 }

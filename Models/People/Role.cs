@@ -8,6 +8,6 @@ namespace Models.People
 {
     public class Role : IdentityRole<Guid>
     {
-        public List<EventUserRole> EventUserRoles { get; set; }
+        public List<PlaceUserRole> PlaceUserRoles { get; set; }
     }
 }

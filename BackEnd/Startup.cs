@@ -59,8 +59,6 @@ namespace BackEnd
                     options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
 #else
             services
-                    .AddDbContext<ProductionDbContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")))
                     .AddDbContext<DataBaseContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif

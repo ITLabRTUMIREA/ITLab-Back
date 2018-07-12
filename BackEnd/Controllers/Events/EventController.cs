@@ -34,34 +34,34 @@ namespace BackEnd.Controllers.Events
             this.eventsManager = eventManager;
         }
         [HttpGet]
-        public async Task<ListResponse<EventPresent>> Get(DateTime? begin, DateTime? end)
+        public async Task<ListResponse<EventView>> Get(DateTime? begin, DateTime? end)
         {
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
              .Events
-			 .IfNotNull(begin, evnts => evnts.Where(e => e.BeginTime >= begin))
-			 .IfNotNull(end, evnts => evnts.Where(e => e.BeginTime <= end))
-             .ProjectTo<EventPresent>()
+			 .IfNotNull(begin, evnts => evnts.Where(e => e.Shifts.Min(c => c.BeginTime) >= begin))
+			 .IfNotNull(end, evnts => evnts.Where(e => e.Shifts.Max(c => c.EndTime)<= end))
+             .ProjectTo<EventView>()
              .ToListAsync();
         }
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<EventPresent>> GetAsync(Guid id)
-            => mapper.Map<EventPresent>(await eventsManager
+        public async Task<OneObjectResponse<EventView>> GetAsync(Guid id)
+            => mapper.Map<EventView>(await eventsManager
                 .FindAsync(id));
 
 
         [HttpPost]
-        public async Task<OneObjectResponse<EventPresent>> PostAsync([FromBody]EventCreateRequest request)
+        public async Task<OneObjectResponse<EventView>> PostAsync([FromBody]EventCreateRequest request)
         {
             var newEvent = await eventsManager.AddAsync(request);
-            return mapper.Map<EventPresent>(newEvent);
+            return mapper.Map<EventView>(newEvent);
         }
 
         [HttpPut]
-        public async Task<OneObjectResponse<EventPresent>> PutAsync([FromBody]EventEditRequest request)
+        public async Task<OneObjectResponse<EventView>> PutAsync([FromBody]EventEditRequest request)
         {
             var toEdit = await eventsManager.EditAsync(request);
-            return mapper.Map<EventPresent>(toEdit);
+            return mapper.Map<EventView>(toEdit);
         }
 
         [HttpDelete]

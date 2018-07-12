@@ -34,19 +34,19 @@ namespace BackEnd.Controllers.Users
             this.registerTokens = registerTokens;
         }
         [HttpGet]
-        public async Task<ListResponse<UserPresent>> GetAsync(string email, int count = 5)
+        public async Task<ListResponse<UserView>> GetAsync(string email, int count = 5)
             => await userManager
                 .Users
                 .IfNotNull(email, users => users.Where(u => u.Email.ToUpper().Contains(email.ToUpper())))
                 .If(count > 0, users => users.Take(count))
-                .ProjectTo<UserPresent>()
+                .ProjectTo<UserView>()
                 .ToListAsync();
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<UserPresent>> GetAsync(Guid id)
+        public async Task<OneObjectResponse<UserView>> GetAsync(Guid id)
         => await userManager
             .Users
-            .ProjectTo<UserPresent>()
+            .ProjectTo<UserView>()
             .FirstOrDefaultAsync(u => u.Id == id)
             ?? throw ResponseStatusCode.NotFound.ToApiException();
 
