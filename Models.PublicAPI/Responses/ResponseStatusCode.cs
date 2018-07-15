@@ -20,6 +20,7 @@ namespace Models.PublicAPI.Responses
         DeleteRoleError,
         IncorrectUserIds,
         EquipmentReserved,
-        IncorrectAccessToken
+        IncorrectAccessToken,
+        NoShifts
     }
 }

@@ -10,11 +10,8 @@ namespace Models.PublicAPI.Responses.Event
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime BeginTime { get; set; }
-        public DateTime EndTime { get; set; }
         public string Address { get; set; }
-        public int NeededParticipantsCount { get; set; }
         public EventTypePresent EventType { get; set; }
-        public List<ShiftView> Changes { get; set; }
+        public List<ShiftView> Shifts { get; set; }
     }
 }

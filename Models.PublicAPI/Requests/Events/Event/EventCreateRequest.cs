@@ -15,8 +15,9 @@ namespace Models.PublicAPI.Requests.Events.Event
         [Required]
         public Guid EventTypeId { get; set; }
         public string Description { get; set; }
-
-        public List<ShiftView> Shifts { get; set; }
+        
+        [MinCount(1)]
+        public List<ShiftCreateRequest> Shifts { get; set; }
 
     }
 }

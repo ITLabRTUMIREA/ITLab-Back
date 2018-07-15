@@ -11,6 +11,7 @@ namespace Models.Events
         public Guid Id { get; set; }
 
 
+        public int TargetParticipantsCount { get; set; }
         public List<PlaceEquipment> PlaceEquipments { get; set; }
         public List<PlaceUserRole> PlaceUserRoles { get; set; }
 

@@ -7,6 +7,6 @@ namespace Models.PublicAPI.Requests.Events.Event
 {
     public class PersonWorkRequest : IdRequest
     {
-        public string Role { get; set; }
+        public Guid RoleId { get; set; }
     }
 }

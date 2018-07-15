@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Models.Equipments;
 using Models.Events;
@@ -60,6 +61,17 @@ namespace BackEnd.DataBase
                 .HasOne(pur => pur.Role)
                 .WithMany(r => r.PlaceUserRoles)
                 .HasForeignKey(pur => pur.RoleId);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        {
+            ChangeTracker
+                .Entries<Event>()
+                .Where(e => e.State != EntityState.Deleted)
+                .ToList()
+                .ForEach(e => e.Entity.BeginTime = e.Entity.Shifts?.Min(s => s.BeginTime) ?? e.Entity.BeginTime);
+                
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }
 }

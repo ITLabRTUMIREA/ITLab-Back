@@ -73,18 +73,14 @@ namespace BackEnd
                      .AddAuthenticationSchemes("Bearer")
                      .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
-                options.OutputFormatters.RemoveType<JsonOutputFormatter>();
-                options.OutputFormatters.Add(new JsonOutputFormatter(new JsonSerializerSettings
+            }).AddJsonOptions(options =>
                 {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new CamelCaseNamingStrategy()
-                    },
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                }, ArrayPool<char>.Shared));
-
-            });
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                }
+            );
 
             services.AddAutoMapper();
 

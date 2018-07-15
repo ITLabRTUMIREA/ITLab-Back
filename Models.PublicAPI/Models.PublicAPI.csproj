@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>ITLab.Models.PublicAPI</PackageId>
@@ -8,21 +7,19 @@
     <Title>ITLab.Models.PublicAPI</Title>
     <Description>Library with classes for public API</Description>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Responses\Equipment\EquipmentType\**" />
     <EmbeddedResource Remove="Responses\Equipment\EquipmentType\**" />
     <None Remove="Responses\Equipment\EquipmentType\**" />
     <None Remove="Responses\Event\EventTypePresent.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.3" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
     <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 </Project>

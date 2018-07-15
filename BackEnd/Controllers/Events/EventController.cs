@@ -12,6 +12,7 @@ using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.General;
 using AutoMapper.QueryableExtensions;
 using Extensions;
+using Models.Events;
 
 namespace BackEnd.Controllers.Events
 {
@@ -33,17 +34,20 @@ namespace BackEnd.Controllers.Events
             this.mapper = mapper;
             this.eventsManager = eventManager;
         }
+
         [HttpGet]
-        public async Task<ListResponse<EventView>> Get(DateTime? begin, DateTime? end)
+        public async Task<ListResponse<CompactEventView>> Get(DateTime? begin, DateTime? end)
         {
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
-             .Events
-			 .IfNotNull(begin, evnts => evnts.Where(e => e.Shifts.Min(c => c.BeginTime) >= begin))
-			 .IfNotNull(end, evnts => evnts.Where(e => e.Shifts.Max(c => c.EndTime)<= end))
-             .ProjectTo<EventView>()
-             .ToListAsync();
+                .Events
+                .ProjectTo<CompactEventView>()
+                .IfNotNull(begin, evnts => evnts.Where(e => e.BeginTime >= begin))
+                .IfNotNull(end, evnts => evnts.Where(e => e.BeginTime <= end))
+                .OrderBy(cev => cev.BeginTime)
+                .ToListAsync();
         }
+
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EventView>> GetAsync(Guid id)
             => mapper.Map<EventView>(await eventsManager
@@ -51,24 +55,24 @@ namespace BackEnd.Controllers.Events
 
 
         [HttpPost]
-        public async Task<OneObjectResponse<EventView>> PostAsync([FromBody]EventCreateRequest request)
+        public async Task<OneObjectResponse<EventView>> PostAsync([FromBody] EventCreateRequest request)
         {
-            var newEvent = await eventsManager.AddAsync(request);
-            return mapper.Map<EventView>(newEvent);
+            var newEventQuerable = await eventsManager.AddAsync(request);
+            return await newEventQuerable.ProjectTo<EventView>().SingleAsync();
         }
 
         [HttpPut]
-        public async Task<OneObjectResponse<EventView>> PutAsync([FromBody]EventEditRequest request)
+        public async Task<OneObjectResponse<EventView>> PutAsync([FromBody] EventEditRequest request)
         {
             var toEdit = await eventsManager.EditAsync(request);
             return mapper.Map<EventView>(toEdit);
         }
 
-        [HttpDelete]
-        public async Task<OneObjectResponse<Guid>> DeleteAsync([FromBody]IdRequest request)
+        [HttpDelete("{eventId:guid}")]
+        public async Task<OneObjectResponse<Guid>> DeleteAsync(Guid eventId)
         {
-            await eventsManager.DeleteAsync(request.Id);
-            return request.Id;
+            await eventsManager.DeleteAsync(eventId);
+            return eventId;
         }
     }
 }

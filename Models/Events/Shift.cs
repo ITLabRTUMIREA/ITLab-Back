@@ -8,7 +8,6 @@ namespace Models.Events
     public class Shift
     {
         public Guid Id { get; set; }
-        public int Number { get; set; }
         public DateTime BeginTime { get; set; }
         public DateTime EndTime { get; set; }
 
