@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Models.PublicAPI.Requests.Events.Event.Create;
+using Models.PublicAPI.Requests.Events.Event.Edit;
 
 namespace BackEnd.Services.Interfaces
 {

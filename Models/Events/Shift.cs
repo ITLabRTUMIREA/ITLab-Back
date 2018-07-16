@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Extensions.General;
 using Newtonsoft.Json.Serialization;
 
 namespace Models.Events
 {
-    public class Shift
+    public class Shift : IdInterface
     {
         public Guid Id { get; set; }
         public DateTime BeginTime { get; set; }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
-using Models.PublicAPI.Responses.Event;
 
-namespace Models.PublicAPI.Requests.Events.Event
+namespace Models.PublicAPI.Requests.Events.Event.Create
 {
     public class EventCreateRequest
     {

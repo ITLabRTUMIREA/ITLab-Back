@@ -13,6 +13,8 @@ using Models.PublicAPI.Responses.General;
 using AutoMapper.QueryableExtensions;
 using Extensions;
 using Models.Events;
+using Models.PublicAPI.Requests.Events.Event.Create;
+using Models.PublicAPI.Requests.Events.Event.Edit;
 
 namespace BackEnd.Controllers.Events
 {
@@ -41,10 +43,10 @@ namespace BackEnd.Controllers.Events
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
                 .Events
-                .ProjectTo<CompactEventView>()
                 .IfNotNull(begin, evnts => evnts.Where(e => e.BeginTime >= begin))
                 .IfNotNull(end, evnts => evnts.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
+                .ProjectTo<CompactEventView>()
                 .ToListAsync();
         }
 

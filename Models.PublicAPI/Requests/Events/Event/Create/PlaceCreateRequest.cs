@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json.Serialization;
 
-namespace Models.PublicAPI.Requests.Events.Event
+namespace Models.PublicAPI.Requests.Events.Event.Create
 {
     public class PlaceCreateRequest
     {

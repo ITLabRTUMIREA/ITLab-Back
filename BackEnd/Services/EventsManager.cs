@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using BackEnd.Extensions;
@@ -14,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions;
+using Models.PublicAPI.Requests.Events.Event.Create;
+using Models.PublicAPI.Requests.Events.Event.Edit;
 
 namespace BackEnd.Services
 {
@@ -35,7 +36,7 @@ namespace BackEnd.Services
             get
             {
                 var allEvents = dbContext
-                .Events
+                        .Events
 //                .Include(e => e.EventType)
 //                .Include(e => e.Shifts)
 //                    .ThenInclude(s => s.Places)
@@ -46,7 +47,7 @@ namespace BackEnd.Services
 //                    .ThenInclude(s => s.Places)
 //                        .ThenInclude(p => p.PlaceUserRoles)
 //                            .ThenInclude(pur => pur.Role)
- ;
+                    ;
                 return allEvents;
             }
         }
@@ -58,11 +59,12 @@ namespace BackEnd.Services
         {
             await CheckAndGetEventTypeAsync(request.EventTypeId);
             var newEvent = mapper.Map<Event>(request);
+
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
-            return dbContext.Events.Where(ev => ev.Id ==newEvent.Id);
+            return dbContext.Events.Where(ev => ev.Id == newEvent.Id);
         }
-        
+
 
         public async Task<Event> EditAsync(EventEditRequest request)
         {
@@ -71,6 +73,15 @@ namespace BackEnd.Services
                 await CheckAndGetEventTypeAsync(request.EventTypeId.Value);
 
             mapper.Map(request, toEdit);
+            var deleteIds = request
+                .Shifts
+                .SelectMany(s => s.Places)
+                .Where(p => p.Delete)
+                .Select(p => p.Id)
+                .Concat(request.Shifts.Where(s => s.Delete).Select(s => s.Id))
+                .ToList();
+            toEdit.Shifts.ForEach(s => s.Places.RemoveAll(p => deleteIds.Contains(p.Id)));
+            toEdit.Shifts.RemoveAll(s => deleteIds.Contains(s.Id));
 
             await dbContext.SaveChangesAsync();
             return toEdit;
@@ -85,19 +96,19 @@ namespace BackEnd.Services
 
         private async Task<EventType> CheckAndGetEventTypeAsync(Guid typeId)
             => await dbContext.EventTypes.FindAsync(typeId)
-                ?? throw ApiLogicException.Create(ResponseStatusCode.EventTypeNotFound);
+               ?? throw ApiLogicException.Create(ResponseStatusCode.EventTypeNotFound);
 
         private async Task<Event> CheckAndGetEventAsync(Guid id)
-           => await dbContext.Events
-                .Include(e => e.EventType)
-                .Include(e => e.Shifts)
-                  .ThenInclude(s => s.Places)
-                  .ThenInclude(p => p.PlaceEquipments)
-                .Include(e => e.Shifts)
-                  .ThenInclude(s => s.Places)
-                  .ThenInclude(p => p.PlaceUserRoles)
-                  .ThenInclude(pur => pur.Role)
-                .FirstOrDefaultAsync(e => e.Id == id)
-             ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+            => await dbContext.Events
+                   .Include(e => e.EventType)
+                   .Include(e => e.Shifts)
+                   .ThenInclude(s => s.Places)
+                   .ThenInclude(p => p.PlaceEquipments)
+                   .Include(e => e.Shifts)
+                   .ThenInclude(s => s.Places)
+                   .ThenInclude(p => p.PlaceUserRoles)
+                   .ThenInclude(pur => pur.Role)
+                   .FirstOrDefaultAsync(e => e.Id == id)
+               ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
     }
 }

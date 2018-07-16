@@ -18,8 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BackEnd.Formatting;
 using Extensions;
 using Models.DataBaseLinks;
+using Models.PublicAPI.Requests.Events.Event.Create;
+using Models.PublicAPI.Requests.Events.Event.Edit;
 
 namespace BackEnd.Formating
 {
@@ -27,6 +30,7 @@ namespace BackEnd.Formating
     {
         public MapperProfile()
         {
+            EventEditMaps();
             CreateMap<EquipmentTypeCreateRequest, EquipmentType>();
             CreateMap<EventTypeEditRequest, EventType>()
                 .ForAllMembers(opt => opt.Condition(a =>
@@ -48,9 +52,6 @@ namespace BackEnd.Formating
             CreateMap<EventType, EventTypePresent>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventView>();
-            CreateMap<EventEditRequest, Event>()
-                .ForAllMembers(opt => opt.Condition(a =>
-                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
             CreateMap<Event, CompactEventView>()
                 .ForMember(cev => cev.ShiftsCount, map => map.MapFrom(ev => ev.Shifts.Count))
@@ -97,6 +98,22 @@ namespace BackEnd.Formating
             CreateMap<User, UserView>();
             CreateMap<UserSetting, UserSettingPresent>()
                 .ForMember(usp => usp.Value, map => map.MapFrom(us => us.Value.ParseToJson()));
+        }
+
+        private void EventEditMaps()
+        {
+            CreateMap<List<ShiftEditRequest>,List<Shift>>()
+                .ConvertUsing(new ListsConverter<ShiftEditRequest, Shift>());
+            CreateMap<EventEditRequest, Event>()
+                .ForAllMembers(opt => opt.Condition(a =>
+                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+            CreateMap<ShiftEditRequest, Shift>()
+                .ForMember(ev => ev.Places, map => map.UseDestinationValue())
+                .ForAllMembers(opt => opt.Condition(a =>
+                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+            CreateMap<PlaceEditRequest, Place>()
+                .ForAllMembers(opt => opt.Condition(a =>
+                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
         }
     }
 }

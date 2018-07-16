@@ -6,7 +6,6 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <RuntimeIdentifiers>osx-x64</RuntimeIdentifiers>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
-
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="DataBase\Migrations\Production\" />
@@ -39,5 +38,9 @@
   <ItemGroup>
     <None Remove=".DS_Store" />
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Shema.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Shema.json" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

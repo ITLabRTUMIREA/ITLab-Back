@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Extensions.General;
 using Models.DataBaseLinks;
 using Newtonsoft.Json.Serialization;
 
 namespace Models.Events
 {
-    public class Place
+    public class Place : IdInterface
     {
         public Guid Id { get; set; }
 
