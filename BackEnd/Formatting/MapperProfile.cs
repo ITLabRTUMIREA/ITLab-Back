@@ -25,7 +25,7 @@ using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 
-namespace BackEnd.Formating
+namespace BackEnd.Formatting
 {
     public class MapperProfile : Profile
     {
@@ -59,7 +59,7 @@ namespace BackEnd.Formating
                 .ForMember(cev => cev.TotalDurationInMinutes, map => map.MapFrom(ev =>
                     ev
                         .Shifts
-                        .Select(s => (s.EndTime - s.BeginTime).TotalMinutes)
+                        .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
                         .Sum()))
                 .ForMember(cev => cev.Сompleteness, map => map.MapFrom(ev =>
                     100 *
