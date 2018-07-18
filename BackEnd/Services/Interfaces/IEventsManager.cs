@@ -14,7 +14,7 @@ namespace BackEnd.Services.Interfaces
         IQueryable<Event> Events { get; }
         Task<Event> FindAsync(Guid id);
         Task<IQueryable<Event>> AddAsync(EventCreateRequest request);
-        Task<Event> EditAsync(EventEditRequest ev);
+        Task<IQueryable<Event>> EditAsync(EventEditRequest ev);
         Task DeleteAsync(Guid id);
 
     }

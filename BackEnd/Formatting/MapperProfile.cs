@@ -39,6 +39,7 @@ namespace BackEnd.Formatting
 
             CreateMap<EquipmentCreateRequest, Equipment>();
             CreateMap<Equipment, EquipmentView>();
+
             CreateMap<EquipmentType, EquipmentTypeView>();
             CreateMap<AccountCreateRequest, User>()
                 .ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));

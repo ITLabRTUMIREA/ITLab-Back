@@ -52,8 +52,10 @@ namespace BackEnd.Controllers.Events
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EventView>> GetAsync(Guid id)
-            => mapper.Map<EventView>(await eventsManager
-                .FindAsync(id));
+            => await eventsManager
+                .Events
+                .ProjectTo<EventView>()
+                .FirstOrDefaultAsync(ev => ev.Id == id);
 
 
         [HttpPost]
@@ -65,10 +67,10 @@ namespace BackEnd.Controllers.Events
 
         [HttpPut]
         public async Task<OneObjectResponse<EventView>> PutAsync([FromBody] EventEditRequest request)
-        {
-            var toEdit = await eventsManager.EditAsync(request);
-            return mapper.Map<EventView>(toEdit);
-        }
+        => await (await eventsManager.EditAsync(request))
+                .ProjectTo<EventView>()
+                .SingleAsync();
+
 
         [HttpDelete("{eventId:guid}")]
         public async Task<OneObjectResponse<Guid>> DeleteAsync(Guid eventId)

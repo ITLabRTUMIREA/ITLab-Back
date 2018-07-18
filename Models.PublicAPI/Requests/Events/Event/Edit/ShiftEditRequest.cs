@@ -11,6 +11,6 @@ namespace Models.PublicAPI.Requests.Events.Event.Edit
         [CompareWith(nameof(BeginTime), Criterion.MoreOrEqual)]
         public DateTime? EndTime { get; set; }
         
-        public List<PlaceEditRequest> Places { get; set; }
+        public List<PlaceEditRequest> Places { get; set; } = new List<PlaceEditRequest>();
     }
 }

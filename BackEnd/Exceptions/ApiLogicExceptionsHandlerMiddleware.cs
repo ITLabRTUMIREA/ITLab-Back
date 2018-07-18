@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.PublicAPI.Responses;
@@ -51,6 +52,9 @@ namespace BackEnd.Exceptions
         {
             switch (ex)
             {
+                case DbUpdateException dbUpdate:
+                    logger.LogInformation(dbUpdate, "error while update DB");
+                    return new ResponseBase(ResponseStatusCode.IncorrectRequestData);
                 case ApiLogicException api:
                     logger.LogInformation(ex, "exception in controller");
                     return api.ResponseModel;

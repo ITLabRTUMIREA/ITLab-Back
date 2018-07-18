@@ -31,26 +31,7 @@ namespace BackEnd.Services
             this.mapper = mapper;
         }
 
-        public IQueryable<Event> Events
-        {
-            get
-            {
-                var allEvents = dbContext
-                        .Events
-//                .Include(e => e.EventType)
-//                .Include(e => e.Shifts)
-//                    .ThenInclude(s => s.Places)
-//                        .ThenInclude(p => p.PlaceEquipments)
-//                            .ThenInclude(p => p.Equipment)
-//                                .ThenInclude(e => e.EquipmentType)
-//                .Include(e => e.Shifts)
-//                    .ThenInclude(s => s.Places)
-//                        .ThenInclude(p => p.PlaceUserRoles)
-//                            .ThenInclude(pur => pur.Role)
-                    ;
-                return allEvents;
-            }
-        }
+        public IQueryable<Event> Events => dbContext.Events;
 
         public Task<Event> FindAsync(Guid id)
             => CheckAndGetEventAsync(id);
@@ -66,7 +47,7 @@ namespace BackEnd.Services
         }
 
 
-        public async Task<Event> EditAsync(EventEditRequest request)
+        public async Task<IQueryable<Event>> EditAsync(EventEditRequest request)
         {
             var toEdit = await CheckAndGetEventAsync(request.Id);
             if (request.EventTypeId.HasValue)
@@ -76,7 +57,7 @@ namespace BackEnd.Services
             if (toEdit.Shifts?.Count < 1)
                 throw ResponseStatusCode.LastShift.ToApiException();
             await dbContext.SaveChangesAsync();
-            return toEdit;
+            return dbContext.Events.Where(ev => ev.Id == toEdit.Id);
         }
 
         public async Task DeleteAsync(Guid id)
@@ -100,6 +81,10 @@ namespace BackEnd.Services
                    .ThenInclude(s => s.Places)
                    .ThenInclude(p => p.PlaceUserRoles)
                    .ThenInclude(pur => pur.Role)
+                   .Include(e => e.Shifts)
+                   .ThenInclude(s => s.Places)
+                   .ThenInclude(p => p.PlaceUserRoles)
+                   .ThenInclude(pur => pur.User)
                    .FirstOrDefaultAsync(e => e.Id == id)
                ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
     }
