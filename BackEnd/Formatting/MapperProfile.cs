@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using BackEnd.Formatting;
 using Extensions;
 using Models.DataBaseLinks;
+using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 
@@ -103,17 +104,28 @@ namespace BackEnd.Formating
         private void EventEditMaps()
         {
             CreateMap<List<ShiftEditRequest>,List<Shift>>()
-                .ConvertUsing(new ListsConverter<ShiftEditRequest, Shift>());
+                .ConvertUsing(new ListsConverter<ShiftEditRequest, Shift>(s => s.Id));
             CreateMap<EventEditRequest, Event>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+
+            CreateMap<List<PlaceEditRequest>,List<Place>>()
+                .ConvertUsing(new ListsConverter<PlaceEditRequest, Place>(p => p.Id));
             CreateMap<ShiftEditRequest, Shift>()
-                .ForMember(ev => ev.Places, map => map.UseDestinationValue())
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+            
+            CreateMap<List<DeletableRequest>,List<PlaceEquipment>>()
+                .ConvertUsing(new ListsConverter<DeletableRequest, PlaceEquipment>(eq => eq.EquipmentId));
+            CreateMap<List<PersonWorkRequest>,List<PlaceUserRole>>()
+                .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserRole>(pur => pur.UserId));
             CreateMap<PlaceEditRequest, Place>()
+                .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Workers))
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+            CreateMap<DeletableRequest, PlaceEquipment>()
+                .ForMember(pe => pe.EquipmentId, map => map.MapFrom(eer => eer.Id));
         }
     }
 }

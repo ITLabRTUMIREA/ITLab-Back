@@ -73,16 +73,8 @@ namespace BackEnd.Services
                 await CheckAndGetEventTypeAsync(request.EventTypeId.Value);
 
             mapper.Map(request, toEdit);
-            var deleteIds = request
-                .Shifts
-                .SelectMany(s => s.Places)
-                .Where(p => p.Delete)
-                .Select(p => p.Id)
-                .Concat(request.Shifts.Where(s => s.Delete).Select(s => s.Id))
-                .ToList();
-            toEdit.Shifts.ForEach(s => s.Places.RemoveAll(p => deleteIds.Contains(p.Id)));
-            toEdit.Shifts.RemoveAll(s => deleteIds.Contains(s.Id));
-
+            if (toEdit.Shifts?.Count < 1)
+                throw ResponseStatusCode.LastShift.ToApiException();
             await dbContext.SaveChangesAsync();
             return toEdit;
         }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Models.PublicAPI.Requests.Equipment.Equipment
 {
-    public class EquipmentEditRequest : IdRequest
+    public class EquipmentEditRequest : DeletableRequest
     {
         public string SerialNumber { get; set; }
         public Guid? EquipmentTypeId { get; set; }

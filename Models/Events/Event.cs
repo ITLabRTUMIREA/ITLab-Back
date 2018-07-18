@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Extensions.General;
 
 namespace Models.Events
 {
-    public class Event : IdInterface
+    public class Event
     {
         public Guid Id { get; set; }
         public string Address { get; set; }

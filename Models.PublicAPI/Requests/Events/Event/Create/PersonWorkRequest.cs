@@ -2,7 +2,7 @@
 
 namespace Models.PublicAPI.Requests.Events.Event.Create
 {
-    public class PersonWorkRequest : IdRequest
+    public class PersonWorkRequest : DeletableRequest
     {
         public Guid RoleId { get; set; }
     }

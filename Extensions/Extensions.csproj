@@ -13,4 +13,7 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
     <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="General" />
+  </ItemGroup>
 </Project>

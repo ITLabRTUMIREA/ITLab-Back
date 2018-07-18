@@ -21,6 +21,7 @@ namespace Models.PublicAPI.Responses
         IncorrectUserIds,
         EquipmentReserved,
         IncorrectAccessToken,
-        NoShifts
+        NoShifts,
+        LastShift
     }
 }
