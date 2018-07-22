@@ -28,6 +28,7 @@ using Microsoft.CodeAnalysis.Options;
 using Models.People;
 using System.Runtime.InteropServices;
 using BackEnd.Extensions;
+using BackEnd.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json.Serialization;
@@ -140,6 +141,7 @@ namespace BackEnd
              .AddDefaultTokenProviders();
 
             services.AddCors();
+            services.AddSignalR();
 
             services.AddSingleton<IUserRegisterTokens, InMemoryUserRegisterTokens>();
             services.AddTransient<IEmailSender, EmailService>();
@@ -166,7 +168,11 @@ namespace BackEnd
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseMiddlewareClassTemplate();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<MirrorHub>("/chatHub");
+            });
+            app.UseExceptionHandlerMiddleware();
             app.UseAuthentication();
             app.UseMvc();
         }

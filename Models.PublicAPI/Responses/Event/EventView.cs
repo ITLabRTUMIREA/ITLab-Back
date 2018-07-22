@@ -11,7 +11,7 @@ namespace Models.PublicAPI.Responses.Event
         public string Title { get; set; }
         public string Description { get; set; }
         public string Address { get; set; }
-        public EventTypePresent EventType { get; set; }
+        public EventTypeView EventType { get; set; }
         public List<ShiftView> Shifts { get; set; }
     }
 }
