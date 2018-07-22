@@ -38,23 +38,23 @@ namespace BackEnd.Controllers.Events
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<EventTypePresent>> GetAsync(string match, bool all = false)
+        public async Task<ListResponse<EventTypeView>> GetAsync(string match, bool all = false)
            => await dbContext
                 .EventTypes
                 .OrderBy(et => et.Events.Count)
                 .IfNotNull(match, evtypes => 
                     evtypes.Where(et => et.Title.ToUpper().Contains(match.ToUpper())))
                 .If(!all, evtypes => evtypes.Take(5))
-                .ProjectTo<EventTypePresent>()
+                .ProjectTo<EventTypeView>()
                 .ToListAsync();
 
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<EventTypePresent>> GetAsync(Guid id)
-            => mapper.Map<EventTypePresent>(await CheckAndGetEquipmentTypeAsync(id));
+        public async Task<OneObjectResponse<EventTypeView>> GetAsync(Guid id)
+            => mapper.Map<EventTypeView>(await CheckAndGetEquipmentTypeAsync(id));
 
         [HttpPost]
-        public async Task<OneObjectResponse<EventTypePresent>> Post([FromBody]EventTypeCreateRequest request)
+        public async Task<OneObjectResponse<EventTypeView>> Post([FromBody]EventTypeCreateRequest request)
         {
             var EventType = mapper.Map<EventType>(request);
             var now = dbContext.EventTypes.FirstOrDefault(et => et.Title == request.Title);
@@ -62,17 +62,17 @@ namespace BackEnd.Controllers.Events
                 throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
             var added = await dbContext.EventTypes.AddAsync(EventType);
             await dbContext.SaveChangesAsync();
-            return mapper.Map<EventTypePresent>(added.Entity);
+            return mapper.Map<EventTypeView>(added.Entity);
         }
 
 
         [HttpPut]
-        public async Task<OneObjectResponse<EventTypePresent>> Put([FromBody]EventTypeEditRequest request)
+        public async Task<OneObjectResponse<EventTypeView>> Put([FromBody]EventTypeEditRequest request)
         {
             var now = await CheckAndGetEquipmentTypeAsync(request.Id);
             mapper.Map(request, now);
             await dbContext.SaveChangesAsync();
-            return mapper.Map<EventTypePresent>(now);
+            return mapper.Map<EventTypeView>(now);
         }
 
         [HttpDelete]

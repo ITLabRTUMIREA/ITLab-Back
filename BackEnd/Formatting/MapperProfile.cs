@@ -51,7 +51,7 @@ namespace BackEnd.Formatting
 
 
             CreateMap<EventTypeCreateRequest, EventType>();
-            CreateMap<EventType, EventTypePresent>();
+            CreateMap<EventType, EventTypeView>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventView>();
 
