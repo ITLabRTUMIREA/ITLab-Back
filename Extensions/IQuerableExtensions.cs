@@ -22,5 +22,16 @@ namespace Extensions
             bool check,
             Func<IQueryable<T>, IQueryable<T>> ifTrueQuearble)
             => check ? ifTrueQuearble(querable) : querable;
+
+        public static IQueryable<T> ResetToDefault<T, V>(
+            this IQueryable<T> source,
+            Func<V, bool> predicate,
+            ref V value,
+            V defaultValue)
+        {
+            if (predicate(value))
+                value = defaultValue;
+            return source;
+        }
     }
 }

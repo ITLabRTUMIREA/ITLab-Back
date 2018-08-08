@@ -34,10 +34,17 @@ namespace BackEnd.Controllers.Users
             this.registerTokens = registerTokens;
         }
         [HttpGet]
-        public async Task<ListResponse<UserView>> GetAsync(string email, int count = 5)
+        public async Task<ListResponse<UserView>> GetAsync(
+            string email,
+            string firstname,
+            string lastname,
+            int count = 5)
             => await userManager
                 .Users
                 .IfNotNull(email, users => users.Where(u => u.Email.ToUpper().Contains(email.ToUpper())))
+                .IfNotNull(firstname, users => users.Where(u => u.FirstName.ToUpper().Contains(firstname.ToUpper())))
+                .IfNotNull(lastname, users => users.Where(u => u.LastName.ToUpper().Contains(lastname.ToUpper())))
+                .ResetToDefault(c => c <= 0, ref count, 5)
                 .If(count > 0, users => users.Take(count))
                 .ProjectTo<UserView>()
                 .ToListAsync();
