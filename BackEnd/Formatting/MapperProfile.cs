@@ -84,13 +84,13 @@ namespace BackEnd.Formatting
                 .ForMember(pe => pe.EquipmentId, map => map.MapFrom(g => g));
             CreateMap<PlaceCreateRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(s => s.Equipment))
-                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(pcr => pcr.Workers));
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(pcr => pcr.Participants));
 
             CreateMap<Place, PlaceView>()
                 .ForMember(p => p.Equipment, map => map.MapFrom(p =>
                     p.PlaceEquipments.Select(pe => pe.Equipment)
                 ))
-                .ForMember(p => p.Users, map => map.MapFrom(p => p.PlaceUserRoles));
+                .ForMember(p => p.Participants, map => map.MapFrom(p => p.PlaceUserRoles));
 
             CreateMap<RoleCreateRequest, Role>();
             CreateMap<Role, RoleView>();
@@ -122,7 +122,7 @@ namespace BackEnd.Formatting
                 .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserRole>(pur => pur.UserId));
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))
-                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Workers))
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Participants))
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
             CreateMap<DeletableRequest, PlaceEquipment>()
