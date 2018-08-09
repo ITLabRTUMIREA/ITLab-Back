@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Extensions
@@ -33,5 +35,10 @@ namespace Extensions
                 value = defaultValue;
             return source;
         }
+
+        public static IQueryable<T> ForAll<T, V>(
+            this IQueryable<T> source,
+            IEnumerable<V> forSource,
+            Func<IQueryable<T>, V, IQueryable<T>> func) => forSource.Aggregate(source, func);
     }
 }
