@@ -62,13 +62,12 @@ namespace BackEnd.Formatting
                         .Shifts
                         .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
                         .Sum()))
-                .ForMember(cev => cev.Сompleteness, map => map.MapFrom(ev =>
-                    100 *
+                .ForMember(cev => cev.CurrentParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
                         .SelectMany(p => p.PlaceUserRoles)
-                        .Count(pur => pur.Role.NormalizedName == "PARTICIPANT")
-                    /
+                        .Count(pur => pur.Role.NormalizedName == "PARTICIPANT")))
+                .ForMember(cev => cev.TargetParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
                         .Sum(p => p.TargetParticipantsCount)));
