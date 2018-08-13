@@ -77,13 +77,13 @@ namespace BackEnd.Formatting
             CreateMap<Shift, ShiftView>();
 
 
-            CreateMap<PersonWorkRequest, PlaceUserRole>()
-                .ForMember(pur => pur.UserId, map => map.MapFrom(pwr => pwr.Id));
+            CreateMap<Guid, PlaceUserRole>()
+                .ForMember(pur => pur.UserId, map => map.MapFrom(pwr => pwr));
             CreateMap<Guid, PlaceEquipment>()
                 .ForMember(pe => pe.EquipmentId, map => map.MapFrom(g => g));
             CreateMap<PlaceCreateRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(s => s.Equipment))
-                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(pcr => pcr.Participants));
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(pcr => pcr.Invited));
 
             CreateMap<Place, PlaceView>()
                 .ForMember(p => p.Equipment, map => map.MapFrom(p =>

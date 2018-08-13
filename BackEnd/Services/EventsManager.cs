@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Extensions;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
+using System.Runtime.Versioning;
 
 namespace BackEnd.Services
 {
@@ -22,13 +23,17 @@ namespace BackEnd.Services
     {
         private readonly DataBaseContext dbContext;
         private readonly IMapper mapper;
+        private readonly IRolesAccessor rolesAccessor;
 
         public EventsManager(
             DataBaseContext dbContext,
-            IMapper mapper)
+            IMapper mapper,
+            IRolesAccessor rolesAccessor
+        )
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
+            this.rolesAccessor = rolesAccessor;
         }
 
         public IQueryable<Event> Events => dbContext.Events;
@@ -40,7 +45,12 @@ namespace BackEnd.Services
         {
             await CheckAndGetEventTypeAsync(request.EventTypeId);
             var newEvent = mapper.Map<Event>(request);
-
+            newEvent
+                .Shifts
+                .SelectMany(s => s.Places)
+                .SelectMany(p => p.PlaceUserRoles)
+                .DoForEach(p => p.RoleId = rolesAccessor.InvitedRoleId);
+            
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
             return dbContext.Events.Where(ev => ev.Id == newEvent.Id);
@@ -69,7 +79,7 @@ namespace BackEnd.Services
 
         private async Task<EventType> CheckAndGetEventTypeAsync(Guid typeId)
             => await dbContext.EventTypes.FindAsync(typeId)
-               ?? throw ApiLogicException.Create(ResponseStatusCode.EventTypeNotFound);
+               ?? throw ResponseStatusCode.EventTypeNotFound.ToApiException();
 
         private async Task<Event> CheckAndGetEventAsync(Guid id)
             => await dbContext.Events
@@ -86,6 +96,28 @@ namespace BackEnd.Services
                    .ThenInclude(p => p.PlaceUserRoles)
                    .ThenInclude(pur => pur.User)
                    .FirstOrDefaultAsync(e => e.Id == id)
-               ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+                   ?? throw ResponseStatusCode.NotFound.ToApiException();
+
+        public async Task WishTo(Guid userId, Guid placeId)
+        {
+            var targetPlace = await dbContext
+                .Events
+                .SelectMany(e => e.Shifts)
+                .SelectMany(s => s.Places)
+                .SingleOrDefaultAsync(p => p.Id == placeId)
+                ?? throw ResponseStatusCode.NotFound.ToApiException();
+
+            var nowInRole = targetPlace
+                .PlaceUserRoles
+                .Any(pur => pur.UserId == userId);
+            if (nowInRole)
+                throw ResponseStatusCode.YouAreInRole.ToApiException();
+            targetPlace.PlaceUserRoles.Add(new PlaceUserRole
+            {
+                UserId = userId,
+                RoleId = rolesAccessor.WishingRoleId
+            });
+            await dbContext.SaveChangesAsync();    
+        }
     }
 }

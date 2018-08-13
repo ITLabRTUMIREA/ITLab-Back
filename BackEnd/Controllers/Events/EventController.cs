@@ -15,12 +15,15 @@ using Extensions;
 using Models.Events;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
+using Models.PublicAPI.Responses;
+using Microsoft.AspNetCore.Identity;
+using Models.People;
 
 namespace BackEnd.Controllers.Events
 {
     [Produces("application/json")]
     [Route("api/Event")]
-    public class EventController : Controller
+    public class EventController : AuthorizeController
     {
         private readonly IEventsManager eventsManager;
 
@@ -28,9 +31,10 @@ namespace BackEnd.Controllers.Events
         private readonly IMapper mapper;
 
         public EventController(
+            UserManager<User> userManager,
             IEventsManager eventManager,
             ILogger<EventTypeController> logger,
-            IMapper mapper)
+            IMapper mapper) : base(userManager)
         {
             this.logger = logger;
             this.mapper = mapper;
@@ -77,6 +81,13 @@ namespace BackEnd.Controllers.Events
         {
             await eventsManager.DeleteAsync(eventId);
             return eventId;
+        }
+
+        [HttpPost("wishto/{placeId:guid}")]
+        public async Task<ResponseBase> WishTo(Guid placeId)
+        {
+            await eventsManager.WishTo(UserId, placeId);
+            return ResponseStatusCode.OK;
         }
     }
 }
