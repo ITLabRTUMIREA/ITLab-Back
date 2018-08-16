@@ -1,4 +1,5 @@
 ﻿using System;
+using Models.PublicAPI.Requests.Events.EventType;
 
 namespace Models.PublicAPI.Responses.Event
 {
