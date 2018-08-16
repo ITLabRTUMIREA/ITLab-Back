@@ -7,7 +7,7 @@ namespace Models.PublicAPI.Responses.Event
 {
     public class UserAndRole
     {
-        public Guid UserId { get; set; }
+        public UserView User { get; set; }
         public RoleView Role { get; set; }
     }
 }

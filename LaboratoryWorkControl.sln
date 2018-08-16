@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2011
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackEnd", "BackEnd\BackEnd.csproj", "{8AB6293D-E4FB-43D8-A26A-F881258AD31E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackEnd", "BackEnd\BackEnd.csproj", "{8AB6293D-E4FB-43D8-A26A-F881258AD31E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models.PublicAPI", "Models.PublicAPI\Models.PublicAPI.csproj", "{837EB41B-41FA-40F6-8954-416AD7B64BC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models.PublicAPI", "Models.PublicAPI\Models.PublicAPI.csproj", "{837EB41B-41FA-40F6-8954-416AD7B64BC5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "Extensions\Extensions.csproj", "{E4907F0C-B8DA-49B1-854E-2DF026CF3B4E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extensions", "Extensions\Extensions.csproj", "{E4907F0C-B8DA-49B1-854E-2DF026CF3B4E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{78FA8E6D-50F9-449F-9214-15A26D9D7300}"
 EndProject

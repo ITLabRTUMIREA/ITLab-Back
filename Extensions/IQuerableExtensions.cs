@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Extensions
@@ -22,5 +24,21 @@ namespace Extensions
             bool check,
             Func<IQueryable<T>, IQueryable<T>> ifTrueQuearble)
             => check ? ifTrueQuearble(querable) : querable;
+
+        public static IQueryable<T> ResetToDefault<T, V>(
+            this IQueryable<T> source,
+            Func<V, bool> predicate,
+            ref V value,
+            V defaultValue)
+        {
+            if (predicate(value))
+                value = defaultValue;
+            return source;
+        }
+
+        public static IQueryable<T> ForAll<T, V>(
+            this IQueryable<T> source,
+            IEnumerable<V> forSource,
+            Func<IQueryable<T>, V, IQueryable<T>> func) => forSource.Aggregate(source, func);
     }
 }

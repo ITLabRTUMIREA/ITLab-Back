@@ -8,6 +8,6 @@ namespace Models.PublicAPI.Requests.Events.Event.Edit
     {
         public int TargetParticipantsCount { get; set; }
         public List<DeletableRequest> Equipment { get; set; } = new List<DeletableRequest>();
-        public List<PersonWorkRequest> Workers { get; set; } = new List<PersonWorkRequest>();
+        public List<PersonWorkRequest> Participants { get; set; } = new List<PersonWorkRequest>();
     }
 }

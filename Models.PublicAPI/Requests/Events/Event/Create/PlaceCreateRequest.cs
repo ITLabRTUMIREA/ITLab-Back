@@ -7,6 +7,6 @@ namespace Models.PublicAPI.Requests.Events.Event.Create
     {
         public int TargetParticipantsCount { get; set; }
         public List<Guid> Equipment { get; set; }
-        public List<PersonWorkRequest> Workers { get; set; }
+        public List<Guid> Invited { get; set; }
     }
 }

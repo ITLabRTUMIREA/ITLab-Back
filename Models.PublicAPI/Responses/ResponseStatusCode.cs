@@ -22,6 +22,7 @@ namespace Models.PublicAPI.Responses
         EquipmentReserved,
         IncorrectAccessToken,
         NoShifts,
-        LastShift
+        LastShift,
+        YouAreInRole
     }
 }

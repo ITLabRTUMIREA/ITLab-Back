@@ -6,6 +6,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
+using Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -49,23 +50,22 @@ namespace BackEnd.Controllers.Equipments
 
         [HttpGet]
         public async Task<ListResponse<EquipmentView>> GetAsync(
-            [FromQuery] Guid? eventId,
-            [FromQuery] Guid? equipmentTypeId,
-            [FromQuery] string equipmentTypeName
+            Guid? eventId,
+            Guid? equipmentTypeId,
+            string match
         )
-        {
-            IQueryable<Equipment> equipments = dbContext.Equipments;
-            if (eventId.HasValue)
-            {
-                equipments = equipments
-                    .Where(eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId));
-            }
-            if (equipmentTypeId.HasValue)
-                equipments = equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId);
-            if (!string.IsNullOrEmpty(equipmentTypeName))
-                equipments = equipments.Where(eq => eq.EquipmentType.Title == equipmentTypeName);
-            return await equipments.ProjectTo<EquipmentView>().ToListAsync();
-        }
+            => await dbContext
+                .Equipments
+                .If(eventId.HasValue,
+                    equipments =>
+                        equipments.Where(eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId)))
+                .If(equipmentTypeId.HasValue,
+                    equipments => equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId))
+                .IfNotNull(match, equipments => equipments.ForAll(match.Split(' '), (equipments2, matcher) =>
+                        equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher)
+                                                || eq.EquipmentType.Title.ToUpper().Contains(matcher))))
+                .ProjectTo<EquipmentView>()
+                .ToListAsync();
 
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentView>> PostAsync([FromBody]EquipmentCreateRequest request)

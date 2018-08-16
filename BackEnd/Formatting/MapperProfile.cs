@@ -62,13 +62,12 @@ namespace BackEnd.Formatting
                         .Shifts
                         .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
                         .Sum()))
-                .ForMember(cev => cev.Сompleteness, map => map.MapFrom(ev =>
-                    100 *
+                .ForMember(cev => cev.CurrentParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
                         .SelectMany(p => p.PlaceUserRoles)
-                        .Count(pur => pur.Role.NormalizedName == "PARTICIPANT")
-                    /
+                        .Count(pur => pur.Role.NormalizedName == "PARTICIPANT")))
+                .ForMember(cev => cev.TargetParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
                         .Sum(p => p.TargetParticipantsCount)));
@@ -78,19 +77,19 @@ namespace BackEnd.Formatting
             CreateMap<Shift, ShiftView>();
 
 
-            CreateMap<PersonWorkRequest, PlaceUserRole>()
-                .ForMember(pur => pur.UserId, map => map.MapFrom(pwr => pwr.Id));
+            CreateMap<Guid, PlaceUserRole>()
+                .ForMember(pur => pur.UserId, map => map.MapFrom(pwr => pwr));
             CreateMap<Guid, PlaceEquipment>()
                 .ForMember(pe => pe.EquipmentId, map => map.MapFrom(g => g));
             CreateMap<PlaceCreateRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(s => s.Equipment))
-                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(pcr => pcr.Workers));
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(pcr => pcr.Invited));
 
             CreateMap<Place, PlaceView>()
                 .ForMember(p => p.Equipment, map => map.MapFrom(p =>
                     p.PlaceEquipments.Select(pe => pe.Equipment)
                 ))
-                .ForMember(p => p.Users, map => map.MapFrom(p => p.PlaceUserRoles));
+                .ForMember(p => p.Participants, map => map.MapFrom(p => p.PlaceUserRoles));
 
             CreateMap<RoleCreateRequest, Role>();
             CreateMap<Role, RoleView>();
@@ -122,7 +121,7 @@ namespace BackEnd.Formatting
                 .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserRole>(pur => pur.UserId));
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))
-                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Workers))
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Participants))
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
             CreateMap<DeletableRequest, PlaceEquipment>()
