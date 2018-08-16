@@ -85,13 +85,27 @@ namespace BackEnd.Controllers.Events
             return eventId;
         }
 
-        [HttpPost("wishto")]
-        public async Task<ResponseBase> WishTo(
-            [FromBody]Guid placeId,
-            [FromBody]Guid roleId)
+        [HttpPost("wishTo/{placeId:guid}/{roleId:guid}")]
+        public async Task<ResponseBase> WishTo(Guid placeId, Guid roleId)
         {
             await eventsManager.WishTo(UserId, roleId, placeId);
             return ResponseStatusCode.OK;
         }
+
+
+        [HttpPost("acceptInvite/{placeId:guid}")]
+        public async Task<ResponseBase> AcceptInvite(Guid placeId)
+        {
+            await eventsManager.AcceptInvite(UserId, placeId);
+            return ResponseStatusCode.OK;
+        }
+
+        [HttpPost("acceptWish/{placeId:guid}/{userId:guid}")]
+        public async Task<ResponseBase> AcceptWish(Guid placeId, Guid userId)
+        {
+            await eventsManager.AcceptWish(placeId, userId);
+            return ResponseStatusCode.OK;
+        }
+
     }
 }

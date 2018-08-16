@@ -91,7 +91,7 @@ namespace BackEnd.Formatting
                 ))
                 .ForMember(p => p.Participants, map => map.MapFrom(p => p.PlaceUserRoles
                                                                    .Where(pur => pur.UserStatus == UserStatus.Accepted)))
-                .ForMember(p => p.Inviters, map => map.MapFrom(p => p.PlaceUserRoles
+                .ForMember(p => p.Invited, map => map.MapFrom(p => p.PlaceUserRoles
                                                                .Where(pur => pur.UserStatus == UserStatus.Invited)))
                 .ForMember(p => p.Wishers, map => map.MapFrom(p => p.PlaceUserRoles
                                                               .Where(pur => pur.UserStatus == UserStatus.Wisher)))

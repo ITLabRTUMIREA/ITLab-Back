@@ -113,6 +113,7 @@ namespace BackEnd.Services
                 .Events
                 .SelectMany(e => e.Shifts)
                 .SelectMany(s => s.Places)
+                .Include(p => p.PlaceUserRoles)
                 .SingleOrDefaultAsync(p => p.Id == placeId)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
@@ -129,5 +130,30 @@ namespace BackEnd.Services
             });
             await dbContext.SaveChangesAsync();    
         }
+
+        public async Task AcceptInvite(Guid userId, Guid placeId)
+        {
+            var targetPlaceUserRole = await PlaceUserRoles
+                .SingleOrDefaultAsync(p => p.PlaceId == placeId && p.UserId == userId && p.UserStatus == UserStatus.Invited)
+                ?? throw ResponseStatusCode.NotFound.ToApiException();
+            targetPlaceUserRole.UserStatus = UserStatus.Accepted;
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task AcceptWish(Guid placeId, Guid userId)
+        {
+            var targetPlaceUserRole = await PlaceUserRoles
+                .SingleOrDefaultAsync(pur => pur.PlaceId == placeId && pur.UserId == userId && pur.UserStatus == UserStatus.Wisher)
+                ?? throw ResponseStatusCode.NotFound.ToApiException();
+            targetPlaceUserRole.UserStatus = UserStatus.Accepted;
+            await dbContext.SaveChangesAsync();
+        }
+
+        private IQueryable<PlaceUserRole> PlaceUserRoles =>
+            dbContext
+                .Events
+                .SelectMany(e => e.Shifts)
+                .SelectMany(s => s.Places)
+                .SelectMany(p => p.PlaceUserRoles);
     }
 }

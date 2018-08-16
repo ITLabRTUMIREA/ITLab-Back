@@ -156,7 +156,7 @@ namespace BackEnd
             IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
-            if (Configuration.GetValue<bool>("DBInitialize:Need"))
+            if (Configuration.GetValue<bool>("db-init"))
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
 
