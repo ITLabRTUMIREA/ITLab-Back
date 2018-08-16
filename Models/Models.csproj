@@ -23,4 +23,7 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Events\Roles\PlaceRole.cs" />
+  </ItemGroup>
 </Project>

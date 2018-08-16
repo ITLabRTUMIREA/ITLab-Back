@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Models.PublicAPI;
 
 namespace BackEnd.DataBase
 {
@@ -26,8 +27,7 @@ namespace BackEnd.DataBase
 
         public async Task Fill()
         {
-            if (options.NeededStandartRoles != null)
-                foreach (var roleName in options.NeededStandartRoles)
+            foreach (var roleName in RoleNames.List)
                 {
                     await roleManager.CreateAsync(new Role { Name = roleName });
                 }

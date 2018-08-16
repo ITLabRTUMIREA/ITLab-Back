@@ -7,7 +7,6 @@ namespace BackEnd.DataBase
 {
     public class DBInitialize
     {
-        public List<string> NeededStandartRoles { get; set; }
         public List<UserToRole> WantedRoles { get; set; }
     }
     

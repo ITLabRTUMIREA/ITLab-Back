@@ -66,7 +66,7 @@ namespace BackEnd.Formatting
                     ev.Shifts
                         .SelectMany(s => s.Places)
                         .SelectMany(p => p.PlaceUserRoles)
-                        .Count(pur => pur.Role.NormalizedName == "PARTICIPANT")))
+                        .Count(pur => pur.UserStatus == UserStatus.Accepted)))
                 .ForMember(cev => cev.TargetParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
@@ -89,7 +89,14 @@ namespace BackEnd.Formatting
                 .ForMember(p => p.Equipment, map => map.MapFrom(p =>
                     p.PlaceEquipments.Select(pe => pe.Equipment)
                 ))
-                .ForMember(p => p.Participants, map => map.MapFrom(p => p.PlaceUserRoles));
+                .ForMember(p => p.Participants, map => map.MapFrom(p => p.PlaceUserRoles
+                                                                   .Where(pur => pur.UserStatus == UserStatus.Accepted)))
+                .ForMember(p => p.Inviters, map => map.MapFrom(p => p.PlaceUserRoles
+                                                               .Where(pur => pur.UserStatus == UserStatus.Invited)))
+                .ForMember(p => p.Wishers, map => map.MapFrom(p => p.PlaceUserRoles
+                                                              .Where(pur => pur.UserStatus == UserStatus.Wisher)))
+                .ForMember(p => p.Unknowns, map => map.MapFrom(p => p.PlaceUserRoles
+                                                               .Where(pur => pur.UserStatus == UserStatus.Unknown)));
 
             CreateMap<RoleCreateRequest, Role>();
             CreateMap<Role, RoleView>();
@@ -121,11 +128,13 @@ namespace BackEnd.Formatting
                 .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserRole>(pur => pur.UserId));
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))
-                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Participants))
+                .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Invited))
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
             CreateMap<DeletableRequest, PlaceEquipment>()
                 .ForMember(pe => pe.EquipmentId, map => map.MapFrom(eer => eer.Id));
+            CreateMap<PersonWorkRequest, PlaceUserRole>()
+                .ForMember(pur => pur.UserId, map => map.MapFrom(pwr => pwr.Id));
         }
     }
 }

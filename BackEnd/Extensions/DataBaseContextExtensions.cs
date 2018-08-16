@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Models.PublicAPI;
 
 namespace BackEnd.Extensions
 {
@@ -11,7 +12,7 @@ namespace BackEnd.Extensions
     {
         public static void FillDefaults(this DataBaseContext context, DBInitialize data)
         {
-            foreach (var role in data.NeededStandartRoles)
+            foreach (var role in RoleNames.List)
             {
                 context.Roles.Add(new Role { Name = role });
             }

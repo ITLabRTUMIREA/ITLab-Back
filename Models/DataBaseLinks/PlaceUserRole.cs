@@ -16,5 +16,7 @@ namespace Models.DataBaseLinks
 
         public Guid RoleId { get; set; }
         public Role Role { get; set; }
+
+        public UserStatus UserStatus { get; set; }
     }
 }

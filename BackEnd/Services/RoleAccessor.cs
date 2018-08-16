@@ -7,18 +7,16 @@ using System.ComponentModel;
 using Extensions;
 using System.Linq;
 using System.Reflection;
+using Models.PublicAPI;
 namespace BackEnd.Services
 {
     public class RoleAccessor : IRolesAccessor
     {
-        [Description("Participant")]
+        [Description(RoleNames.ParticipantRoleName)]
         public Guid ParticipantRoleId { get; set; }
-        [Description("Orginizer")]
+
+        [Description(RoleNames.OrginizerRoleName)]
         public Guid OrginizerRoleId { get; set; }
-        [Description("Invited")]
-        public Guid InvitedRoleId { get; set; }
-        [Description("Wishing")]
-        public Guid WishingRoleId { get; set; }
 
         public RoleAccessor(IServiceProvider serviceProvider)
         {

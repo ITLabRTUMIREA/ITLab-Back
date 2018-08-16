@@ -5,7 +5,5 @@ namespace BackEnd.Services.Interfaces
     {
         Guid ParticipantRoleId { get; }
         Guid OrginizerRoleId { get; }
-        Guid InvitedRoleId { get; }
-        Guid WishingRoleId { get; }
     }
 }

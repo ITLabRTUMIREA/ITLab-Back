@@ -16,6 +16,7 @@ using Extensions;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 using System.Runtime.Versioning;
+using Models.People;
 
 namespace BackEnd.Services
 {
@@ -49,7 +50,7 @@ namespace BackEnd.Services
                 .Shifts
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
-                .DoForEach(p => p.RoleId = rolesAccessor.InvitedRoleId);
+                .DoForEach(p => p.UserStatus = UserStatus.Invited);
             
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
@@ -64,6 +65,14 @@ namespace BackEnd.Services
                 await CheckAndGetEventTypeAsync(request.EventTypeId.Value);
 
             mapper.Map(request, toEdit);
+
+            toEdit
+                .Shifts
+                .SelectMany(s => s.Places)
+                .SelectMany(p => p.PlaceUserRoles)
+                .Where(p => p.UserStatus == UserStatus.Unknown)
+                .DoForEach(p => p.UserStatus = UserStatus.Invited);
+
             if (toEdit.Shifts?.Count < 1)
                 throw ResponseStatusCode.LastShift.ToApiException();
             await dbContext.SaveChangesAsync();
@@ -98,7 +107,7 @@ namespace BackEnd.Services
                    .FirstOrDefaultAsync(e => e.Id == id)
                    ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-        public async Task WishTo(Guid userId, Guid placeId)
+        public async Task WishTo(Guid userId, Guid roleId, Guid placeId)
         {
             var targetPlace = await dbContext
                 .Events
@@ -115,7 +124,8 @@ namespace BackEnd.Services
             targetPlace.PlaceUserRoles.Add(new PlaceUserRole
             {
                 UserId = userId,
-                RoleId = rolesAccessor.WishingRoleId
+                RoleId = roleId,
+                UserStatus = UserStatus.Wisher
             });
             await dbContext.SaveChangesAsync();    
         }

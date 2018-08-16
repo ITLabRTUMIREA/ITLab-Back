@@ -18,6 +18,7 @@ using Models.PublicAPI.Requests.Events.Event.Edit;
 using Models.PublicAPI.Responses;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
+using BackEnd.Extensions;
 
 namespace BackEnd.Controllers.Events
 {
@@ -59,7 +60,8 @@ namespace BackEnd.Controllers.Events
             => await eventsManager
                 .Events
                 .ProjectTo<EventView>()
-                .FirstOrDefaultAsync(ev => ev.Id == id);
+                .FirstOrDefaultAsync(ev => ev.Id == id)
+                ?? throw ResponseStatusCode.NotFound.ToApiException();
 
 
         [HttpPost]
@@ -83,10 +85,12 @@ namespace BackEnd.Controllers.Events
             return eventId;
         }
 
-        [HttpPost("wishto/{placeId:guid}")]
-        public async Task<ResponseBase> WishTo(Guid placeId)
+        [HttpPost("wishto")]
+        public async Task<ResponseBase> WishTo(
+            [FromBody]Guid placeId,
+            [FromBody]Guid roleId)
         {
-            await eventsManager.WishTo(UserId, placeId);
+            await eventsManager.WishTo(UserId, roleId, placeId);
             return ResponseStatusCode.OK;
         }
     }
