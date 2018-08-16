@@ -24,17 +24,14 @@ namespace BackEnd.Services
     {
         private readonly DataBaseContext dbContext;
         private readonly IMapper mapper;
-        private readonly IRolesAccessor rolesAccessor;
 
         public EventsManager(
             DataBaseContext dbContext,
-            IMapper mapper,
-            IRolesAccessor rolesAccessor
+            IMapper mapper
         )
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
-            this.rolesAccessor = rolesAccessor;
         }
 
         public IQueryable<Event> Events => dbContext.Events;

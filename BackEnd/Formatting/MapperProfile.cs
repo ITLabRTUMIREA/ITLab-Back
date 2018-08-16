@@ -24,6 +24,7 @@ using Models.DataBaseLinks;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
+using BackEnd.Models;
 
 namespace BackEnd.Formatting
 {
@@ -54,8 +55,11 @@ namespace BackEnd.Formatting
             CreateMap<EventType, EventTypeView>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventView>();
+            var userId = default(Guid);
+            CreateMap<Event, EventAndUserId>()
+                .ForMember(evuid => evuid.UserId, map => map.MapFrom(ev => userId));
 
-            CreateMap<Event, CompactEventView>()
+            CreateMap<EventAndUserId, CompactEventView>()
                 .ForMember(cev => cev.ShiftsCount, map => map.MapFrom(ev => ev.Shifts.Count))
                 .ForMember(cev => cev.TotalDurationInMinutes, map => map.MapFrom(ev =>
                     ev
@@ -70,7 +74,14 @@ namespace BackEnd.Formatting
                 .ForMember(cev => cev.TargetParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
-                        .Sum(p => p.TargetParticipantsCount)));
+                        .Sum(p => p.TargetParticipantsCount)))
+                .ForMember(cev => cev.Participating, map => map.MapFrom(evuid =>
+                    evuid
+                        .Shifts
+                        .SelectMany(s => s.Places)
+                        .SelectMany(p => p.PlaceUserRoles)
+                        .Where(pur => pur.UserStatus == UserStatus.Accepted)
+                        .Any(pur => pur.UserId == evuid.UserId)));
 
 
             CreateMap<ShiftCreateRequest, Shift>();
@@ -110,21 +121,21 @@ namespace BackEnd.Formatting
 
         private void EventEditMaps()
         {
-            CreateMap<List<ShiftEditRequest>,List<Shift>>()
+            CreateMap<List<ShiftEditRequest>, List<Shift>>()
                 .ConvertUsing(new ListsConverter<ShiftEditRequest, Shift>(s => s.Id));
             CreateMap<EventEditRequest, Event>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
-            CreateMap<List<PlaceEditRequest>,List<Place>>()
+            CreateMap<List<PlaceEditRequest>, List<Place>>()
                 .ConvertUsing(new ListsConverter<PlaceEditRequest, Place>(p => p.Id));
             CreateMap<ShiftEditRequest, Shift>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
-            
-            CreateMap<List<DeletableRequest>,List<PlaceEquipment>>()
+
+            CreateMap<List<DeletableRequest>, List<PlaceEquipment>>()
                 .ConvertUsing(new ListsConverter<DeletableRequest, PlaceEquipment>(eq => eq.EquipmentId));
-            CreateMap<List<PersonWorkRequest>,List<PlaceUserRole>>()
+            CreateMap<List<PersonWorkRequest>, List<PlaceUserRole>>()
                 .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserRole>(pur => pur.UserId));
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))

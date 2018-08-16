@@ -147,7 +147,6 @@ namespace BackEnd
             services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddTransient<DataBaseFiller>();
-            services.AddSingleton<IRolesAccessor, RoleAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

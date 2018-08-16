@@ -13,5 +13,6 @@ namespace Models.PublicAPI.Responses.Event
         public int ShiftsCount { get; set; }
         public int CurrentParticipantsCount { get; set; }
         public int TargetParticipantsCount { get; set; }
+        public bool Participating { get; set; }
     }
 }
