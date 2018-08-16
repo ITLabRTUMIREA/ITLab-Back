@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Models.PublicAPI.Responses.Event
 {
-    public class EventTypePresent
+    public class EventTypeView
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
