@@ -15,6 +15,6 @@ namespace Models.PublicAPI
                .Select(f => f.GetRawConstantValue().ToString())
                .ToList());
         public const string ParticipantRoleName = "Participant";
-        public const string OrginizerRoleName = "Orginizer";
+        public const string OrginizerRoleName = "Organizer";
     }
 }

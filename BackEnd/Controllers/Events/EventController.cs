@@ -56,7 +56,7 @@ namespace BackEnd.Controllers.Events
                 .ToListAsync();
         }
 
-        [HttpGet("invitions")]
+        [HttpGet("invitations")]
         public async Task<ListResponse<CompactEventView>> GeInvites()
             => await eventsManager
             .Events
