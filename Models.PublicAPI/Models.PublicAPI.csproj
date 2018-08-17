@@ -20,4 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Responses\Event\Invitations\" />
+  </ItemGroup>
 </Project>

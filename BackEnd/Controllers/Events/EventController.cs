@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Extensions;
 using BackEnd.Models;
+using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Controllers.Events
 {
@@ -52,12 +53,13 @@ namespace BackEnd.Controllers.Events
                 .IfNotNull(begin, evnts => evnts.Where(e => e.BeginTime >= begin))
                 .IfNotNull(end, evnts => evnts.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
-                .ToCompactEventView(UserId)
+                .AttachUserId(UserId)
+                .ProjectTo<CompactEventView>()
                 .ToListAsync();
         }
 
         [HttpGet("invitations")]
-        public async Task<ListResponse<CompactEventView>> GeInvites()
+        public async Task<ListResponse<InvitationsEventView>> GeInvites()
             => await eventsManager
             .Events
             .Where(e => e
@@ -66,7 +68,8 @@ namespace BackEnd.Controllers.Events
                    .SelectMany(p => p.PlaceUserRoles)
                    .Any(pur => pur.UserId == UserId && 
                         (pur.UserStatus != UserStatus.Accepted )))
-            .ToCompactEventView(UserId)
+            .AttachUserId(UserId)
+            .ProjectTo<InvitationsEventView>()
             .ToListAsync();
 
         [HttpGet("{id}")]

@@ -8,7 +8,7 @@ namespace BackEnd.Extensions
 {
     public static class IQueryableExtensions
     {
-        public static IQueryable<CompactEventView> ToCompactEventView(this IQueryable<Event> source, Guid userId)
-            => source.ProjectTo<EventAndUserId>(new { userId }).ProjectTo<CompactEventView>();
+        public static IQueryable<EventAndUserId> AttachUserId(this IQueryable<Event> source, Guid userId)
+            => source.ProjectTo<EventAndUserId>(new { userId });
     }
 }

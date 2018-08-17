@@ -25,6 +25,7 @@ using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 using BackEnd.Models;
+using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Formatting
 {
@@ -33,6 +34,7 @@ namespace BackEnd.Formatting
         public MapperProfile()
         {
             EventEditMaps();
+            Invitations();
             CreateMap<EquipmentTypeCreateRequest, EquipmentType>();
             CreateMap<EventTypeEditRequest, EventType>()
                 .ForAllMembers(opt => opt.Condition(a =>
@@ -146,6 +148,34 @@ namespace BackEnd.Formatting
                 .ForMember(pe => pe.EquipmentId, map => map.MapFrom(eer => eer.Id));
             CreateMap<PersonWorkRequest, PlaceUserRole>()
                 .ForMember(pur => pur.UserId, map => map.MapFrom(pwr => pwr.Id));
+        }
+
+        private void Invitations()
+        {
+            CreateMap<EventAndUserId, InvitationsEventView>()
+                .ForMember(iev => iev.PlaceId, map => map.MapFrom(euid =>
+                    euid
+                        .Shifts
+                        .SelectMany(s => s.Places)
+                        .SelectMany(p => p.PlaceUserRoles)
+                        .Single(pur => pur.UserId == euid.UserId)
+                        .PlaceId))
+                .ForMember(iev => iev.ShiftDurationInMinutes, map => map.MapFrom(euid =>
+                    euid
+                        .Shifts
+                        .Where(s => s
+                               .Places
+                               .Any(p => p.PlaceUserRoles
+                                    .Any(pur => pur.UserId == euid.UserId)))
+                                .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
+                        .Single()))
+                .ForMember(iev => iev.Role, map => map.MapFrom(euid =>
+                   euid
+                       .Shifts
+                       .SelectMany(s => s.Places)
+                       .SelectMany(p => p.PlaceUserRoles)
+                       .Single(pur => pur.UserId == euid.UserId)
+                       .Role));
         }
     }
 }
