@@ -18,5 +18,7 @@ namespace Models.PublicAPI.Requests.Account
         public string Email { get; set; }
         [Required]
         public string AccessToken { get; set; }
+        [Phone]
+        public string PhoneNumber { get; set; }
     }
 }

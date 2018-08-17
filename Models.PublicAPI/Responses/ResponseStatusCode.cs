@@ -11,7 +11,7 @@ namespace Models.PublicAPI.Responses
         IncorrectRequestData,
         NotImplenment,
         EquipmentTypeNotFound,
-        EventTypeNotFound, 
+        EventTypeNotFound,
         InvalidToken,
         UserNotFound,
         WrongPassword,
@@ -23,6 +23,7 @@ namespace Models.PublicAPI.Responses
         IncorrectAccessToken,
         NoShifts,
         LastShift,
-        YouAreInRole
+        YouAreInRole,
+        WrongLoginOrPassword
     }
 }

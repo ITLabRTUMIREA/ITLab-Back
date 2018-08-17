@@ -45,25 +45,20 @@ namespace BackEnd.Controllers
         [AllowAnonymous]
         public async Task<OneObjectResponse<LoginResponse>> Login([FromBody] AccountLoginRequest loginData)
         {
-            var user = await userManager.FindByNameAsync(loginData.Username);
-            if (user == null)
-            {
-                throw ApiLogicException.Create(ResponseStatusCode.UserNotFound);
-            }
+            var user = await userManager.FindByNameAsync(loginData.Username) ?? 
+                throw ApiLogicException.Create(ResponseStatusCode.WrongLoginOrPassword);
+
             if (!await userManager.CheckPasswordAsync(user, loginData.Password))
             {
-                throw ApiLogicException.Create(ResponseStatusCode.WrongPassword);
+                throw ApiLogicException.Create(ResponseStatusCode.WrongLoginOrPassword);
             }
-            return GenerateResponseAsync(user);
+            return GenerateResponse(user);
         }
 
-        private LoginResponse GenerateResponseAsync(User user, string token = "")
+        private LoginResponse GenerateResponse(User user)
         {
             var loginInfo = mapper.Map<LoginResponse>(user);
-            loginInfo.Token = token;
-
             var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString()/*, userManager.GetRolesAsync(user).Result.ToArray()*/);
-
             loginInfo.Token = jwtFactory.GenerateEncodedToken(user.UserName, identity);
             return loginInfo;
         }
