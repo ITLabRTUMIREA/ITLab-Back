@@ -7,8 +7,8 @@ namespace BackEnd.Services.Interfaces
 {
     public interface IUserRegisterTokens
     {
-        string AddRegisterToken(string email);
-        bool IsCorrectToken(string email, string token);
-        void RemoveToken(string email);
+        Task<string> AddRegisterToken(string email);
+        Task<bool> IsCorrectToken(string email, string token);
+        Task RemoveToken(string email);
     }
 }

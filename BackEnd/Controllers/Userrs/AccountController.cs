@@ -59,17 +59,13 @@ namespace BackEnd.Controllers.Users
         [HttpPost]
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {
-            if (!registerTokens.IsCorrectToken(account.Email, account.AccessToken))
+            if (!await registerTokens.IsCorrectToken(account.Email, account.AccessToken))
                 return ResponseStatusCode.IncorrectAccessToken;
             User user;
             user = mapper.Map<User>(account);
             var result = await userManager.CreateAsync(user, account.Password);
             if (result.Succeeded)
-                registerTokens.RemoveToken(account.Email);
-            //result = await userManager.AddToRoleAsync(user, "User");
-            //var token = userManager.GenerateEmailConfirmationTokenAsync(user);
-            //var url = $"http://localhost:5000/api/Account/{user.Id}/{token}";
-            //await emailSender.SendEmailConfirm(account.Email, url);
+                await registerTokens.RemoveToken(account.Email);
 
             return ResponseStatusCode.OK;
         }

@@ -7,6 +7,7 @@ namespace BackEnd.Models
 {
     public class RegisterTokenPair
     {
+        public Guid Id { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
     }

@@ -33,6 +33,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
+using BackEnd.Models.Settings;
 
 namespace BackEnd
 {
@@ -66,6 +67,7 @@ namespace BackEnd
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.Configure<DBInitialize>(Configuration.GetSection(nameof(DBInitialize)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
+            services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
@@ -143,7 +145,7 @@ namespace BackEnd
             services.AddCors();
             services.AddSignalR();
 
-            services.AddSingleton<IUserRegisterTokens, InMemoryUserRegisterTokens>();
+            services.AddTransient<IUserRegisterTokens, DbUserRegisterTokens>();
             services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddTransient<DataBaseFiller>();

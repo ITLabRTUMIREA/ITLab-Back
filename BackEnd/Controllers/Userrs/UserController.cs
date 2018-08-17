@@ -16,6 +16,7 @@ using Models.PublicAPI.Responses.People;
 using Extensions;
 using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
+using Models.PublicAPI.Requests.User;
 
 namespace BackEnd.Controllers.Users
 {
@@ -25,13 +26,16 @@ namespace BackEnd.Controllers.Users
     {
         private readonly DataBaseContext dbContext;
         private readonly IUserRegisterTokens registerTokens;
+        private readonly IEmailSender emailSender;
 
         public UserController(UserManager<User> userManager,
                               DataBaseContext dbContext,
-                              IUserRegisterTokens registerTokens) : base(userManager)
+                              IUserRegisterTokens registerTokens,
+                              IEmailSender emailSender) : base(userManager)
         {
             this.dbContext = dbContext;
             this.registerTokens = registerTokens;
+            this.emailSender = emailSender;
         }
         [HttpGet]
         public async Task<ListResponse<UserView>> GetAsync(
@@ -64,9 +68,11 @@ namespace BackEnd.Controllers.Users
             ?? throw ResponseStatusCode.NotFound.ToApiException();
 
         [HttpPost]
-        public OneObjectResponse<string> InviteUser([FromBody]string email)
+        public async Task<ResponseBase> InviteUser([FromBody]InviteUserRequest inviteRequest)
         {
-            return registerTokens.AddRegisterToken(email);
+            var token = await registerTokens.AddRegisterToken(inviteRequest.Email);
+            await emailSender.SendEmailConfirm(inviteRequest.Email, inviteRequest.RedirectUrl, token);
+            return ResponseStatusCode.OK;
         }
     }
 }

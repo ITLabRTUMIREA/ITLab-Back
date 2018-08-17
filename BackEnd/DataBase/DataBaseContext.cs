@@ -11,6 +11,7 @@ using Models.DataBaseLinks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
+using BackEnd.Models;
 
 namespace BackEnd.DataBase
 {
@@ -21,6 +22,7 @@ namespace BackEnd.DataBase
         public DbSet<EventType> EventTypes { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
+        public DbSet<RegisterTokenPair> RegisterTokenPairs { get; set; }
 
         public DataBaseContext(DbContextOptions options) : base(options)
         {

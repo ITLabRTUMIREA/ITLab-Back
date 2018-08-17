@@ -8,6 +8,6 @@ namespace BackEnd.Services.Interfaces
     public interface IEmailSender
     {
         Task SendEmailAsync(string email, string subject, string message);
-        Task SendEmailConfirm(string email, string url);
+        Task SendEmailConfirm(string email, string url, string accessToken);
     }
 }
