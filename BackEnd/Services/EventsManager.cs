@@ -48,7 +48,7 @@ namespace BackEnd.Services
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
                 .DoForEach(p => p.UserStatus = UserStatus.Invited);
-            
+
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
             return dbContext.Events.Where(ev => ev.Id == newEvent.Id);
@@ -125,26 +125,41 @@ namespace BackEnd.Services
                 RoleId = roleId,
                 UserStatus = UserStatus.Wisher
             });
-            await dbContext.SaveChangesAsync();    
+            await dbContext.SaveChangesAsync();
         }
 
-        public async Task AcceptInvite(Guid userId, Guid placeId)
+        public async Task AcceptInvite(Guid placeId, Guid userId)
         {
-            var targetPlaceUserRole = await PlaceUserRoles
-                .SingleOrDefaultAsync(p => p.PlaceId == placeId && p.UserId == userId && p.UserStatus == UserStatus.Invited)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+            var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Invited);
             targetPlaceUserRole.UserStatus = UserStatus.Accepted;
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task RejectInvite(Guid placeId, Guid userId)
+        {
+            var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Invited);
+            dbContext.Remove(targetPlaceUserRole);
             await dbContext.SaveChangesAsync();
         }
 
         public async Task AcceptWish(Guid placeId, Guid userId)
         {
-            var targetPlaceUserRole = await PlaceUserRoles
-                .SingleOrDefaultAsync(pur => pur.PlaceId == placeId && pur.UserId == userId && pur.UserStatus == UserStatus.Wisher)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+            var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Wisher);
             targetPlaceUserRole.UserStatus = UserStatus.Accepted;
             await dbContext.SaveChangesAsync();
         }
+
+        public async Task RejectWish(Guid placeId, Guid userId)
+        {
+            var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Wisher);
+            dbContext.Remove(targetPlaceUserRole);
+            await dbContext.SaveChangesAsync();
+        }
+
+        private Task<PlaceUserRole> FindPlaceUserRole(Guid placeId, Guid userId, UserStatus status)
+            => PlaceUserRoles
+                .SingleOrDefaultAsync(pur => pur.PlaceId == placeId && pur.UserId == userId && pur.UserStatus == status)
+                ?? throw ResponseStatusCode.NotFound.ToApiException();
 
         private IQueryable<PlaceUserRole> PlaceUserRoles =>
             dbContext

@@ -113,7 +113,15 @@ namespace BackEnd.Controllers.Events
         [HttpPost("acceptInvite/{placeId:guid}")]
         public async Task<ResponseBase> AcceptInvite(Guid placeId)
         {
-            await eventsManager.AcceptInvite(UserId, placeId);
+            await eventsManager.AcceptInvite(placeId, UserId);
+            return ResponseStatusCode.OK;
+        }
+
+
+        [HttpPost("rejectInvite/{placeId:guid}")]
+        public async Task<ResponseBase> RejectInvite(Guid placeId)
+        {
+            await eventsManager.RejectInvite(placeId, UserId);
             return ResponseStatusCode.OK;
         }
 
@@ -124,5 +132,11 @@ namespace BackEnd.Controllers.Events
             return ResponseStatusCode.OK;
         }
 
+        [HttpPost("rejectWish/{placeId:guid}/{userId:guid}")]
+        public async Task<ResponseBase> RejectWish(Guid placeId, Guid userId)
+        {
+            await eventsManager.RejectWish(placeId, userId);
+            return ResponseStatusCode.OK;
+        }
     }
 }
