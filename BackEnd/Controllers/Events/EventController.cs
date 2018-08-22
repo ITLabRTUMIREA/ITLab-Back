@@ -50,8 +50,8 @@ namespace BackEnd.Controllers.Events
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
                 .Events
-                .IfNotNull(begin, evnts => evnts.Where(e => e.BeginTime >= begin))
-                .IfNotNull(end, evnts => evnts.Where(e => e.BeginTime <= end))
+                .IfNotNull(begin, events => events.Where(e => e.BeginTime >= begin))
+                .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
                 .AttachUserId(UserId)
                 .ProjectTo<CompactEventView>()
@@ -114,15 +114,7 @@ namespace BackEnd.Controllers.Events
             return eventId;
         }
 
-        [HttpPost("wishTo/{placeId:guid}/{roleId:guid}")]
-        public async Task<ResponseBase> WishTo(Guid placeId, Guid roleId)
-        {
-            await eventsManager.WishTo(UserId, roleId, placeId);
-            return ResponseStatusCode.OK;
-        }
-
-
-        [HttpPost("{placeId:guid}/accept")]
+        [HttpPost("invitation/{placeId:guid}/accept")]
         public async Task<ResponseBase> AcceptInvite(Guid placeId)
         {
             await eventsManager.AcceptInvite(placeId, UserId);
@@ -130,21 +122,27 @@ namespace BackEnd.Controllers.Events
         }
 
 
-        [HttpPost("{placeId:guid}/reject")]
+        [HttpPost("invitation/{placeId:guid}/reject")]
         public async Task<ResponseBase> RejectInvite(Guid placeId)
         {
             await eventsManager.RejectInvite(placeId, UserId);
             return ResponseStatusCode.OK;
         }
 
-        [HttpPost("acceptWish/{placeId:guid}/{userId:guid}")]
+        [HttpPost("wish/{placeId:guid}/{roleId:guid}")]
+        public async Task<ResponseBase> Wish(Guid placeId, Guid roleId)
+        {
+            await eventsManager.WishTo(UserId, roleId, placeId);
+            return ResponseStatusCode.OK;
+        }
+        [HttpPost("wish/{placeId:guid}/{userId:guid}/accept")]
         public async Task<ResponseBase> AcceptWish(Guid placeId, Guid userId)
         {
             await eventsManager.AcceptWish(placeId, userId);
             return ResponseStatusCode.OK;
         }
 
-        [HttpPost("rejectWish/{placeId:guid}/{userId:guid}")]
+        [HttpPost("wish/{placeId:guid}/{userId:guid}/reject")]
         public async Task<ResponseBase> RejectWish(Guid placeId, Guid userId)
         {
             await eventsManager.RejectWish(placeId, userId);

@@ -57,7 +57,7 @@ namespace BackEnd.Formatting
             CreateMap<EventType, EventTypeView>();
             CreateMap<EventCreateRequest, Event>();
             CreateMap<Event, EventView>();
-            var userId = default(Guid);
+            Guid userId = default;
             CreateMap<Event, EventAndUserId>()
                 .ForMember(evuid => evuid.UserId, map => map.MapFrom(ev => userId));
 

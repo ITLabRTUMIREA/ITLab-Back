@@ -7,7 +7,7 @@ namespace Models.PublicAPI
     public class RoleNames
     {
         private static List<string> list;
-        public static List<string> List = list ??
+        public static readonly List<string> List = list ??
             (list = typeof(RoleNames)
                 .GetFields(BindingFlags.Public | BindingFlags.Static |
                             BindingFlags.FlattenHierarchy)
@@ -15,6 +15,6 @@ namespace Models.PublicAPI
                .Select(f => f.GetRawConstantValue().ToString())
                .ToList());
         public const string ParticipantRoleName = "Participant";
-        public const string OrginizerRoleName = "Organizer";
+        public const string OrganizerRoleName = "Organizer";
     }
 }
