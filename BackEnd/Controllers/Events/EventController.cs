@@ -122,7 +122,7 @@ namespace BackEnd.Controllers.Events
         }
 
 
-        [HttpPost("acceptInvite/{placeId:guid}")]
+        [HttpPost("{placeId:guid}/accept")]
         public async Task<ResponseBase> AcceptInvite(Guid placeId)
         {
             await eventsManager.AcceptInvite(placeId, UserId);
@@ -130,7 +130,7 @@ namespace BackEnd.Controllers.Events
         }
 
 
-        [HttpPost("rejectInvite/{placeId:guid}")]
+        [HttpPost("{placeId:guid}/reject")]
         public async Task<ResponseBase> RejectInvite(Guid placeId)
         {
             await eventsManager.RejectInvite(placeId, UserId);
