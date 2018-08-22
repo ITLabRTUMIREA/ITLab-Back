@@ -176,6 +176,13 @@ namespace BackEnd.Formatting
                        .SelectMany(p => p.PlaceUserRoles)
                        .Single(pur => pur.UserId == euid.UserId)
                        .Role));
+
+            CreateMap<PlaceUserRole, WisherEventView>()
+                .ForMember(wev => wev.EventId, map => map.MapFrom(pur => pur.Place.Shift.EventId))
+                .ForMember(wev => wev.EventType, map => map.MapFrom(pur => pur.Place.Shift.Event.EventType))
+                .ForMember(wev => wev.Wish, map => map.MapFrom(pur => pur))
+                .ForMember(wev => wev.TargetParticipantsCount, map => map.MapFrom(pur => pur.Place.TargetParticipantsCount))
+                .ForMember(wev => wev.CurrentParticipantsCount, map => map.MapFrom(pur => pur.Place.PlaceUserRoles.Count(pur1 => pur1.UserStatus == UserStatus.Accepted)));
         }
     }
 }

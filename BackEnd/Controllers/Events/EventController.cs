@@ -72,6 +72,18 @@ namespace BackEnd.Controllers.Events
             .ProjectTo<InvitationsEventView>()
             .ToListAsync();
 
+        [HttpGet("wishers")]
+        public async Task<ListResponse<WisherEventView>> GetWishers()
+        => await eventsManager
+            .Events
+            .SelectMany(e => e.Shifts)
+            .SelectMany(s => s.Places)
+            .SelectMany(p => p.PlaceUserRoles)
+            .Where(pur => pur.UserStatus == UserStatus.Wisher)
+            .ProjectTo<WisherEventView>()
+            .ToListAsync();
+
+
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EventView>> GetAsync(Guid id)
             => await eventsManager
