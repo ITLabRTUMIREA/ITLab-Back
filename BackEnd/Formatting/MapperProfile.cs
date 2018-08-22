@@ -178,8 +178,10 @@ namespace BackEnd.Formatting
                        .Role));
 
             CreateMap<PlaceUserRole, WisherEventView>()
-                .ForMember(wev => wev.EventId, map => map.MapFrom(pur => pur.Place.Shift.EventId))
+                .ForMember(wev => wev.Id, map => map.MapFrom(pur => pur.Place.Shift.EventId))
+                .ForMember(wev => wev.Title, map => map.MapFrom(pur => pur.Place.Shift.Event.Title))
                 .ForMember(wev => wev.EventType, map => map.MapFrom(pur => pur.Place.Shift.Event.EventType))
+                .ForMember(wev => wev.BeginTime, map => map.MapFrom(pur => pur.Place.Shift.Event.BeginTime))
                 .ForMember(wev => wev.Wish, map => map.MapFrom(pur => pur))
                 .ForMember(wev => wev.TargetParticipantsCount, map => map.MapFrom(pur => pur.Place.TargetParticipantsCount))
                 .ForMember(wev => wev.CurrentParticipantsCount, map => map.MapFrom(pur => pur.Place.PlaceUserRoles.Count(pur1 => pur1.UserStatus == UserStatus.Accepted)));
