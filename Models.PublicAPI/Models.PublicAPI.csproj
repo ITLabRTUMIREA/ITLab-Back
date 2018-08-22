@@ -20,7 +20,6 @@
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Responses\Event\Invitations\" />
     <Folder Include="Requests\User\" />
   </ItemGroup>
 </Project>

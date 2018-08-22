@@ -152,7 +152,7 @@ namespace BackEnd.Formatting
 
         private void Invitations()
         {
-            CreateMap<EventAndUserId, InvitationsEventView>()
+            CreateMap<EventAndUserId, EventApplicationView>()
                 .ForMember(iev => iev.PlaceId, map => map.MapFrom(euid =>
                     euid
                         .Shifts

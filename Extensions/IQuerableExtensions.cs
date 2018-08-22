@@ -12,7 +12,7 @@ namespace Extensions
             object checkObj,
             Func<IQueryable<T>, IQueryable<T>> ifNotNullQuearble)
             => If(querable, checkObj != null, ifNotNullQuearble);
-        
+
         public static IQueryable<T> IfNotNull<T, S>(
             this IQueryable<T> querable,
             S? checkObj,
@@ -33,6 +33,23 @@ namespace Extensions
         {
             if (predicate(value))
                 value = defaultValue;
+            return source;
+        }
+
+        public static IQueryable<T> Translate<T, TI, TO>(this IQueryable<T> source, TI parameter, out TO result, Func<TI, TO> translateFunc)
+        {
+            result = translateFunc(parameter);
+            return source;
+        }
+        public static IQueryable<T> Translate<T, TI, TO>(this IQueryable<T> source, TI parameter, out TO result, TO defaultValue, params (TI parameter, TO result)[] conditions)
+        {
+            result = defaultValue;
+            foreach (var condition in conditions)
+                if (condition.parameter.Equals(parameter))
+                {
+                    result = condition.result;
+                    break;
+                }
             return source;
         }
 

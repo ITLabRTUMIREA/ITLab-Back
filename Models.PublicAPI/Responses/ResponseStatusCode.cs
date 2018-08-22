@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Models.PublicAPI.Responses
+﻿namespace Models.PublicAPI.Responses
 {
     public enum ResponseStatusCode
     {
@@ -9,7 +7,7 @@ namespace Models.PublicAPI.Responses
         FieldExist,
         NotFound,
         IncorrectRequestData,
-        NotImplenment,
+        NotImplemented,
         EquipmentTypeNotFound,
         EventTypeNotFound,
         InvalidToken,

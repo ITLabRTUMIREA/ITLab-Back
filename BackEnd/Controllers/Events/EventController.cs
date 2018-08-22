@@ -6,20 +6,16 @@ using BackEnd.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Models.PublicAPI.Requests;
-using Models.PublicAPI.Requests.Events.Event;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.General;
 using AutoMapper.QueryableExtensions;
 using Extensions;
-using Models.Events;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 using Models.PublicAPI.Responses;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Extensions;
-using BackEnd.Models;
 using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Controllers.Events
@@ -30,18 +26,13 @@ namespace BackEnd.Controllers.Events
     {
         private readonly IEventsManager eventsManager;
 
-        private readonly ILogger<EventTypeController> logger;
-        private readonly IMapper mapper;
-
         public EventController(
             UserManager<User> userManager,
-            IEventsManager eventManager,
+            IEventsManager eventsManager,
             ILogger<EventTypeController> logger,
             IMapper mapper) : base(userManager)
         {
-            this.logger = logger;
-            this.mapper = mapper;
-            this.eventsManager = eventManager;
+            this.eventsManager = eventsManager;
         }
 
         [HttpGet]
@@ -58,18 +49,21 @@ namespace BackEnd.Controllers.Events
                 .ToListAsync();
         }
 
-        [HttpGet("invitations")]
-        public async Task<ListResponse<InvitationsEventView>> GeInvites()
+        [HttpGet("applications/{requestType}")]
+        public async Task<ListResponse<EventApplicationView>> GeInvites(string requestType)
             => await eventsManager
             .Events
+            .Translate(requestType, out var userStatus,
+                    UserStatus.Unknown,
+                    ("wishes", UserStatus.Wisher),
+                    ("invitations", UserStatus.Invited))
             .Where(e => e
                    .Shifts
                    .SelectMany(s => s.Places)
                    .SelectMany(p => p.PlaceUserRoles)
-                   .Any(pur => pur.UserId == UserId && 
-                        (pur.UserStatus != UserStatus.Accepted )))
+                   .Any(pur => pur.UserId == UserId && pur.UserStatus == userStatus))
             .AttachUserId(UserId)
-            .ProjectTo<InvitationsEventView>()
+            .ProjectTo<EventApplicationView>()
             .ToListAsync();
 
         [HttpGet("wishers")]
@@ -95,14 +89,13 @@ namespace BackEnd.Controllers.Events
 
         [HttpPost]
         public async Task<OneObjectResponse<EventView>> PostAsync([FromBody] EventCreateRequest request)
-        {
-            var newEventQuerable = await eventsManager.AddAsync(request);
-            return await newEventQuerable.ProjectTo<EventView>().SingleAsync();
-        }
+            => await (await eventsManager.AddAsync(request))
+                .ProjectTo<EventView>()
+                .SingleAsync();
 
         [HttpPut]
         public async Task<OneObjectResponse<EventView>> PutAsync([FromBody] EventEditRequest request)
-        => await (await eventsManager.EditAsync(request))
+            => await (await eventsManager.EditAsync(request))
                 .ProjectTo<EventView>()
                 .SingleAsync();
 

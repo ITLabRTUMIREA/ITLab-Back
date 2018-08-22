@@ -60,7 +60,7 @@ namespace BackEnd.Exceptions
                     return api.ResponseModel;
                 case NotImplementedException nie:
                     logger.LogWarning(ex, "Not implement");
-                    return new ResponseBase(ResponseStatusCode.NotImplenment);
+                    return new ResponseBase(ResponseStatusCode.NotImplemented);
                 default:
                     logger.LogWarning(ex, "Unknown exception");
                     return new ResponseBase(ResponseStatusCode.Unknown);
