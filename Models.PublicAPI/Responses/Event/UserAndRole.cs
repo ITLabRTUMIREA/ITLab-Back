@@ -9,5 +9,7 @@ namespace Models.PublicAPI.Responses.Event
     {
         public UserView User { get; set; }
         public RoleView Role { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime? DoneTime { get; set; }
     }
 }

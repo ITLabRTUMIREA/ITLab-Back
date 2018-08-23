@@ -47,7 +47,8 @@ namespace BackEnd.Services
                 .Shifts
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
-                .DoForEach(p => p.UserStatus = UserStatus.Invited);
+                .DoForEach(p => p.UserStatus = UserStatus.Invited)
+                .DoForEach(p => p.CreateTime = DateTime.UtcNow);
 
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
@@ -68,7 +69,8 @@ namespace BackEnd.Services
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
                 .Where(p => p.UserStatus == UserStatus.Unknown)
-                .DoForEach(p => p.UserStatus = UserStatus.Invited);
+                .DoForEach(p => p.UserStatus = UserStatus.Invited)
+                .DoForEach(p => p.CreateTime = DateTime.UtcNow);
 
             if (toEdit.Shifts?.Count < 1)
                 throw ResponseStatusCode.LastShift.ToApiException();
@@ -123,7 +125,8 @@ namespace BackEnd.Services
             {
                 UserId = userId,
                 RoleId = roleId,
-                UserStatus = UserStatus.Wisher
+                UserStatus = UserStatus.Wisher,
+                CreateTime = DateTime.UtcNow
             });
             await dbContext.SaveChangesAsync();
         }
@@ -132,6 +135,7 @@ namespace BackEnd.Services
         {
             var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Invited);
             targetPlaceUserRole.UserStatus = UserStatus.Accepted;
+            targetPlaceUserRole.DoneTime = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
@@ -139,6 +143,7 @@ namespace BackEnd.Services
         {
             var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Invited);
             dbContext.Remove(targetPlaceUserRole);
+            targetPlaceUserRole.DoneTime = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
@@ -146,6 +151,7 @@ namespace BackEnd.Services
         {
             var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Wisher);
             targetPlaceUserRole.UserStatus = UserStatus.Accepted;
+            targetPlaceUserRole.DoneTime = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
@@ -153,11 +159,12 @@ namespace BackEnd.Services
         {
             var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Wisher);
             dbContext.Remove(targetPlaceUserRole);
+            targetPlaceUserRole.DoneTime = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
         }
 
-        private Task<PlaceUserRole> FindPlaceUserRole(Guid placeId, Guid userId, UserStatus status)
-            => PlaceUserRoles
+        private async Task<PlaceUserRole> FindPlaceUserRole(Guid placeId, Guid userId, UserStatus status)
+            => await PlaceUserRoles
                 .SingleOrDefaultAsync(pur => pur.PlaceId == placeId && pur.UserId == userId && pur.UserStatus == status)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
