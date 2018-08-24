@@ -89,7 +89,7 @@ namespace BackEnd
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 
-            services.AddSingleton<IJwtFactory, JwtFactory>();
+            services.AddTransient<IJwtFactory, JwtFactory>();
 
             SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
                 jwtAppSettingOptions.SecretKey));

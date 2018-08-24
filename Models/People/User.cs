@@ -13,5 +13,6 @@ namespace Models.People
         public List<UserSetting> UserSettings { get; set; }
         public List<Equipment> Equipment  { get; set; }
         public List<PlaceUserRole> PlaceUserRoles { get; set; }
+        public List<RefreshToken> RefreshTokens { get; set; }
     }
 }

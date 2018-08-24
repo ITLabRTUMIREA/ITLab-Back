@@ -42,6 +42,7 @@ namespace BackEnd.Formatting
             CreateMap<AccountCreateRequest, User>()
                 .ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
             CreateMap<User, LoginResponse>();
+            CreateMap<RefreshToken, RefreshTokenView>();
 
             CreateMap<EquipmentEditRequest, Equipment>()
                 .ForAllMembers(opt => opt.Condition(a =>

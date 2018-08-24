@@ -22,6 +22,7 @@
         NoShifts,
         LastShift,
         YouAreInRole,
-        WrongLoginOrPassword
+        WrongLoginOrPassword,
+        IncorrectRefreshtoken
     }
 }

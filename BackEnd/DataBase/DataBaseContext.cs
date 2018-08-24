@@ -23,6 +23,7 @@ namespace BackEnd.DataBase
         public DbSet<Event> Events { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<RegisterTokenPair> RegisterTokenPairs { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public DataBaseContext(DbContextOptions options) : base(options)
         {
