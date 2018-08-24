@@ -148,44 +148,14 @@ namespace BackEnd.Formatting
 
         private void Invitations()
         {
-            CreateMap<EventAndUserId, EventApplicationView>()
-                .ForMember(iev => iev.PlaceId, map => map.MapFrom(euid =>
-                    euid
-                        .Shifts
-                        .SelectMany(s => s.Places)
-                        .SelectMany(p => p.PlaceUserRoles)
-                        .Single(pur => pur.UserId == euid.UserId)
-                        .PlaceId))
-                .ForMember(iev => iev.ShiftDurationInMinutes, map => map.MapFrom(euid =>
-                    euid
-                        .Shifts
-                        .Where(s => s
-                               .Places
-                               .Any(p => p.PlaceUserRoles
-                                    .Any(pur => pur.UserId == euid.UserId)))
-                                .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
-                        .Single()))
-                .ForMember(iev => iev.Role, map => map.MapFrom(euid =>
-                    euid
-                       .Shifts
-                       .SelectMany(s => s.Places)
-                       .SelectMany(p => p.PlaceUserRoles)
-                       .Single(pur => pur.UserId == euid.UserId)
-                       .Role))
-                .ForMember(iev => iev.CreateTime, map => map.MapFrom(euid =>
-                    euid
-                       .Shifts
-                       .SelectMany(s => s.Places)
-                       .SelectMany(p => p.PlaceUserRoles)
-                       .Single(pur => pur.UserId == euid.UserId)
-                       .CreateTime))
-                .ForMember(iev => iev.DoneTime, map => map.MapFrom(euid =>
-                    euid
-                       .Shifts
-                       .SelectMany(s => s.Places)
-                       .SelectMany(p => p.PlaceUserRoles)
-                       .Single(pur => pur.UserId == euid.UserId)
-                       .DoneTime));
+            CreateMap<PlaceUserRole, EventApplicationView>()
+                .ForMember(eav => eav.Id, map => map.MapFrom(pur => pur.Place.Shift.EventId))
+                .ForMember(eav => eav.Title, map => map.MapFrom(pur => pur.Place.Shift.Event.Title))
+                .ForMember(eav => eav.EventType, map => map.MapFrom(pur => pur.Place.Shift.Event.EventType))
+                .ForMember(eav => eav.BeginTime, map => map.MapFrom(pur => pur.Place.Shift.BeginTime))
+                .ForMember(eav => eav.ShiftDurationInMinutes,
+                    map => map.MapFrom(pur => pur.Place.Shift.EndTime.Subtract(pur.Place.Shift.BeginTime).TotalMinutes));
+                
 
             CreateMap<PlaceUserRole, WisherEventView>()
                 .ForMember(wev => wev.Id, map => map.MapFrom(pur => pur.Place.Shift.EventId))

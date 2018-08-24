@@ -54,15 +54,13 @@ namespace BackEnd.Controllers.Events
             => await eventsManager
             .Events
             .Translate(requestType, out var userStatus,
-                    UserStatus.Unknown,
-                    ("wishes", UserStatus.Wisher),
-                    ("invitations", UserStatus.Invited))
-            .Where(e => e
-                   .Shifts
-                   .SelectMany(s => s.Places)
-                   .SelectMany(p => p.PlaceUserRoles)
-                   .Any(pur => pur.UserId == UserId && pur.UserStatus == userStatus))
-            .AttachUserId(UserId)
+                UserStatus.Unknown,
+                ("wishes", UserStatus.Wisher),
+                ("invitations", UserStatus.Invited))
+            .SelectMany(ev => ev.Shifts)
+            .SelectMany(s => s.Places)
+            .SelectMany(p => p.PlaceUserRoles)
+            .Where(pur => pur.UserId == UserId && pur.UserStatus == userStatus)
             .ProjectTo<EventApplicationView>()
             .ToListAsync();
 

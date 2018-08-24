@@ -47,8 +47,8 @@ namespace BackEnd.Services
                 .Shifts
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
-                .DoForEach(p => p.UserStatus = UserStatus.Invited)
-                .DoForEach(p => p.CreateTime = DateTime.UtcNow);
+                .WithActions(p => p.UserStatus = UserStatus.Invited)
+                .WithActions(p => p.CreateTime = DateTime.UtcNow);
 
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
@@ -69,8 +69,12 @@ namespace BackEnd.Services
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
                 .Where(p => p.UserStatus == UserStatus.Unknown)
-                .DoForEach(p => p.UserStatus = UserStatus.Invited)
-                .DoForEach(p => p.CreateTime = DateTime.UtcNow);
+                .WithActions(p =>
+                {
+                    p.UserStatus = UserStatus.Invited;
+                    p.CreateTime = DateTime.UtcNow;
+                })
+                .Iterate();
 
             if (toEdit.Shifts?.Count < 1)
                 throw ResponseStatusCode.LastShift.ToApiException();
