@@ -165,12 +165,26 @@ namespace BackEnd.Formatting
                                 .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
                         .Single()))
                 .ForMember(iev => iev.Role, map => map.MapFrom(euid =>
-                   euid
+                    euid
                        .Shifts
                        .SelectMany(s => s.Places)
                        .SelectMany(p => p.PlaceUserRoles)
                        .Single(pur => pur.UserId == euid.UserId)
-                       .Role));
+                       .Role))
+                .ForMember(iev => iev.CreateTime, map => map.MapFrom(euid =>
+                    euid
+                       .Shifts
+                       .SelectMany(s => s.Places)
+                       .SelectMany(p => p.PlaceUserRoles)
+                       .Single(pur => pur.UserId == euid.UserId)
+                       .CreateTime))
+                .ForMember(iev => iev.DoneTime, map => map.MapFrom(euid =>
+                    euid
+                       .Shifts
+                       .SelectMany(s => s.Places)
+                       .SelectMany(p => p.PlaceUserRoles)
+                       .Single(pur => pur.UserId == euid.UserId)
+                       .DoneTime));
 
             CreateMap<PlaceUserRole, WisherEventView>()
                 .ForMember(wev => wev.Id, map => map.MapFrom(pur => pur.Place.Shift.EventId))
