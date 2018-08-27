@@ -6,7 +6,9 @@ namespace Models.PublicAPI.Responses.General
 {
     public class ListResponse<T> : ResponseBase
     {
-        public IEnumerable<T> Data { get; }
+        public IEnumerable<T> Data { get; set; }
+
+        public ListResponse(){}
         public ListResponse(
             ResponseStatusCode statusCode,
             IEnumerable<T> data) : base(statusCode)

@@ -38,26 +38,26 @@ namespace BackEnd.Controllers.Users
             this.emailSender = emailSender;
         }
         [HttpGet]
-        public async Task<ListResponse<UserView>> GetAsync(
+        public async Task<PageOfListResponse<UserView>> GetAsync(
             string email,
             string firstname,
             string lastname,
             string match,
-            int count = 5)
-            => await userManager
-                .Users
-                .ResetToDefault(m => true, ref match, match?.ToUpper())
-                .IfNotNull(email, users => users.Where(u => u.Email.ToUpper().Contains(email.ToUpper())))
-                .IfNotNull(firstname, users => users.Where(u => u.FirstName.ToUpper().Contains(firstname.ToUpper())))
-                .IfNotNull(lastname, users => users.Where(u => u.LastName.ToUpper().Contains(lastname.ToUpper())))
-                .IfNotNull(match, users => users.ForAll(match.Split(' '), (us2, matcher) =>  us2.Where(u => u.LastName.ToUpper().Contains(matcher)
-                                                            || u.FirstName.ToUpper().Contains(matcher)
-                                                            || u.Email.ToUpper().Contains(matcher)
-                                                            || u.PhoneNumber.ToUpper().Contains(matcher))))
-                .ResetToDefault(c => c <= 0, ref count, 5)
-                .If(count > 0, users => users.Take(count))
+            int count = 5,
+            int offset = 0)
+            => (await GetUsersByParams(email, firstname, lastname, match)
+                .If(count > 0, users => users.Skip(offset * count).Take(count))
                 .ProjectTo<UserView>()
-                .ToListAsync();
+                .ToListAsync()).ToPage(offset * count);
+
+        [HttpGet("count")]
+        public async Task<OneObjectResponse<int>> GetCountAsync(
+            string email,
+            string firstname,
+            string lastname,
+            string match)
+            => await GetUsersByParams(email, firstname, lastname, match)
+                .CountAsync();
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<UserView>> GetAsync(Guid id)
@@ -74,5 +74,21 @@ namespace BackEnd.Controllers.Users
             await emailSender.SendEmailConfirm(inviteRequest.Email, inviteRequest.RedirectUrl, token);
             return ResponseStatusCode.OK;
         }
+
+
+        private IQueryable<User> GetUsersByParams(string email,
+            string firstname,
+            string lastname,
+            string match)
+            => userManager
+                .Users
+                .ResetToDefault(m => true, ref match, match?.ToUpper())
+                .IfNotNull(email, users => users.Where(u => u.Email.ToUpper().Contains(email.ToUpper())))
+                .IfNotNull(firstname, users => users.Where(u => u.FirstName.ToUpper().Contains(firstname.ToUpper())))
+                .IfNotNull(lastname, users => users.Where(u => u.LastName.ToUpper().Contains(lastname.ToUpper())))
+                .IfNotNull(match, users => users.ForAll(match.Split(' '), (us2, matcher) => us2.Where(u => u.LastName.ToUpper().Contains(matcher)
+                                                           || u.FirstName.ToUpper().Contains(matcher)
+                                                           || u.Email.ToUpper().Contains(matcher)
+                                                           || u.PhoneNumber.ToUpper().Contains(matcher))));
     }
 }
