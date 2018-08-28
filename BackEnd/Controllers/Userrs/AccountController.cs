@@ -16,25 +16,24 @@ using Models.PublicAPI.Responses;
 using Models.People;
 using BackEnd.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Models.PublicAPI.Responses.People;
 
 namespace BackEnd.Controllers.Users
 {
     [Produces("application/json")]
     [Route("api/account")]
-    public class AccountController : Controller
+    public class AccountController : AuthorizeController
     {
         private readonly IMapper mapper;
-        private readonly UserManager<User> userManager;
         private readonly IEmailSender emailSender;
         private readonly IUserRegisterTokens registerTokens;
 
         public AccountController(IMapper mapper, 
             UserManager<User> userManager, 
             IEmailSender emailSender,
-            IUserRegisterTokens registerTokens)
+            IUserRegisterTokens registerTokens) : base(userManager)
         {
             this.mapper = mapper;
-            this.userManager = userManager;
             this.emailSender = emailSender;
             this.registerTokens = registerTokens;
         }
@@ -68,6 +67,15 @@ namespace BackEnd.Controllers.Users
                 await registerTokens.RemoveToken(account.Email);
 
             return ResponseStatusCode.OK;
+        }
+
+        [HttpPut]
+        public async Task<UserView> EditUser([FromBody]AccountEditRequest editRequest)
+        {
+            var currentUser = await GetCurrentUser();
+            mapper.Map(editRequest, currentUser);
+            await userManager.UpdateAsync(currentUser);
+            return mapper.Map<UserView>(currentUser);
         }
     }
 }

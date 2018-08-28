@@ -88,10 +88,13 @@ namespace BackEnd.Controllers
 
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
         {
-            var loginInfo = mapper.Map<LoginResponse>(user);
             var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString()/*, userManager.GetRolesAsync(user).Result.ToArray()*/);
-            loginInfo.AccessToken = jwtFactory.GenerateAccessToken(user.UserName, identity);
-            loginInfo.RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent);
+            var loginInfo = new LoginResponse
+            {
+                User = mapper.Map<UserView>(user),
+                AccessToken = jwtFactory.GenerateAccessToken(user.UserName, identity),
+                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent)
+            };
             return loginInfo;
         }
     }

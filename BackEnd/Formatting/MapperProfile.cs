@@ -113,6 +113,9 @@ namespace BackEnd.Formatting
             CreateMap<PlaceUserRole, UserAndRole>();
 
             CreateMap<User, UserView>();
+            CreateMap<AccountEditRequest, User>()
+                .ForAllMembers(opt => opt.Condition(a =>
+                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
             CreateMap<UserSetting, UserSettingPresent>()
                 .ForMember(usp => usp.Value, map => map.MapFrom(us => us.Value.ParseToJson()));
         }
