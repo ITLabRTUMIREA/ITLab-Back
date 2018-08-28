@@ -47,8 +47,12 @@ namespace BackEnd.Services
                 .Shifts
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserRoles)
-                .WithActions(p => p.UserStatus = UserStatus.Invited)
-                .WithActions(p => p.CreateTime = DateTime.UtcNow);
+                .WithActions(p =>
+                {
+                    p.UserStatus = UserStatus.Invited;
+                    p.CreationTime = DateTime.UtcNow;
+                })
+                .Iterate();
 
             await dbContext.Events.AddAsync(newEvent);
             await dbContext.SaveChangesAsync();
@@ -72,7 +76,7 @@ namespace BackEnd.Services
                 .WithActions(p =>
                 {
                     p.UserStatus = UserStatus.Invited;
-                    p.CreateTime = DateTime.UtcNow;
+                    p.CreationTime = DateTime.UtcNow;
                 })
                 .Iterate();
 
@@ -130,7 +134,7 @@ namespace BackEnd.Services
                 UserId = userId,
                 RoleId = roleId,
                 UserStatus = UserStatus.Wisher,
-                CreateTime = DateTime.UtcNow
+                CreationTime = DateTime.UtcNow
             });
             await dbContext.SaveChangesAsync();
         }

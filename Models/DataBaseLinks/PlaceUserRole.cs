@@ -18,7 +18,7 @@ namespace Models.DataBaseLinks
         public Role Role { get; set; }
 
         public UserStatus UserStatus { get; set; }
-        public DateTime CreateTime { get; set; }
+        public DateTime CreationTime { get; set; }
         public DateTime? DoneTime { get; set; }
     }
 }
