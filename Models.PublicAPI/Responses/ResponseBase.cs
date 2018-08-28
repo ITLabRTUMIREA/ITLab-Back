@@ -3,7 +3,7 @@ namespace Models.PublicAPI.Responses
 {
     public class ResponseBase
     {
-        public ResponseStatusCode StatusCode { get; set; }
+        public ResponseStatusCode StatusCode { get; set; } = ResponseStatusCode.OK;
 # if DEBUG
         public string OnlyDebugStatusCodeText { get; set; }
 #endif
