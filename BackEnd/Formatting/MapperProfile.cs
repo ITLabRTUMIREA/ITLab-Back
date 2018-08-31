@@ -140,8 +140,8 @@ namespace BackEnd.Formatting
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))
                 .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Invited))
-                .ForAllMembers(opt => opt.Condition(a =>
-                    a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+                .ForAllMembers(opt => opt.Condition((source, destination, sourceMember, destMember) =>
+                    sourceMember != null));
             CreateMap<DeletableRequest, PlaceEquipment>()
                 .ForMember(pe => pe.EquipmentId, map => map.MapFrom(eer => eer.Id));
             CreateMap<PersonWorkRequest, PlaceUserRole>()
