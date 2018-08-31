@@ -12,11 +12,15 @@ namespace BackEnd.Formatting
         
     {
         private readonly Func<V, Guid> getId;
+        private readonly Func<T, V, bool> isNeed;
 
-        public ListsConverter(Func<V, Guid> getId)
+        public ListsConverter(Func<V, Guid> getId, Func<T, V, bool> isNeed = null)
         {
             this.getId = getId;
+            this.isNeed = isNeed;
         }
+
+
         public List<V> Convert(List<T> source, List<V> destination, ResolutionContext context)
         {
             Console.WriteLine($"convert {typeof(T).Name} to {typeof(V).Name}");
@@ -29,6 +33,10 @@ namespace BackEnd.Formatting
                     continue;
                 }
                 var destItem = destination.FirstOrDefault(i => getId(i) == sourceItem.Id);
+
+                if (isNeed?.Invoke(sourceItem, destItem) == false)
+                    continue;
+
                 if (destItem != null)
                 {
                     context.Mapper.Map(sourceItem, destItem);
