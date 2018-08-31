@@ -136,8 +136,7 @@ namespace BackEnd.Formatting
 
             CreateMap<List<DeletableRequest>, List<PlaceEquipment>>()
                 .ConvertUsing(new ListsConverter<DeletableRequest, PlaceEquipment>(eq => eq.EquipmentId));
-            CreateMap<List<PersonWorkRequest>, List<PlaceUserRole>>()
-                .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserRole>(pur => pur.UserId));
+
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))
                 .ForMember(p => p.PlaceUserRoles, map => map.MapFrom(per => per.Invited))
