@@ -17,6 +17,7 @@ using Models.People;
 using BackEnd.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Models.PublicAPI.Responses.People;
+using Models.PublicAPI.Responses.General;
 
 namespace BackEnd.Controllers.Users
 {
@@ -70,7 +71,7 @@ namespace BackEnd.Controllers.Users
         }
 
         [HttpPut]
-        public async Task<UserView> EditUser([FromBody]AccountEditRequest editRequest)
+        public async Task<OneObjectResponse<UserView>> EditUser([FromBody]AccountEditRequest editRequest)
         {
             var currentUser = await GetCurrentUser();
             mapper.Map(editRequest, currentUser);
