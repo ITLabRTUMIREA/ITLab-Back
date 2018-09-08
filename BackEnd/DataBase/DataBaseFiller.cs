@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Models.PublicAPI;
+using Microsoft.Extensions.Logging;
 
 namespace BackEnd.DataBase
 {
@@ -13,15 +14,18 @@ namespace BackEnd.DataBase
     {
         private readonly RoleManager<Role> roleManager;
         private readonly UserManager<User> userManager;
+        private readonly ILogger<DataBaseFiller> logger;
         private readonly DBInitialize options;
 
         public DataBaseFiller(
             RoleManager<Role> roleManager,
             UserManager<User> userManager,
-            IOptions<DBInitialize> options)
+            IOptions<DBInitialize> options,
+            ILogger<DataBaseFiller> logger)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
+            this.logger = logger;
             this.options = options.Value;
         }
 
@@ -43,6 +47,16 @@ namespace BackEnd.DataBase
                         await userManager.AddToRoleAsync(targetUser, targetRole.Name);
                     }
                 }
+            var user = new User
+            {
+                UserName = "test@gmail.com",
+                FirstName = "Tester",
+                LastName = "Testerov",
+                Email = "test@gmail.com",
+                PhoneNumber = "+79161853166"                
+            };
+            var result = await userManager.CreateAsync(user, "123456");
+            logger.LogInformation($"creating default user: {result.Succeeded}");
         }
     }
 }

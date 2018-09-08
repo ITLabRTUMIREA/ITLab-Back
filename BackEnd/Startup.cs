@@ -49,21 +49,30 @@ namespace BackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-//#if DEBUG
-//            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-//                services
-//                    .AddDbContext<DataBaseContext>(options =>
-//                    options.UseSqlServer(Configuration.GetConnectionString("LocalDBDataBase")));
-//            else
-//                services
-//                    .AddEntityFrameworkNpgsql()
-//                    .AddDbContext<DataBaseContext>(options =>
-//                    options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
-//#else
+#if DEBUG
+            if (Configuration.GetValue<bool>("is-docker"))
+            {
+                Console.WriteLine("IM IN IS DOCKER YAY");
+                services
+                     .AddEntityFrameworkNpgsql()
+                     .AddDbContext<DataBaseContext>(options =>
+                     options.UseNpgsql(Configuration.GetConnectionString("DockerPosgresDataBase")));
+            }
+            else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                services
+                    .AddDbContext<DataBaseContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("LocalDBDataBase")));
+            else
+                services
+                    .AddEntityFrameworkNpgsql()
+                    .AddDbContext<DataBaseContext>(options =>
+                    options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
+#else
             services
                     .AddDbContext<DataBaseContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
-//#endif
+#endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.Configure<DBInitialize>(Configuration.GetSection(nameof(DBInitialize)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
@@ -158,6 +167,23 @@ namespace BackEnd
             IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
+            if (Configuration.GetValue<bool>("is-docker"))
+                try
+                {
+
+
+                    using (var scope = app.ApplicationServices.CreateScope())
+                        scope
+                            .ServiceProvider
+                            .GetService<DataBaseContext>()
+                            .Database
+                            .Migrate();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
             if (Configuration.GetValue<bool>("db-init"))
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
