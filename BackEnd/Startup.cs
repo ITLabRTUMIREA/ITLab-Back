@@ -50,7 +50,7 @@ namespace BackEnd
         public void ConfigureServices(IServiceCollection services)
         {
 #if DEBUG
-            if (Configuration.GetValue<bool>("is-docker"))
+            if (Configuration.GetValue<bool>("IS_DOCKER"))
             {
                 Console.WriteLine("IM IN IS DOCKER YAY");
                 services
@@ -167,7 +167,7 @@ namespace BackEnd
             IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
-            if (Configuration.GetValue<bool>("is-docker"))
+            if (Configuration.GetValue<bool>("IS_DOCKER"))
                 try
                 {
 
@@ -184,7 +184,7 @@ namespace BackEnd
                     Console.WriteLine(ex.Message);
                 }
 
-            if (Configuration.GetValue<bool>("db-init"))
+            if (Configuration.GetValue<bool>("DB_INIT"))
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                     serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
 
