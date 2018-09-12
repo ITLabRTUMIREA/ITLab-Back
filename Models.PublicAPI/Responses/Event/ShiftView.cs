@@ -9,6 +9,8 @@ namespace Models.PublicAPI.Responses.Event
         public Guid Id { get; set; }
         public DateTime BeginTime { get; set; }
         public DateTime EndTime { get; set; }
+        public string Description { get; set; }
+
         public List<PlaceView> Places { get; set; }
 
     }

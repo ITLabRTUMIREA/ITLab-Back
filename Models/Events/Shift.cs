@@ -14,6 +14,8 @@ namespace Models.Events
         public List<Place> Places { get; set; }
             = new List<Place>();
 
+        public string Description { get; set; }
+
         public Event Event { get; set; }
         public Guid EventId { get; set; }
     }

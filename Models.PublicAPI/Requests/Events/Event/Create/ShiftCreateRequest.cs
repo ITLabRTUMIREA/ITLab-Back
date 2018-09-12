@@ -11,5 +11,6 @@ namespace Models.PublicAPI.Requests.Events.Event.Create
         [CompareWith(nameof(BeginTime), Criterion.MoreOrEqual)]
         public DateTime EndTime { get; set; }
         public List<PlaceCreateRequest> Places { get; set; }
+        public string Description { get; set; }
     }
 }

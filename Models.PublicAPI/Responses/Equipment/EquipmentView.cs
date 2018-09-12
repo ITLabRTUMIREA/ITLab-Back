@@ -8,6 +8,8 @@ namespace Models.PublicAPI.Responses.Equipment
     {
         public Guid Id { get; set; }
         public string SerialNumber { get; set; }
+        public string Description { get; set; }
+
         public EquipmentTypeView EquipmentType { get; set; }
 
         public Guid EquipmentTypeId { get; set; }

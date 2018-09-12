@@ -9,5 +9,6 @@ namespace Models.PublicAPI.Requests.Events.Event.Edit
         public int TargetParticipantsCount { get; set; }
         public List<DeletableRequest> Equipment { get; set; } = new List<DeletableRequest>();
         public List<PersonWorkRequest> Invited { get; set; } = new List<PersonWorkRequest>();
+        public string Description { get; set; }
     }
 }
