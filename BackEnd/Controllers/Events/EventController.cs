@@ -50,7 +50,7 @@ namespace BackEnd.Controllers.Events
         }
 
         [HttpGet("applications/{requestType}")]
-        public async Task<ListResponse<EventApplicationView>> GeInvites(string requestType)
+        public async Task<ListResponse<EventApplicationView>> GetInvites(string requestType)
             => await eventsManager
             .Events
             .Translate(requestType, out var userStatus,

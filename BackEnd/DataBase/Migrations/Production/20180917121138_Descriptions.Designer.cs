@@ -12,9 +12,10 @@ using System;
 namespace BackEnd.DataBase.Migrations.Production
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180917121138_Descriptions")]
+    partial class Descriptions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
