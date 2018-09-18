@@ -14,19 +14,46 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BackEnd.Models.Roles;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers
 {
     [Route("api/roles")]
-    public class RolesController : Controller
+    public class RolesController : AuthorizeController
     {
         private readonly RoleManager<Role> roleManager;
         private readonly IMapper mapper;
 
-        public RolesController(RoleManager<Role> roleManager, IMapper mapper)
+        public RolesController(
+            RoleManager<Role> roleManager,
+            UserManager<User> userManager,
+            IMapper mapper) : base(userManager)
         {
             this.roleManager = roleManager;
             this.mapper = mapper;
+        }
+
+
+        [RequireRole(RoleNames.CanEditRoles)]
+        [HttpPost("{userId}/{roleId}")]
+        public async Task<OneObjectResponse<bool>> AttachToRole(Guid userId, Guid roleId)
+        {
+            var role = await roleManager.FindByIdAsync(roleId.ToString()) ?? throw ResponseStatusCode.NotFound.ToApiException();
+            var user = await userManager.FindByIdAsync(userId.ToString()) ?? throw ResponseStatusCode.NotFound.ToApiException();
+
+            var addRoleResult = await userManager.AddToRoleAsync(user, role.Name);
+            return addRoleResult.Succeeded;
+        }
+        [RequireRole(RoleNames.CanEditRoles)]
+        [HttpDelete("{userId}/{roleId}")]
+        public async Task<OneObjectResponse<bool>> DetachFromRole(Guid userId, Guid roleId)
+        {
+            var role = await roleManager.FindByIdAsync(roleId.ToString()) ?? throw ResponseStatusCode.NotFound.ToApiException();
+            var user = await userManager.FindByIdAsync(userId.ToString()) ?? throw ResponseStatusCode.NotFound.ToApiException();
+
+            var addRoleResult = await userManager.RemoveFromRoleAsync(user, role.Name);
+            return addRoleResult.Succeeded;
         }
 
         [HttpGet]

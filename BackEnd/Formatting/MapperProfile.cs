@@ -20,6 +20,7 @@ using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 using BackEnd.Models;
+using Models.People.Roles;
 using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Formatting

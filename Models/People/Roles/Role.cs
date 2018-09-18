@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Models.DataBaseLinks;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Models.DataBaseLinks;
 
-namespace Models.People
+namespace Models.People.Roles
 {
     public class Role : IdentityRole<Guid>
     {

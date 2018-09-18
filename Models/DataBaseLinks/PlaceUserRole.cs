@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Models.Events;
 using Models.People;
+using Models.People.Roles;
 
 namespace Models.DataBaseLinks
 {

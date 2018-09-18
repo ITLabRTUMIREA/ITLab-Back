@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Exceptions\" />
-    <Folder Include="Controllers\Userrs\" />
+    <Folder Include="Controllers\Users\" />
     <Folder Include="Models\Settings\" />
   </ItemGroup>
   <ItemGroup>

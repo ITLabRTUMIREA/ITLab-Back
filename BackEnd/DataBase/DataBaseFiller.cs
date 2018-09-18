@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Models.PublicAPI;
 using Microsoft.Extensions.Logging;
+using Models.People.Roles;
 
 namespace BackEnd.DataBase
 {
@@ -31,9 +32,9 @@ namespace BackEnd.DataBase
 
         public async Task Fill()
         {
-            foreach (var roleName in RoleNames.List)
+            foreach (var roleName in Enum.GetValues(typeof(RoleNames)).Cast<RoleNames>())
                 {
-                    await roleManager.CreateAsync(new Role { Name = roleName });
+                    await roleManager.CreateAsync(new Role { Name = roleName.ToString() });
                 }
             if (options.WantedRoles != null)
                 foreach (var wantPair in options.WantedRoles)
@@ -41,7 +42,7 @@ namespace BackEnd.DataBase
                     var targetUser = await userManager.FindByEmailAsync(wantPair.Email);
                     var targetRole = await roleManager.FindByNameAsync(wantPair.RoleName);
                     if (targetUser == null || targetRole == null)
-                        throw new Exception($"Can't fint user {wantPair.Email} or role {wantPair.RoleName}");
+                        throw new Exception($"Can't find user {wantPair.Email} or role {wantPair.RoleName}");
                     if (!await userManager.IsInRoleAsync(targetUser, targetRole.Name))
                     {
                         await userManager.AddToRoleAsync(targetUser, targetRole.Name);

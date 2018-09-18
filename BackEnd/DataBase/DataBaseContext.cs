@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Models;
+using Models.People.Roles;
 
 namespace BackEnd.DataBase
 {
