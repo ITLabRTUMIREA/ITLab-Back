@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using BackEnd.Formatting;
@@ -15,6 +16,7 @@ using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 using Extensions;
+using Models.PublicAPI.Responses.Equipment;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -37,22 +39,28 @@ namespace BackEnd.Controllers.Equipments
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<EquipmentType>> GetAsync(string match, bool all = false)
+        public async Task<ListResponse<CompactEquipmentTypeView>> GetAsync(string match, bool all = false)
             => await dbContext
                 .EquipmentTypes
-                .IfNotNull(match, eqtypes => 
+                .WhereIf(string.IsNullOrEmpty(match), t => t.ParentId == null)
+                .IfNotNull(match, eqtypes =>
                     eqtypes.Where(eq => eq.Title.ToUpper().Contains(match.ToUpper())))
-                .If (!all, eqtypes => eqtypes.Take(5))
+                .If(!all, eqtypes => eqtypes.Take(5))
+                .ProjectTo<CompactEquipmentTypeView>()
                 .ToListAsync();
 
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<EquipmentType>> GetAsync(Guid id)
-            => await dbContext.EquipmentTypes.FindAsync(id)
-                ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+        public async Task<OneObjectResponse<EquipmentTypeView>> GetAsync(Guid id)
+            => await dbContext
+                   .EquipmentTypes
+                   .Where(eqt => eqt.Id == id)
+                    .ProjectTo<EquipmentTypeView>()
+                    .SingleOrDefaultAsync()
+                    ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
         [HttpPost]
-        public async Task<OneObjectResponse<EquipmentType>> Post([FromBody]EquipmentTypeCreateRequest request)
+        public async Task<OneObjectResponse<EquipmentTypeView>> Post([FromBody]EquipmentTypeCreateRequest request)
         {
             var equipmentType = mapper.Map<EquipmentType>(request);
             var now = dbContext.EquipmentTypes.FirstOrDefault(et => et.Title == request.Title);
@@ -60,17 +68,17 @@ namespace BackEnd.Controllers.Equipments
                 throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
             var added = await dbContext.EquipmentTypes.AddAsync(equipmentType);
             await dbContext.SaveChangesAsync();
-            return added.Entity;
+            return mapper.Map<EquipmentTypeView>(added.Entity);
         }
 
 
         [HttpPut]
-        public async Task<OneObjectResponse<EquipmentType>> Put([FromBody]EquipmentTypeEditRequest request)
+        public async Task<OneObjectResponse<EquipmentTypeView>> Put([FromBody]EquipmentTypeEditRequest request)
         {
             var now = await dbContext.EquipmentTypes.FindAsync(request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
             now.Title = request.Title;
             await dbContext.SaveChangesAsync();
-            return now;
+            return mapper.Map<EquipmentTypeView>(now);
         }
 
         [HttpDelete]

@@ -10,7 +10,8 @@ namespace Models.PublicAPI.Responses.Equipment
         public string Title { get; set; }
         public string Description { get; set; }
 
-        public EquipmentTypeView Parent { get; set; }
+        public  Guid? ParentId { get; set; }
+
         public List<EquipmentTypeView> Children { get; set; }
     }
 }

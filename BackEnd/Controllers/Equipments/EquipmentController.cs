@@ -48,10 +48,14 @@ namespace BackEnd.Controllers.Equipments
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EquipmentView>> GetAsync(Guid id)
-            => mapper.Map<EquipmentView>(await CheckAndGetEquipmentAsync(id));
+            => await dbContext
+                .Equipments
+                .ProjectTo<EquipmentView>()
+                .SingleOrDefaultAsync(eq => eq.Id == id)
+                ?? NotFound<EquipmentView>();
 
         [HttpGet]
-        public async Task<ListResponse<EquipmentView>> GetAsync(
+        public async Task<ListResponse<CompactEquipmentView>> GetAsync(
             Guid? eventId,
             Guid? equipmentTypeId,
             string match
@@ -66,7 +70,7 @@ namespace BackEnd.Controllers.Equipments
                 .IfNotNull(match, equipments => equipments.ForAll(match.Split(' '), (equipments2, matcher) =>
                         equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher)
                                                 || eq.EquipmentType.Title.ToUpper().Contains(matcher))))
-                .ProjectTo<EquipmentView>()
+                .ProjectTo<CompactEquipmentView>()
                 .ToListAsync();
 
         [HttpPost]
@@ -118,7 +122,7 @@ namespace BackEnd.Controllers.Equipments
 
         private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
             => await dbContext.Equipments.Include(eq => eq.EquipmentType).FirstOrDefaultAsync(eq => eq.Id == id)
-              ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+              ?? NotFound<Equipment>();
 
         private async Task CheckNotExist(string serialNumber)
         {
