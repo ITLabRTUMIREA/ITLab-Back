@@ -17,6 +17,8 @@ namespace Models.Events
         public List<PlaceUserRole> PlaceUserRoles { get; set; }
             = new List<PlaceUserRole>();
 
+        public string Description { get; set; }
+
         public Shift Shift { get; set; }
         public Guid ShiftId { get; set; }
     }

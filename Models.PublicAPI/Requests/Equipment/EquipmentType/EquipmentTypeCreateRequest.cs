@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace Models.PublicAPI.Requests.Equipment.EquipmentType
 {
@@ -7,5 +8,6 @@ namespace Models.PublicAPI.Requests.Equipment.EquipmentType
         [Required]
         public string Title { get; set; }
         public string Description { get; set; }
+        public Guid? ParentId { get; set; }
     }
 }

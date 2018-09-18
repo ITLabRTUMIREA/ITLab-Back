@@ -22,7 +22,9 @@ namespace BackEnd
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseConfigFile("appsettings.Secret.json")
-                .ConfigureAppConfiguration(config => config.AddCommandLine(args))
+                   .ConfigureAppConfiguration(config => config
+                                              .AddCommandLine(args)
+                                              .AddEnvironmentVariables())
                 .UseStartup<Startup>()
                 .Build();
     }
