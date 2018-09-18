@@ -20,6 +20,8 @@ using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.General;
+using Microsoft.Data.Edm.Csdl;
+using BackEnd.Extensions;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -74,6 +76,17 @@ namespace BackEnd.Controllers.Equipments
             await CheckNotExist(request.SerialNumber);
 
             var newEquipment = mapper.Map<Equipment>(request);
+            newEquipment.Number = type.LastNumber++;
+            if (request.Children?.Count > 0)
+                newEquipment.Children =
+                    await dbContext
+                    .Equipments
+                    .Where(eq => request.Children.Contains(eq.Id))
+                    .ToListAsync();
+
+            if (newEquipment.Children?.Count != request.Children?.Count)
+                throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
+
             await dbContext.Equipments.AddAsync(newEquipment);
             await dbContext.SaveChangesAsync();
             return mapper.Map<EquipmentView>(newEquipment);

@@ -9,5 +9,6 @@ namespace Models.PublicAPI.Requests.Equipment.Equipment
         public string SerialNumber { get; set; }
         public Guid EquipmentTypeId { get; set; }
         public string Description { get; set; }
+        public List<Guid> Children { get; set; }
     }
 }
