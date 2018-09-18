@@ -5,6 +5,7 @@
         Participant,
         Organizer,
         CanEditEquipment,
-        CanEditRoles
+        CanEditRoles,
+        CanEditEvent
     }
 }
