@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Models.DataBaseLinks;
@@ -16,6 +16,8 @@ namespace Models.Events
             = new List<PlaceEquipment>();
         public List<PlaceUserRole> PlaceUserRoles { get; set; }
             = new List<PlaceUserRole>();
+        public List<PlaceUserEventRole> PlaceUserEventRoles { get; set; }
+            = new List<PlaceUserEventRole>();
 
         public string Description { get; set; }
 
