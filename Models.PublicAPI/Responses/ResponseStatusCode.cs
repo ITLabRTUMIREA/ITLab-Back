@@ -23,6 +23,7 @@
         LastShift,
         YouAreInRole,
         WrongLoginOrPassword,
-        IncorrectRefreshtoken
+        IncorrectRefreshToken,
+        UserNowInSystem
     }
 }

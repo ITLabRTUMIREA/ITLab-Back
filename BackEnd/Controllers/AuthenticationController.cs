@@ -84,7 +84,7 @@ namespace BackEnd.Controllers
         }
 
         private Exception IncorrectRefreshToken()
-        => ResponseStatusCode.IncorrectRefreshtoken.ToApiException();
+        => ResponseStatusCode.IncorrectRefreshToken.ToApiException();
 
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
         {

@@ -6,6 +6,7 @@
         Organizer,
         CanEditEquipment,
         CanEditRoles,
-        CanEditEvent
+        CanEditEvent,
+        CanInviteToSystem
     }
 }
