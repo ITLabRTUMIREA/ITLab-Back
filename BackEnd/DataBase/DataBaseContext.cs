@@ -49,6 +49,26 @@ namespace BackEnd.DataBase
                 .HasOne(pe => pe.Equipment)
                 .WithMany(eq => eq.PlaceEquipments)
                 .HasForeignKey(pe => pe.EquipmentId);
+
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasKey(t => new { t.UserId, t.PlaceId });
+
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasOne(pur => pur.Place)
+                .WithMany(ev => ev.PlaceUserRoles)
+                .HasForeignKey(pur => pur.PlaceId);
+
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasOne(pur => pur.User)
+                .WithMany(u => u.PlaceUserRoles)
+                .HasForeignKey(pur => pur.UserId);
+
+            modelBuilder.Entity<PlaceUserRole>()
+                .HasOne(pur => pur.Role)
+                .WithMany(r => r.PlaceUserRoles)
+                .HasForeignKey(pur => pur.RoleId);
+
+            ConfigurePlaceUserEventRole(modelBuilder);
         }
 
         private static void ConfigurePlaceUserEventRole(ModelBuilder modelBuilder)
