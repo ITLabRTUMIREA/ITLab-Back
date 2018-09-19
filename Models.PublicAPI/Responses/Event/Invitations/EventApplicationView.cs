@@ -10,7 +10,7 @@ namespace Models.PublicAPI.Responses.Event.Invitations
         public DateTime BeginTime { get; set; }
         public Guid PlaceId { get; set; }
         public double ShiftDurationInMinutes { get; set; }
-        public RoleView Role { get; set; }
+        public EventRoleView EventRole { get; set; }
         public DateTime CreationTime { get; set; }
         public DateTime? DoneTime { get; set; }
     }

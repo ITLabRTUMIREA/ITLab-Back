@@ -4,14 +4,16 @@ using BackEnd.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BackEnd.DataBase.Migrations.Production
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180919185312_AddEventRoleModel")]
+    partial class AddEventRoleModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +152,29 @@ namespace BackEnd.DataBase.Migrations.Production
                     b.HasIndex("PlaceId");
 
                     b.ToTable("PlaceUserEventRole");
+                });
+
+            modelBuilder.Entity("Models.DataBaseLinks.PlaceUserRole", b =>
+                {
+                    b.Property<Guid>("UserId");
+
+                    b.Property<Guid>("PlaceId");
+
+                    b.Property<DateTime>("CreationTime");
+
+                    b.Property<DateTime?>("DoneTime");
+
+                    b.Property<Guid>("RoleId");
+
+                    b.Property<int>("UserStatus");
+
+                    b.HasKey("UserId", "PlaceId");
+
+                    b.HasIndex("PlaceId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("PlaceUserRole");
                 });
 
             modelBuilder.Entity("Models.Equipments.Equipment", b =>
@@ -469,6 +494,24 @@ namespace BackEnd.DataBase.Migrations.Production
 
                     b.HasOne("Models.People.User", "User")
                         .WithMany("PlaceUserEventRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Models.DataBaseLinks.PlaceUserRole", b =>
+                {
+                    b.HasOne("Models.Events.Place", "Place")
+                        .WithMany("PlaceUserRoles")
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Models.People.Roles.Role", "Role")
+                        .WithMany("PlaceUserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Models.People.User", "User")
+                        .WithMany("PlaceUserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

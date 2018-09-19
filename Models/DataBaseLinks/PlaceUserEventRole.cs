@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using Models.Events;
+using Models.Events.Roles;
 using Models.People;
 
 namespace Models.DataBaseLinks
 {
-    public class PlaceUserRole
+    public class PlaceUserEventRole
     {
         public Guid PlaceId { get; set; }
         public Place Place { get; set; }
@@ -14,8 +15,8 @@ namespace Models.DataBaseLinks
         public Guid UserId { get; set; }
         public User User { get; set; }
 
-        public Guid RoleId { get; set; }
-        public Role Role { get; set; }
+        public Guid EventRoleId { get; set; }
+        public EventRole EventRole { get; set; }
 
         public UserStatus UserStatus { get; set; }
         public DateTime CreationTime { get; set; }

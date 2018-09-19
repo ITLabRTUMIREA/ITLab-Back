@@ -16,7 +16,7 @@ namespace BackEnd.Services.Interfaces
         Task<IQueryable<Event>> AddAsync(EventCreateRequest request);
         Task<IQueryable<Event>> EditAsync(EventEditRequest ev);
         Task DeleteAsync(Guid id);
-        Task WishTo(Guid userId, Guid roleId, Guid placeId);
+        Task WishTo(Guid userId, Guid eventRoleId, Guid placeId);
         Task AcceptInvite(Guid placeId, Guid userId);
         Task RejectInvite(Guid placeId, Guid userId);
         Task AcceptWish(Guid placeId, Guid userId);

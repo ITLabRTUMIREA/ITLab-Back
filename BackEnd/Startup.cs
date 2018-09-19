@@ -34,6 +34,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
 using BackEnd.Models.Settings;
+using Models.People.Roles;
 
 namespace BackEnd
 {
@@ -100,7 +101,7 @@ namespace BackEnd
 
             services.AddTransient<IJwtFactory, JwtFactory>();
 
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
                 jwtAppSettingOptions.SecretKey));
 
             services.Configure<JwtIssuerOptions>(options =>
@@ -130,9 +131,12 @@ namespace BackEnd
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(configureOptions =>
             {
+
                 configureOptions.ClaimsIssuer = jwtAppSettingOptions.Issuer;
                 configureOptions.TokenValidationParameters = tokenValidationParameters;
                 configureOptions.SaveToken = true;
