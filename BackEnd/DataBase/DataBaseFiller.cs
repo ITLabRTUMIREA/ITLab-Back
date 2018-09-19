@@ -65,30 +65,6 @@ namespace BackEnd.DataBase
             };
             var result = await userManager.CreateAsync(user, "123456");
             logger.LogInformation($"creating default user: {result.Succeeded}");
-
-            await MoveRoles();
-        }
-
-        private async Task MoveRoles()
-        {
-            var eventRoles = new ConcurrentDictionary<string, EventRole>();
-            var placeUserEventRoles = (await dbContext
-                .Users
-                .SelectMany(u => u.PlaceUserRoles)
-                    .Include(pur => pur.Role)
-                .ToListAsync())
-                .Select(pur => new PlaceUserEventRole
-                {
-                    UserId = pur.UserId,
-                    PlaceId = pur.PlaceId,
-                    EventRole = eventRoles.GetOrAdd(pur.Role.Name, new EventRole { Title = pur.Role.Name }),
-                    DoneTime = pur.DoneTime,
-                    CreationTime = pur.CreationTime,
-                    UserStatus = pur.UserStatus
-                })
-                .ToList();
-            dbContext.AddRange(placeUserEventRoles);
-            await dbContext.SaveChangesAsync();
         }
     }
 }

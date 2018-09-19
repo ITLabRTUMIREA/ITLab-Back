@@ -46,7 +46,7 @@ namespace BackEnd.Services
             newEvent
                 .Shifts
                 .SelectMany(s => s.Places)
-                .SelectMany(p => p.PlaceUserRoles)
+                .SelectMany(p => p.PlaceUserEventRoles)
                 .WithActions(p =>
                 {
                     p.UserStatus = UserStatus.Invited;
@@ -71,7 +71,7 @@ namespace BackEnd.Services
             toEdit
                 .Shifts
                 .SelectMany(s => s.Places)
-                .SelectMany(p => p.PlaceUserRoles)
+                .SelectMany(p => p.PlaceUserEventRoles)
                 .Where(p => p.UserStatus == UserStatus.Unknown)
                 .WithActions(p =>
                 {
@@ -105,37 +105,37 @@ namespace BackEnd.Services
                    .ThenInclude(p => p.PlaceEquipments)
                    .Include(e => e.Shifts)
                    .ThenInclude(s => s.Places)
-                   .ThenInclude(p => p.PlaceUserRoles)
+                   .ThenInclude(p => p.PlaceUserEventRoles)
                    .Include(e => e.Shifts)
                    .ThenInclude(s => s.Places)
-                   .ThenInclude(p => p.PlaceUserRoles)
-                   .ThenInclude(pur => pur.Role)
+                   .ThenInclude(p => p.PlaceUserEventRoles)
+                   .ThenInclude(pur => pur.EventRole)
                    .Include(e => e.Shifts)
                    .ThenInclude(s => s.Places)
-                   .ThenInclude(p => p.PlaceUserRoles)
+                   .ThenInclude(p => p.PlaceUserEventRoles)
                    .ThenInclude(pur => pur.User)
                    .FirstOrDefaultAsync(e => e.Id == id)
                    ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-        public async Task WishTo(Guid userId, Guid roleId, Guid placeId)
+        public async Task WishTo(Guid userId, Guid eventRoleId, Guid placeId)
         {
             var targetPlace = await dbContext
                 .Events
                 .SelectMany(e => e.Shifts)
                 .SelectMany(s => s.Places)
-                .Include(p => p.PlaceUserRoles)
+                .Include(p => p.PlaceUserEventRoles)
                 .SingleOrDefaultAsync(p => p.Id == placeId)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
             var nowInRole = targetPlace
-                .PlaceUserRoles
+                .PlaceUserEventRoles
                 .Any(pur => pur.UserId == userId);
             if (nowInRole)
                 throw ResponseStatusCode.YouAreInRole.ToApiException();
-            targetPlace.PlaceUserRoles.Add(new PlaceUserRole
+            targetPlace.PlaceUserEventRoles.Add(new PlaceUserEventRole
             {
                 UserId = userId,
-                RoleId = roleId,
+                EventRoleId = eventRoleId,
                 UserStatus = UserStatus.Wisher,
                 CreationTime = DateTime.UtcNow
             });
@@ -174,16 +174,16 @@ namespace BackEnd.Services
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task<PlaceUserRole> FindPlaceUserRole(Guid placeId, Guid userId, UserStatus status)
-            => await PlaceUserRoles
+        private async Task<PlaceUserEventRole> FindPlaceUserRole(Guid placeId, Guid userId, UserStatus status)
+            => await PlaceUserEventRoles
                 .SingleOrDefaultAsync(pur => pur.PlaceId == placeId && pur.UserId == userId && pur.UserStatus == status)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-        private IQueryable<PlaceUserRole> PlaceUserRoles =>
+        private IQueryable<PlaceUserEventRole> PlaceUserEventRoles =>
             dbContext
                 .Events
                 .SelectMany(e => e.Shifts)
                 .SelectMany(s => s.Places)
-                .SelectMany(p => p.PlaceUserRoles);
+                .SelectMany(p => p.PlaceUserEventRoles);
     }
 }
