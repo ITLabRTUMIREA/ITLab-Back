@@ -7,6 +7,5 @@ namespace Models.People.Roles
 {
     public class Role : IdentityRole<Guid>
     {
-        public List<PlaceUserRole> PlaceUserRoles { get; set; }
     }
 }

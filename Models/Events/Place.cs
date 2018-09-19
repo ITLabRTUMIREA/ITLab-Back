@@ -14,8 +14,9 @@ namespace Models.Events
         public int TargetParticipantsCount { get; set; }
         public List<PlaceEquipment> PlaceEquipments { get; set; }
             = new List<PlaceEquipment>();
-        public List<PlaceUserRole> PlaceUserRoles { get; set; }
-            = new List<PlaceUserRole>();
+
+        public List<PlaceUserEventRole> PlaceUserEventRoles { get; set; }
+            = new List<PlaceUserEventRole>();
 
         public string Description { get; set; }
 

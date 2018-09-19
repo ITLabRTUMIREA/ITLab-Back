@@ -61,7 +61,7 @@ namespace BackEnd.Controllers.Events
                 ("invitations", UserStatus.Invited))
             .SelectMany(ev => ev.Shifts)
             .SelectMany(s => s.Places)
-            .SelectMany(p => p.PlaceUserRoles)
+            .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserId == UserId && pur.UserStatus == userStatus)
             .ProjectTo<EventApplicationView>()
             .ToListAsync();
@@ -72,7 +72,7 @@ namespace BackEnd.Controllers.Events
             .Events
             .SelectMany(e => e.Shifts)
             .SelectMany(s => s.Places)
-            .SelectMany(p => p.PlaceUserRoles)
+            .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserStatus == UserStatus.Wisher)
             .ProjectTo<WisherEventView>()
             .ToListAsync();
