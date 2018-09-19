@@ -2,11 +2,10 @@
 {
     public enum RoleNames
     {
-        Participant,
-        Organizer,
         CanEditEquipment,
         CanEditRoles,
         CanEditEvent,
-        CanInviteToSystem
+        CanInviteToSystem,
+        CanDeleteEventRole
     }
 }

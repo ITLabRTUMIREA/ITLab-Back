@@ -6,7 +6,6 @@ using Models.PublicAPI.Requests.Account;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Requests.Events.EventType;
-using Models.PublicAPI.Requests.Roles;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.Login;
@@ -20,6 +19,7 @@ using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 using BackEnd.Models;
+using Models.Events.Roles;
 using Models.People.Roles;
 using Models.PublicAPI.Responses.Event.Invitations;
 
@@ -108,10 +108,7 @@ namespace BackEnd.Formatting
                 .ForMember(p => p.Unknowns, map => map.MapFrom(p => p.PlaceUserEventRoles
                                                                .Where(pur => pur.UserStatus == UserStatus.Unknown)));
 
-            CreateMap<RoleCreateRequest, Role>();
-            CreateMap<Role, RoleView>();
-
-            CreateMap<PlaceUserEventRole, UserAndRole>();
+            CreateMap<PlaceUserEventRole, UserAndEventRole>();
 
             CreateMap<User, UserView>();
             CreateMap<AccountEditRequest, User>()

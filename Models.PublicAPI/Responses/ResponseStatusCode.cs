@@ -24,6 +24,8 @@
         YouAreInRole,
         WrongLoginOrPassword,
         IncorrectRefreshToken,
-        UserNowInSystem
+        UserNowInSystem,
+        EventRoleNameExist,
+        Forbidden
     }
 }
