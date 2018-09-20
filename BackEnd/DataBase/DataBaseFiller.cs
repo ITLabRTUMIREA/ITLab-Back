@@ -39,6 +39,16 @@ namespace BackEnd.DataBase
 
         public async Task Fill()
         {
+            var user = new User
+            {
+                UserName = "test@gmail.com",
+                FirstName = "Tester",
+                LastName = "Testerov",
+                Email = "test@gmail.com",
+                PhoneNumber = "+79161853166"
+            };
+            var result = await userManager.CreateAsync(user, "123456");
+            logger.LogInformation($"creating default user: {result.Succeeded}");
             foreach (var roleName in Enum.GetValues(typeof(RoleNames)).Cast<RoleNames>())
             {
                 await roleManager.CreateAsync(new Role { Name = roleName.ToString() });
@@ -55,16 +65,6 @@ namespace BackEnd.DataBase
                         await userManager.AddToRoleAsync(targetUser, targetRole.Name);
                     }
                 }
-            var user = new User
-            {
-                UserName = "test@gmail.com",
-                FirstName = "Tester",
-                LastName = "Testerov",
-                Email = "test@gmail.com",
-                PhoneNumber = "+79161853166"
-            };
-            var result = await userManager.CreateAsync(user, "123456");
-            logger.LogInformation($"creating default user: {result.Succeeded}");
         }
     }
 }
