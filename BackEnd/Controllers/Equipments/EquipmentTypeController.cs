@@ -68,7 +68,7 @@ namespace BackEnd.Controllers.Equipments
         public async Task<OneObjectResponse<EquipmentType>> Put([FromBody]EquipmentTypeEditRequest request)
         {
             var now = await dbContext.EquipmentTypes.FindAsync(request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
-            now.Title = request.Title;
+            mapper.Map(request, now);
             await dbContext.SaveChangesAsync();
             return now;
         }
