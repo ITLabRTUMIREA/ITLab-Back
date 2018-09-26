@@ -26,4 +26,7 @@
   <ItemGroup>
     <Compile Remove="Events\Roles\PlaceRole.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="People\UserProperties\" />
+  </ItemGroup>
 </Project>
