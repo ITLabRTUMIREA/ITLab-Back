@@ -90,21 +90,34 @@ namespace BackEnd.Controllers.Users
 
             if (result.Succeeded)
                 return ResponseBase.OK;
-            throw ApiLogicException.Create(
-                new InputParameterIncorrectResponse(
-                    result
-                        .Errors
-                        .Select(y =>
-                            new IncorrectingInfo
-                            {
-                                Fieldname = y.Code,
-                                Messages = new List<string> { y.Description }
-                            })
-                        .ToList())
-            );
 
+            throw ApiLogicException.Create(
+                InputParameterIncorrectResponse.Create(result.Errors));
         }
 
+        [AllowAnonymous]
+        [HttpPost("password/requestreset")]
+        public async Task<OneObjectResponse<string>> ResetPassword([FromBody]string email)
+        {
+            var userByMail = await userManager.FindByEmailAsync(email)
+                                              ?? throw ResponseStatusCode.UserNotFound.ToApiException();
+            var token = await userManager.GeneratePasswordResetTokenAsync(userByMail);
+            return token;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("password/reset")]
+        public async Task<ResponseBase> ResetPassword([FromBody]ResetPasswordRequest request)
+        {
+            var userByMail = await userManager.FindByEmailAsync(request.Email)
+                                              ?? throw ResponseStatusCode.UserNotFound.ToApiException();
+            var result = await userManager.ResetPasswordAsync(userByMail, request.Token, request.NewPassword);
+            if (result.Succeeded)
+                return ResponseBase.OK;
+
+            throw ApiLogicException.Create(
+                InputParameterIncorrectResponse.Create(result.Errors));
+        }
 
     }
 }
