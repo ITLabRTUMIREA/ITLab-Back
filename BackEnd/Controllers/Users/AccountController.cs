@@ -18,6 +18,9 @@ using BackEnd.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Models.PublicAPI.Responses.People;
 using Models.PublicAPI.Responses.General;
+using BackEnd.Exceptions;
+using Models.PublicAPI.Responses.Exceptions;
+using Twilio.Rest.Api.V2010.Account.Usage.Record;
 
 namespace BackEnd.Controllers.Users
 {
@@ -29,8 +32,8 @@ namespace BackEnd.Controllers.Users
         private readonly IEmailSender emailSender;
         private readonly IUserRegisterTokens registerTokens;
 
-        public AccountController(IMapper mapper, 
-            UserManager<User> userManager, 
+        public AccountController(IMapper mapper,
+            UserManager<User> userManager,
             IEmailSender emailSender,
             IUserRegisterTokens registerTokens) : base(userManager)
         {
@@ -78,5 +81,30 @@ namespace BackEnd.Controllers.Users
             await userManager.UpdateAsync(currentUser);
             return mapper.Map<UserView>(currentUser);
         }
+
+        [HttpPut("password")]
+        public async Task<ResponseBase> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            var result = await userManager
+                .ChangePasswordAsync(await GetCurrentUser(), request.CurrentPassword, request.NewPassword);
+
+            if (result.Succeeded)
+                return ResponseBase.OK;
+            throw ApiLogicException.Create(
+                new InputParameterIncorrectResponse(
+                    result
+                        .Errors
+                        .Select(y =>
+                            new IncorrectingInfo
+                            {
+                                Fieldname = y.Code,
+                                Messages = new List<string> { y.Description }
+                            })
+                        .ToList())
+            );
+
+        }
+
+
     }
 }
