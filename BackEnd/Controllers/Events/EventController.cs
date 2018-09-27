@@ -52,7 +52,7 @@ namespace BackEnd.Controllers.Events
         }
 
         [HttpGet("applications/{requestType}")]
-        public async Task<ListResponse<EventApplicationView>> GeInvites(string requestType)
+        public async Task<ListResponse<EventApplicationView>> GetInvites(string requestType)
             => await eventsManager
             .Events
             .Translate(requestType, out var userStatus,
@@ -61,7 +61,7 @@ namespace BackEnd.Controllers.Events
                 ("invitations", UserStatus.Invited))
             .SelectMany(ev => ev.Shifts)
             .SelectMany(s => s.Places)
-            .SelectMany(p => p.PlaceUserRoles)
+            .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserId == UserId && pur.UserStatus == userStatus)
             .ProjectTo<EventApplicationView>()
             .ToListAsync();
@@ -72,7 +72,7 @@ namespace BackEnd.Controllers.Events
             .Events
             .SelectMany(e => e.Shifts)
             .SelectMany(s => s.Places)
-            .SelectMany(p => p.PlaceUserRoles)
+            .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserStatus == UserStatus.Wisher)
             .ProjectTo<WisherEventView>()
             .ToListAsync();

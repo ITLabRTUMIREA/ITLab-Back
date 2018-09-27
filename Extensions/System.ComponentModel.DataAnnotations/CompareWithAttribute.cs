@@ -6,8 +6,9 @@ namespace System.ComponentModel.DataAnnotations
 {
     public class CompareWithAttribute : ValidationAttribute
     {
-        private readonly string _comparisonProperty;
         private readonly Criterion criterion;
+        private readonly Func<ValidationContext, IComparable> GetComparableValue;
+
 
         private static Dictionary<Criterion, Func<int, bool>> comparingFuncs = new Dictionary<Criterion, Func<int, bool>>
         {
@@ -18,29 +19,39 @@ namespace System.ComponentModel.DataAnnotations
             {Criterion.More, a => a > 0 },
         };
 
+        public CompareWithAttribute(object comparisonConstant, Criterion criterion) : this(vc => comparisonConstant as IComparable, criterion)
+        { }
 
-        public CompareWithAttribute(string comparisonProperty, Criterion criterion)
+        public CompareWithAttribute(string comparisonProperty, Criterion criterion) : this(vc => GetFieldByName(vc, comparisonProperty), criterion)
+        {}
+
+        private CompareWithAttribute(Func<ValidationContext, IComparable> getComparableValue, Criterion criterion)
         {
-            _comparisonProperty = comparisonProperty;
-            this.criterion = criterion;
             if (!comparingFuncs.TryGetValue(criterion, out var compareFunc))
                 throw new ArgumentException("Property with this name not found");
+            GetComparableValue = getComparableValue;
+            this.criterion = criterion;
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            ErrorMessage = $"value must be {criterion.ToString()} than {_comparisonProperty}";
             var currentValue = (IComparable)value;
+            var comparisonValue = GetComparableValue(validationContext);
+            ErrorMessage = $"value must be {criterion.ToString()} than {comparisonValue}";
 
-            var property = validationContext.ObjectType.GetProperty(_comparisonProperty);
+            if (currentValue == null || comparisonValue == null) return ValidationResult.Success;
+            var result = currentValue.CompareTo(comparisonValue);
+            return comparingFuncs[criterion](result) ? ValidationResult.Success : new ValidationResult(ErrorMessage);
+        }
+
+        private static IComparable GetFieldByName(ValidationContext validationContext, string comparisonProperty)
+        {
+            var property = validationContext.ObjectType.GetProperty(comparisonProperty);
 
             if (property == null)
                 throw new ArgumentException("Property with this name not found");
 
-            var comparisonValue = (IComparable)property.GetValue(validationContext.ObjectInstance);
-            if (currentValue == null || comparisonValue == null) return ValidationResult.Success;
-            var result = currentValue.CompareTo(comparisonValue);
-            return comparingFuncs[criterion](result) ? ValidationResult.Success : new ValidationResult(ErrorMessage);
+            return (IComparable)property.GetValue(validationContext.ObjectInstance);
         }
     }
 }

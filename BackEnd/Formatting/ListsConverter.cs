@@ -25,6 +25,7 @@ namespace BackEnd.Formatting
         {
             Console.WriteLine($"convert {typeof(T).Name} to {typeof(V).Name}");
             destination = destination ?? new List<V>();
+            var toAdd = new List<V>();
             foreach (var sourceItem in source)
             {
                 if (sourceItem.Delete)
@@ -43,9 +44,10 @@ namespace BackEnd.Formatting
                 }
                 else
                 {
-                    destination.Add(context.Mapper.Map<V>(sourceItem));
+                    toAdd.Add(context.Mapper.Map<V>(sourceItem));
                 }
             }
+            destination.AddRange(toAdd);
             return destination;
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BackEnd.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -36,8 +37,17 @@ namespace BackEnd.Exceptions
             try
             {
                 await _next(context);
-                if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                    throw ApiLogicException.Create(ResponseStatusCode.Unauthorized);
+
+                switch (context.Response.StatusCode)
+                {
+                    case StatusCodes.Status401Unauthorized:
+                        throw ResponseStatusCode.Unauthorized.ToApiException();
+                    case StatusCodes.Status403Forbidden:
+                        throw ResponseStatusCode.Forbidden.ToApiException();
+                    default:
+                        logger.LogTrace(context.Response.StatusCode.ToString());
+                        break;
+                }
             }
             catch (Exception ex)
             {
