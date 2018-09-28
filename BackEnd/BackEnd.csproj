@@ -12,6 +12,7 @@
     <Folder Include="Exceptions\" />
     <Folder Include="Controllers\Users\" />
     <Folder Include="Models\Settings\" />
+    <Folder Include="Services\ConfigureServices\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="3.2.0" />
@@ -30,6 +31,7 @@
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
     <ProjectReference Include="..\Models.PublicAPI\Models.PublicAPI.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\WebApp.Configure\WebApp.Configure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".DS_Store" />

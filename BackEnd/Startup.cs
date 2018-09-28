@@ -35,6 +35,9 @@ using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
 using BackEnd.Models.Settings;
 using Models.People.Roles;
+using WebApp.Configure.Models;
+using BackEnd.Services.ConfigureServices;
+using WebApp.Configure.Models.Invokations;
 
 namespace BackEnd
 {
@@ -163,6 +166,9 @@ namespace BackEnd
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddTransient<DataBaseFiller>();
             services.AddSingleton<ISmsSender, SmsService>();
+
+            services.AddWebAppConfigure()
+                    .AddCongifure<DBInitService>(options => options.TransientImplementation<DBInitService>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -197,6 +203,7 @@ namespace BackEnd
                     .AllowAnyMethod()
                     .AllowAnyOrigin()
                     .AllowCredentials());
+            app.UseWebAppConfigure();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
