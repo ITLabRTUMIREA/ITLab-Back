@@ -76,7 +76,7 @@ namespace BackEnd.Controllers.Users
             if (await dbContext.Users.AnyAsync(u => u.NormalizedEmail == inviteRequest.Email.ToUpper()))
                 throw ResponseStatusCode.UserNowInSystem.ToApiException();
             var token = await registerTokens.AddRegisterToken(inviteRequest.Email);
-            await emailSender.SendEmailConfirm(inviteRequest.Email, inviteRequest.RedirectUrl, token);
+            await emailSender.SendInvitationEmail(inviteRequest.Email, inviteRequest.RedirectUrl, token);
             return ResponseStatusCode.OK;
         }
 
