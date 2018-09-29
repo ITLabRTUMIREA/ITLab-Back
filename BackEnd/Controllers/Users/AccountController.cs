@@ -20,7 +20,6 @@ using Models.PublicAPI.Responses.People;
 using Models.PublicAPI.Responses.General;
 using BackEnd.Exceptions;
 using Models.PublicAPI.Responses.Exceptions;
-using Twilio.Rest.Api.V2010.Account.Usage.Record;
 
 namespace BackEnd.Controllers.Users
 {
@@ -97,12 +96,13 @@ namespace BackEnd.Controllers.Users
 
         [AllowAnonymous]
         [HttpPost("password/requestreset")]
-        public async Task<OneObjectResponse<string>> ResetPassword([FromBody]string email)
+        public async Task<ResponseBase> ResetPassword([FromBody]RequestResetPasswordRequest request)
         {
-            var userByMail = await userManager.FindByEmailAsync(email)
+            var userByMail = await userManager.FindByEmailAsync(request.Email)
                                               ?? throw ResponseStatusCode.UserNotFound.ToApiException();
             var token = await userManager.GeneratePasswordResetTokenAsync(userByMail);
-            return token;
+            await emailSender.SendResetPasswordEmail(request.Email, request.RedirectUrl, token);
+            return ResponseBase.OK;
         }
 
         [AllowAnonymous]
