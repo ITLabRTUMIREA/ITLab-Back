@@ -61,7 +61,7 @@ namespace BackEnd
                 services
                      .AddEntityFrameworkNpgsql()
                      .AddDbContext<DataBaseContext>(options =>
-                     options.UseNpgsql(Configuration.GetConnectionString("DockerPosgresDataBase")));
+                    options.UseInMemoryDatabase("local"));
             }
             else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
