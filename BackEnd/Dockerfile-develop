@@ -10,6 +10,7 @@ COPY Models/Models.csproj Models/
 COPY Extensions/Extensions.csproj Extensions/
 COPY Models.PublicAPI/Models.PublicAPI.csproj Models.PublicAPI/
 COPY ApiSchemaCLI/ApiSchemaCLI.csproj ApiSchemaCLI/
+COPY WebApp.Configure/WebApp.Configure.csproj WebApp.Configure/
 RUN dotnet restore -nowarn:msb3202,nu1503
 COPY . .
 WORKDIR /src/BackEnd
