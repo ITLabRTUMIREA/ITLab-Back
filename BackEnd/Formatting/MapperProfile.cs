@@ -165,6 +165,7 @@ namespace BackEnd.Formatting
                 .ForMember(wev => wev.EventType, map => map.MapFrom(pur => pur.Place.Shift.Event.EventType))
                 .ForMember(wev => wev.BeginTime, map => map.MapFrom(pur => pur.Place.Shift.BeginTime))
                 .ForMember(wev => wev.TargetParticipantsCount, map => map.MapFrom(pur => pur.Place.TargetParticipantsCount))
+                .ForMember(wev => wev.PlaceDescription, map => map.MapFrom(pur => pur.Place.Description))
                 .ForMember(wev => wev.CurrentParticipantsCount, map => map.MapFrom(pur => pur.Place.PlaceUserEventRoles.Count(pur1 => pur1.UserStatus == UserStatus.Accepted)));
         }
     }

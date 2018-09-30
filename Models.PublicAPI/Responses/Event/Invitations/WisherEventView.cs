@@ -9,6 +9,7 @@ namespace Models.PublicAPI.Responses.Event.Invitations
         public EventTypeView EventType { get; set; }
         public DateTime BeginTime { get; set; }
         public Guid PlaceId { get; set; }
+        public string PlaceDescription { get; set; }
         public int CurrentParticipantsCount { get; set; }
         public int TargetParticipantsCount { get; set; }
     }
