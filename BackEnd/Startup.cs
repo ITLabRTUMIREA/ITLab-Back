@@ -82,6 +82,8 @@ namespace BackEnd
             services.Configure<DBInitializeSettings>(Configuration.GetSection(nameof(DBInitializeSettings)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
+            services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
+
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
