@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Models.PublicAPI.Responses;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using BackEnd.Models.Settings;
+using Microsoft.Extensions.Options;
 
 namespace BackEnd.Controllers
 {
-    [Route("")]
-    public class DefaultController : Controller
+    [Route("api/about")]
+    public class AboutController : Controller
     {
         // GET: api/values
         [HttpGet]
@@ -23,7 +25,12 @@ namespace BackEnd.Controllers
                                  .Select(n => new { name = n, code = (int)Enum.Parse(typeof(ResponseStatusCode), n) })
             };
         }
-
+        [HttpGet("build")]
+        public BuildInformation GetBuild(
+            [FromServices]IOptions<BuildInformation> buildInfo)
+        {
+            return buildInfo.Value;
+        }
 
     }
 }

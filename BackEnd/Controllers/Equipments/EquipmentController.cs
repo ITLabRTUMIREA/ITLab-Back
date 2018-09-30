@@ -6,6 +6,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
+using BackEnd.Models.Roles;
 using Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Models;
 using Models.Equipments;
 using Models.People;
+using Models.People.Roles;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses;
@@ -73,6 +75,7 @@ namespace BackEnd.Controllers.Equipments
                 .ProjectTo<CompactEquipmentView>()
                 .ToListAsync();
 
+        [RequireRole(RoleNames.CanEditEquipment)]
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentView>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
@@ -96,6 +99,7 @@ namespace BackEnd.Controllers.Equipments
             return mapper.Map<EquipmentView>(newEquipment);
         }
 
+        [RequireRole(RoleNames.CanEditEquipment)]
         [HttpPut]
         public async Task<OneObjectResponse<EquipmentView>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
         {
@@ -111,6 +115,7 @@ namespace BackEnd.Controllers.Equipments
             return mapper.Map<EquipmentView>(toEdit);
         }
 
+        [RequireRole(RoleNames.CanEditEquipment)]
         [HttpDelete]
         public async Task<OneObjectResponse<Guid>> DeleteAsync([FromBody]IdRequest request)
         {

@@ -58,16 +58,12 @@ namespace BackEnd.Authorize
           => (long)Math.Round((date.ToUniversalTime() -
                                new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
                               .TotalSeconds);
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id /*string[] roles*/)
+        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<string> roles)
         {
-            //var claims = new Claim[roles.Length + 1];
-            //for (int i = 0; i < roles.Length; i++)
-            //{
-            //    claims[i] = new Claim(ClaimTypes.Role, roles[i]);
-            //}
-            //claims[claims.Length - 1] = new Claim(ClaimTypes.NameIdentifier, id);
             var identity = new ClaimsIdentity();
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id));
+            identity.AddClaims(roles
+                .Select(r => new Claim(ClaimTypes.Role, r)));
             return identity;
         }
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)

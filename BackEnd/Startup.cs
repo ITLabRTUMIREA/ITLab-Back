@@ -34,6 +34,11 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
 using BackEnd.Models.Settings;
+using Models.People.Roles;
+using WebApp.Configure.Models;
+using BackEnd.Services.ConfigureServices;
+using WebApp.Configure.Models.Invokations;
+using Microsoft.AspNetCore.Http;
 
 namespace BackEnd
 {
@@ -56,7 +61,7 @@ namespace BackEnd
                 services
                      .AddEntityFrameworkNpgsql()
                      .AddDbContext<DataBaseContext>(options =>
-                     options.UseNpgsql(Configuration.GetConnectionString("DockerPosgresDataBase")));
+                    options.UseInMemoryDatabase("local"));
             }
             else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -74,9 +79,11 @@ namespace BackEnd
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
-            services.Configure<DBInitialize>(Configuration.GetSection(nameof(DBInitialize)));
+            services.Configure<DBInitializeSettings>(Configuration.GetSection(nameof(DBInitializeSettings)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
+            services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
+
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
@@ -100,7 +107,7 @@ namespace BackEnd
 
             services.AddTransient<IJwtFactory, JwtFactory>();
 
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
                 jwtAppSettingOptions.SecretKey));
 
             services.Configure<JwtIssuerOptions>(options =>
@@ -130,9 +137,12 @@ namespace BackEnd
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(configureOptions =>
             {
+
                 configureOptions.ClaimsIssuer = jwtAppSettingOptions.Issuer;
                 configureOptions.TokenValidationParameters = tokenValidationParameters;
                 configureOptions.SaveToken = true;
@@ -157,8 +167,10 @@ namespace BackEnd
             services.AddTransient<IUserRegisterTokens, DbUserRegisterTokens>();
             services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
-            services.AddTransient<DataBaseFiller>();
             services.AddSingleton<ISmsSender, SmsService>();
+
+            services.AddWebAppConfigure()
+                    .AddCongifure<DBInitService>(options => options.TransientImplementation<DBInitService>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -167,32 +179,12 @@ namespace BackEnd
             IHostingEnvironment env,
             ILoggerFactory loggerFactory)
         {
-            if (Configuration.GetValue<bool>("IS_DOCKER"))
-                try
-                {
-
-
-                    using (var scope = app.ApplicationServices.CreateScope())
-                        scope
-                            .ServiceProvider
-                            .GetService<DataBaseContext>()
-                            .Database
-                            .Migrate();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-
-            if (Configuration.GetValue<bool>("DB_INIT"))
-                using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                    serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
-
             app.UseCors(config =>
                 config.AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowAnyOrigin()
                     .AllowCredentials());
+            app.UseWebAppConfigure();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

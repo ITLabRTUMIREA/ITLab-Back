@@ -42,18 +42,31 @@ namespace BackEnd.Services
             
             await client.SendMailAsync(mail);
         }
-        public async Task SendEmailConfirm(string email, string url, string accessToken)
+        public async Task SendInvitationEmail(string email, string url, string accessToken)
         {
-            var template = (await GetEmailTemplate())
+            var template = (await GetInvitationTemplate())
                 .Replace("%email%", email)
                 .Replace("%url%", url)
                 .Replace("%code%", accessToken);
             await SendEmailAsync(email, "Приглашение на регистрацию", template);
         }
 
-        private Task<string> GetEmailTemplate()
+        public async Task SendResetPasswordEmail(string email, string url, string resetPassToken)
         {
-            return new HttpClient().GetStringAsync(options.EmailTemplateUrl);
+            var template = (await GetResetPasswordTemplate())
+                .Replace("%email%", email)
+                .Replace("%url%", url)
+                .Replace("%code%", resetPassToken);
+            await SendEmailAsync(email, "Восстановление пароля", template);
+        }
+
+        private Task<string> GetInvitationTemplate()
+        {
+            return new HttpClient().GetStringAsync(options.InvitationTemplateUrl);
+        }
+        private Task<string> GetResetPasswordTemplate()
+        {
+            return new HttpClient().GetStringAsync(options.ResetPasswordTemplateUrl);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace BackEnd.Authorize
         Task<string> GenerateRefreshToken(Guid userId, string UserAgent);
         Task<RefreshToken> GetRefreshToken(string refreshToken);
         IQueryable<RefreshToken> RefreshTokens(Guid userId);
-        ClaimsIdentity GenerateClaimsIdentity(string userName, string id/*string[] roles*/);
+        ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<string> roles);
         Task DeleteRefreshTokens(List<Guid> tokenIds);
     }
 }

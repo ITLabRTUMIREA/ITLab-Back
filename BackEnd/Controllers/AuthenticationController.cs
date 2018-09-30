@@ -84,11 +84,11 @@ namespace BackEnd.Controllers
         }
 
         private Exception IncorrectRefreshToken()
-        => ResponseStatusCode.IncorrectRefreshtoken.ToApiException();
+        => ResponseStatusCode.IncorrectRefreshToken.ToApiException();
 
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
         {
-            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString()/*, userManager.GetRolesAsync(user).Result.ToArray()*/);
+            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), await userManager.GetRolesAsync(user));
             var loginInfo = new LoginResponse
             {
                 User = mapper.Map<UserView>(user),

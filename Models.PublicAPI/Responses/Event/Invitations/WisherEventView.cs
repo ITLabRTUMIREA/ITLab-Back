@@ -2,7 +2,7 @@
 using Models.PublicAPI.Responses.People;
 namespace Models.PublicAPI.Responses.Event.Invitations
 {
-    public class WisherEventView : UserAndRole
+    public class WisherEventView : UserAndEventRole
     {
         public Guid Id { get; set; }
         public string Title { get; set; }
