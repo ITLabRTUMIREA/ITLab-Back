@@ -24,6 +24,7 @@ using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.General;
 using Microsoft.Data.Edm.Csdl;
 using BackEnd.Extensions;
+using System.Threading;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -32,6 +33,7 @@ namespace BackEnd.Controllers.Equipments
     public class EquipmentController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;
+        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         private readonly ILogger<EquipmentTypeController> logger;
         private readonly IMapper mapper;
@@ -79,6 +81,7 @@ namespace BackEnd.Controllers.Equipments
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentView>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
+            await semaphore.WaitAsync();
             var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
             await CheckNotExist(request.SerialNumber);
 
@@ -96,7 +99,9 @@ namespace BackEnd.Controllers.Equipments
 
             await dbContext.Equipments.AddAsync(newEquipment);
             await dbContext.SaveChangesAsync();
+            semaphore.Release();
             return mapper.Map<EquipmentView>(newEquipment);
+
         }
 
         [RequireRole(RoleNames.CanEditEquipment)]
@@ -131,8 +136,9 @@ namespace BackEnd.Controllers.Equipments
 
         private async Task CheckNotExist(string serialNumber)
         {
-            var now = await dbContext.Equipments.FirstOrDefaultAsync(eq => eq.SerialNumber == serialNumber);
-            if (now != null)
+            if (await dbContext
+                .Equipments
+                .AnyAsync(eq => eq.SerialNumber == serialNumber))
                 throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
         }
 
