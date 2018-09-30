@@ -60,11 +60,11 @@ namespace BackEnd.Formatting
 
             CreateMap<EventAndUserId, CompactEventView>()
                 .ForMember(cev => cev.ShiftsCount, map => map.MapFrom(ev => ev.Shifts.Count))
-                .ForMember(cev => cev.TotalDurationInMinutes, map => map.MapFrom(ev =>
+                .ForMember(cev => cev.EndTime, map => map.MapFrom(ev =>
                     ev
                         .Shifts
-                        .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
-                        .Sum()))
+                        .Select(s => s.EndTime)
+                        .Max()))
                 .ForMember(cev => cev.CurrentParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
