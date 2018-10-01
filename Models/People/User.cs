@@ -13,8 +13,8 @@ namespace Models.People
         public string LastName { get; set; }
         public List<UserSetting> UserSettings { get; set; }
         public List<Equipment> Equipment  { get; set; }
-        public List<PlaceUserRole> PlaceUserRoles { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; }
+        public List<PlaceUserEventRole> PlaceUserEventRoles { get; set; }
         public List<UserProperty> UserProperties { get; set; }
     }
 }

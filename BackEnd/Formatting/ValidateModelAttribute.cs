@@ -22,7 +22,7 @@ namespace BackEnd.Formatting
                 throw new InputParameterIncorrectResponse(modelState.Select(kvp => new IncorrectingInfo
                     {
                         Fieldname = kvp.Key,
-                        Messages = kvp.Value.Errors.Select(E => E.ErrorMessage).ToList()
+                        Messages = kvp.Value.Errors.Select(e => e.ErrorMessage).ToList()
                     }).ToList()
                     ).ToApiException
                     ();

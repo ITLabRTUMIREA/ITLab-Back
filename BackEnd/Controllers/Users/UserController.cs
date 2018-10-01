@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Extensions;
+using BackEnd.Models.Roles;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,7 @@ using Models.PublicAPI.Responses.People;
 using Extensions;
 using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
+using Models.People.Roles;
 using Models.PublicAPI.Requests.User;
 
 namespace BackEnd.Controllers.Users
@@ -67,11 +69,14 @@ namespace BackEnd.Controllers.Users
             .FirstOrDefaultAsync(u => u.Id == id)
             ?? throw ResponseStatusCode.NotFound.ToApiException();
 
+        [RequireRole(RoleNames.CanInviteToSystem)]
         [HttpPost]
         public async Task<ResponseBase> InviteUser([FromBody]InviteUserRequest inviteRequest)
         {
+            if (await dbContext.Users.AnyAsync(u => u.NormalizedEmail == inviteRequest.Email.ToUpper()))
+                throw ResponseStatusCode.UserNowInSystem.ToApiException();
             var token = await registerTokens.AddRegisterToken(inviteRequest.Email);
-            await emailSender.SendEmailConfirm(inviteRequest.Email, inviteRequest.RedirectUrl, token);
+            await emailSender.SendInvitationEmail(inviteRequest.Email, inviteRequest.RedirectUrl, token);
             return ResponseStatusCode.OK;
         }
 
