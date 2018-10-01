@@ -60,11 +60,11 @@ namespace BackEnd.Formatting
 
             CreateMap<EventAndUserId, CompactEventView>()
                 .ForMember(cev => cev.ShiftsCount, map => map.MapFrom(ev => ev.Shifts.Count))
-                .ForMember(cev => cev.TotalDurationInMinutes, map => map.MapFrom(ev =>
+                .ForMember(cev => cev.EndTime, map => map.MapFrom(ev =>
                     ev
                         .Shifts
-                        .Select(s => s.EndTime.Subtract(s.BeginTime).TotalMinutes)
-                        .Sum()))
+                        .Select(s => s.EndTime)
+                        .Max()))
                 .ForMember(cev => cev.CurrentParticipantsCount, map => map.MapFrom(ev =>
                     ev.Shifts
                         .SelectMany(s => s.Places)
@@ -156,7 +156,9 @@ namespace BackEnd.Formatting
                 .ForMember(eav => eav.EventType, map => map.MapFrom(pur => pur.Place.Shift.Event.EventType))
                 .ForMember(eav => eav.BeginTime, map => map.MapFrom(pur => pur.Place.Shift.BeginTime))
                 .ForMember(eav => eav.ShiftDurationInMinutes,
-                    map => map.MapFrom(pur => pur.Place.Shift.EndTime.Subtract(pur.Place.Shift.BeginTime).TotalMinutes));
+                    map => map.MapFrom(pur => pur.Place.Shift.EndTime.Subtract(pur.Place.Shift.BeginTime).TotalMinutes))
+                .ForMember(eav => eav.PlaceDescription, map => map.MapFrom(pur => pur.Place.Description))
+                .ForMember(eav => eav.ShiftDescription, map => map.MapFrom(pur => pur.Place.Shift.Description));
 
 
             CreateMap<PlaceUserEventRole, WisherEventView>()
@@ -165,6 +167,8 @@ namespace BackEnd.Formatting
                 .ForMember(wev => wev.EventType, map => map.MapFrom(pur => pur.Place.Shift.Event.EventType))
                 .ForMember(wev => wev.BeginTime, map => map.MapFrom(pur => pur.Place.Shift.BeginTime))
                 .ForMember(wev => wev.TargetParticipantsCount, map => map.MapFrom(pur => pur.Place.TargetParticipantsCount))
+                .ForMember(wev => wev.PlaceDescription, map => map.MapFrom(pur => pur.Place.Description))
+                .ForMember(wev => wev.ShiftDescription, map => map.MapFrom(pur => pur.Place.Shift.Description))
                 .ForMember(wev => wev.CurrentParticipantsCount, map => map.MapFrom(pur => pur.Place.PlaceUserEventRoles.Count(pur1 => pur1.UserStatus == UserStatus.Accepted)));
         }
     }
