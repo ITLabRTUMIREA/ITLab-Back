@@ -42,10 +42,10 @@ namespace BackEnd.Controllers.Users
         }
         [AllowAnonymous]
         [HttpGet]
-        [Route("{id}/{*emailToken}")]
-        public async Task<ResponseBase> Get(string id, string emailToken)
+        [Route("{id:guid}/{*emailToken}")]
+        public async Task<ResponseBase> Get(Guid id, string emailToken)
         {
-            var user = await userManager.FindByIdAsync(id);
+            var user = await userManager.FindByIdAsync(id.ToString());
             var result = await userManager.ConfirmEmailAsync(user, emailToken);
             if (result.Succeeded)
             {
@@ -80,6 +80,7 @@ namespace BackEnd.Controllers.Users
             await userManager.UpdateAsync(currentUser);
             return mapper.Map<UserView>(currentUser);
         }
+        
 
         [HttpPut("password")]
         public async Task<ResponseBase> ChangePassword([FromBody] ChangePasswordRequest request)

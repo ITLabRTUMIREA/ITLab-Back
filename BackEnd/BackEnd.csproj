@@ -9,12 +9,6 @@
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Exceptions\" />
-    <Folder Include="Controllers\Users\" />
-    <Folder Include="Models\Settings\" />
-    <Folder Include="Services\ConfigureServices\" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.1.3" />
