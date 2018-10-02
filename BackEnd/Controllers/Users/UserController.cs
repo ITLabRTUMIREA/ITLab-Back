@@ -61,7 +61,7 @@ namespace BackEnd.Controllers.Users
             => await GetUsersByParams(email, firstname, lastname, match)
                 .CountAsync();
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<OneObjectResponse<UserView>> GetAsync(Guid id)
         => await userManager
             .Users

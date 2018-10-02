@@ -17,7 +17,7 @@ using Models.People.UserProperties;
 
 namespace BackEnd.Controllers.Users.Properties
 {
-    [Route("api/user/property/type")]
+    [Route("api/account/property/type")]
     public class UserPropertyTypeController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;

@@ -13,6 +13,8 @@ using Models.Events.Roles;
 using BackEnd.DataBase;
 using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
+using Models.People.UserProperties;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackEnd.Services.ConfigureServices
 {
@@ -46,6 +48,7 @@ namespace BackEnd.Services.ConfigureServices
             await CreateBaseEventRoles();
             if (options.WantedRoles?.Any() == true)
                 await ApplyRoles();
+            await CreateUserPropertyTypes();
         }
 
         private async Task CreateUsers()
@@ -98,5 +101,19 @@ namespace BackEnd.Services.ConfigureServices
                 }
             }
         }
+
+        private async Task CreateUserPropertyTypes()
+        {
+            foreach (var typeName in Enum.GetValues(typeof(UserPropertyNames)).Cast<UserPropertyNames>())
+            {
+                if (await dbContext.UserPropertyTypes.AnyAsync(t => t.Name == typeName.ToString()))
+                    continue;
+                dbContext.Add(new UserPropertyType {
+                    Name = typeName.ToString()
+                });
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
     }
 }

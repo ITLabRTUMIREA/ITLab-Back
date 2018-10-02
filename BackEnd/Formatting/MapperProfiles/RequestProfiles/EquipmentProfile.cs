@@ -12,9 +12,9 @@ namespace BackEnd.Formatting.MapperProfiles.RequestProfiles
     {
         public EquipmentProfile()
         {
-            EquipmentTypeRules();
+            EquipmentTypeMaps();
         }
-        private void EquipmentTypeRules()
+        private void EquipmentTypeMaps()
         {
             CreateMap<EquipmentTypeEditRequest, EquipmentType>()
                 .ForAllMembers(opt => opt.Condition(a =>
