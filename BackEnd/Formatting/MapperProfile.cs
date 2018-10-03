@@ -110,7 +110,6 @@ namespace BackEnd.Formatting
 
             CreateMap<PlaceUserEventRole, UserAndEventRole>();
 
-            CreateMap<User, UserView>();
             CreateMap<AccountEditRequest, User>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
