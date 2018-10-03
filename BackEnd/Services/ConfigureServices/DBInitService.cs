@@ -108,8 +108,9 @@ namespace BackEnd.Services.ConfigureServices
             {
                 if (await dbContext.UserPropertyTypes.AnyAsync(t => t.Name == typeName.ToString()))
                     continue;
-                dbContext.Add(new UserPropertyType {
-                    Name = typeName.ToString()
+                await dbContext.AddAsync(new UserPropertyType {
+                    Name = typeName.ToString(),
+                    DefaultStatus = UserPropertyStatus.NotConfirmed
                 });
                 await dbContext.SaveChangesAsync();
             }

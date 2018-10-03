@@ -3,8 +3,8 @@ namespace Models.People.UserProperties
 {
     public enum UserPropertyStatus
     {
-        NotShouldConfirmed,
         NotConfirmed,
-        Confirmed
+        Confirmed,
+        NotShouldConfirmed
     }
 }

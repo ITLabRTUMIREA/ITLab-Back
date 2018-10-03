@@ -41,7 +41,8 @@ namespace BackEnd.Controllers.Users.Properties
 
         //TODO Lock (semaphore) on method
         [HttpPost]
-        public async Task<OneObjectResponse<UserPropertyTypeView>> PostAsync(UserPropertyTypeCreateRequest request)
+        public async Task<OneObjectResponse<UserPropertyTypeView>> PostAsync(
+            [FromBody]UserPropertyTypeCreateRequest request)
         {
             if (await dbContext.UserPropertyTypes.AnyAsync(upt => upt.Name == request.Name))
                 throw ResponseStatusCode.FieldExist.ToApiException();
