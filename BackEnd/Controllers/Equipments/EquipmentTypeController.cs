@@ -42,9 +42,8 @@ namespace BackEnd.Controllers.Equipments
         public async Task<ListResponse<CompactEquipmentTypeView>> GetAsync(string match, bool all = false)
             => await dbContext
                 .EquipmentTypes
-                .WhereIf(string.IsNullOrEmpty(match), t => t.ParentId == null)
-                .IfNotNull(match, eqtypes =>
-                    eqtypes.Where(eq => eq.Title.ToUpper().Contains(match.ToUpper())))
+                .WhereIf(string.IsNullOrEmpty(match), t => t.ParentId == null) 
+                .WhereIf(!string.IsNullOrEmpty(match), eq => eq.Title.ToUpper().Contains(match.ToUpper()))
                 .If(!all, eqtypes => eqtypes.Take(5))
                 .ProjectTo<CompactEquipmentTypeView>()
                 .ToListAsync();
