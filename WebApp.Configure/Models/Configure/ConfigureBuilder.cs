@@ -32,6 +32,15 @@ namespace WebApp.Configure.Models
             serviceCollection.AddHostedService<ConfigureExecutorHostedService>();
         }
 
+        public ConfigureBuilder AddTransientConfigure<T>()
+            where T : class, IConfigureWork
+            => AddCongifure<T>(options => options.TransientImplementation<T>());
+
+        public ConfigureBuilder AddTransientConfigure<T, V>()
+            where T : class, IConfigureWork
+            where V : T
+            => AddCongifure<T>(options => options.TransientImplementation<V>());
+
         public ConfigureBuilder AddCongifure<T>(Action<ConfigureWorkBuilder<T>> configure = null) where T : class, IConfigureWork
         {
             var builder = new ConfigureWorkBuilder<T>(this, serviceCollection);

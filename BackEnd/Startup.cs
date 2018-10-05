@@ -39,6 +39,7 @@ using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
 using WebApp.Configure.Models.Invokations;
 using Microsoft.AspNetCore.Http;
+using BackEnd.Services.UserProperties;
 
 namespace BackEnd
 {
@@ -169,15 +170,20 @@ namespace BackEnd
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddSingleton<ISmsSender, SmsService>();
 
+
+            services.AddSingleton<IUserPropertiesConstants, InMemoryUserPropertiesConstants>();
+            services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
+
+
             services.AddWebAppConfigure()
-                    .AddCongifure<DBInitService>(options => options.TransientImplementation<DBInitService>());
+                    .AddTransientConfigure<DBInitService>()
+                    .AddTransientConfigure<LoadCustomPropertiesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
             IApplicationBuilder app,
-            IHostingEnvironment env,
-            ILoggerFactory loggerFactory)
+            IHostingEnvironment env)
         {
             app.UseCors(config =>
                 config.AllowAnyHeader()
