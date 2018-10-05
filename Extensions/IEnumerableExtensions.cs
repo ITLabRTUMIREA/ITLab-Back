@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Linq;
 
 namespace Extensions
 {
@@ -22,5 +23,17 @@ namespace Extensions
             {}
         }
 
+        public static IEnumerable<TV> SelectMany<T, TV>(
+            this IEnumerable<T> source,
+            Func<T, (TV, TV)> selector
+        )
+        => source.SelectMany(i => selector(i).ToEnumerable());
+
+
+        private static IEnumerable<TV> ToEnumerable<TV>(this (TV, TV) source)
+        {
+            yield return source.Item1;
+            yield return source.Item2;
+        }
     }
 }
