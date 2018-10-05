@@ -36,10 +36,15 @@ namespace BackEnd.Formatting
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
-            CreateMap<EquipmentCreateRequest, Equipment>();
+            CreateMap<EquipmentCreateRequest, Equipment>()
+                .ForMember(eq => eq.Children, map => map.Ignore());
+
+
             CreateMap<Equipment, EquipmentView>();
 
             CreateMap<EquipmentType, EquipmentTypeView>();
+            CreateMap<EquipmentType, CompactEquipmentTypeView>();
+
             CreateMap<AccountCreateRequest, User>()
                 .ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
             CreateMap<User, LoginResponse>();

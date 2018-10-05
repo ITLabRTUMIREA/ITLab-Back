@@ -28,6 +28,11 @@
   <ItemGroup>
     <None Remove=".DS_Store" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.Secret.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Shema.json" />

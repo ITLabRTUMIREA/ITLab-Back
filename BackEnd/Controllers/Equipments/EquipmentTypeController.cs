@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using BackEnd.Formatting;
@@ -15,6 +16,10 @@ using Models.PublicAPI.Requests.Equipment.EquipmentType;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 using Extensions;
+using Models.PublicAPI.Responses.Equipment;
+using System.Collections.Generic;
+using BackEnd.Extensions;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -37,40 +42,60 @@ namespace BackEnd.Controllers.Equipments
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<EquipmentType>> GetAsync(string match, bool all = false)
+        public async Task<ListResponse<CompactEquipmentTypeView>> GetAsync(string match, bool all = false)
             => await dbContext
                 .EquipmentTypes
-                .IfNotNull(match, eqtypes => 
-                    eqtypes.Where(eq => eq.Title.ToUpper().Contains(match.ToUpper())))
-                .If (!all, eqtypes => eqtypes.Take(5))
+                .WhereIf(!all, t => t.ParentId == null) 
+                .WhereIf(!string.IsNullOrEmpty(match), eq => eq.Title.ToUpper().Contains(match.ToUpper()))
+                .If(!all, eqtypes => eqtypes.Take(5))
+                .ProjectTo<CompactEquipmentTypeView>()
                 .ToListAsync();
 
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<EquipmentType>> GetAsync(Guid id)
-            => await dbContext.EquipmentTypes.FindAsync(id)
-                ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+        public async Task<OneObjectResponse<EquipmentTypeView>> GetAsync(Guid id)
+            => await dbContext
+                   .EquipmentTypes
+                   .Where(eqt => eqt.Id == id)
+                    .ProjectTo<EquipmentTypeView>()
+                    .SingleOrDefaultAsync()
+                    ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
 
         [HttpPost]
-        public async Task<OneObjectResponse<EquipmentType>> Post([FromBody]EquipmentTypeCreateRequest request)
+        public async Task<OneObjectResponse<EquipmentTypeView>> Post([FromBody]EquipmentTypeCreateRequest request)
         {
             var equipmentType = mapper.Map<EquipmentType>(request);
-            var now = dbContext.EquipmentTypes.FirstOrDefault(et => et.Title == request.Title);
-            if (now != null)
+            if(await dbContext.EquipmentTypes.AnyAsync(et => et.Title == request.Title))
                 throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
             var added = await dbContext.EquipmentTypes.AddAsync(equipmentType);
             await dbContext.SaveChangesAsync();
-            return added.Entity;
+            return mapper.Map<EquipmentTypeView>(added.Entity);
         }
 
 
         [HttpPut]
-        public async Task<OneObjectResponse<EquipmentType>> Put([FromBody]EquipmentTypeEditRequest request)
+        public async Task<ListResponse<EquipmentTypeView>> Put([FromBody]List<EquipmentTypeEditRequest> request)
         {
-            var now = await dbContext.EquipmentTypes.FindAsync(request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
-            mapper.Map(request, now);
-            await dbContext.SaveChangesAsync();
-            return now;
+            var ids = request
+                .SelectMany(eter => (eter.Id, eter.ParentId))
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .Distinct()
+                .ToArray();
+            var forEdit = await dbContext
+                .EquipmentTypes
+                .Where(et => ids.Contains(et.Id))
+                .ToListAsync();
+            if (ids.Length != forEdit.Count)
+                throw ResponseStatusCode.IncorrectRequestData.ToApiException($"incorrect ids, wait {ids.Length}, found {forEdit.Count}");
+
+            mapper.Map(request, forEdit);
+            var result = await dbContext.SaveChangesAsync();
+            return await dbContext
+                .EquipmentTypes
+                .Where(et => ids.Contains(et.Id))
+                .ProjectTo<EquipmentTypeView>()
+                .ToListAsync();
         }
 
         [HttpDelete]

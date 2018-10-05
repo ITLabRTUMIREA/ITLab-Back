@@ -22,6 +22,9 @@ using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Equipment;
 using Models.PublicAPI.Responses.General;
+using Microsoft.Data.Edm.Csdl;
+using BackEnd.Extensions;
+using System.Threading;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -30,6 +33,7 @@ namespace BackEnd.Controllers.Equipments
     public class EquipmentController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;
+        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         private readonly ILogger<EquipmentTypeController> logger;
         private readonly IMapper mapper;
@@ -48,10 +52,14 @@ namespace BackEnd.Controllers.Equipments
 
         [HttpGet("{id}")]
         public async Task<OneObjectResponse<EquipmentView>> GetAsync(Guid id)
-            => mapper.Map<EquipmentView>(await CheckAndGetEquipmentAsync(id));
+            => await dbContext
+                .Equipments
+                .ProjectTo<EquipmentView>()
+                .SingleOrDefaultAsync(eq => eq.Id == id)
+                ?? NotFound<EquipmentView>();
 
         [HttpGet]
-        public async Task<ListResponse<EquipmentView>> GetAsync(
+        public async Task<ListResponse<CompactEquipmentView>> GetAsync(
             Guid? eventId,
             Guid? equipmentTypeId,
             string match
@@ -66,20 +74,34 @@ namespace BackEnd.Controllers.Equipments
                 .IfNotNull(match, equipments => equipments.ForAll(match.Split(' '), (equipments2, matcher) =>
                         equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher)
                                                 || eq.EquipmentType.Title.ToUpper().Contains(matcher))))
-                .ProjectTo<EquipmentView>()
+                .ProjectTo<CompactEquipmentView>()
                 .ToListAsync();
 
         [RequireRole(RoleNames.CanEditEquipment)]
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentView>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
+            await semaphore.WaitAsync();
             var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
             await CheckNotExist(request.SerialNumber);
 
             var newEquipment = mapper.Map<Equipment>(request);
+            newEquipment.Number = type.LastNumber++;
+            if (request.Children?.Count > 0)
+                newEquipment.Children =
+                    await dbContext
+                    .Equipments
+                    .Where(eq => request.Children.Contains(eq.Id))
+                    .ToListAsync();
+
+            if (newEquipment.Children?.Count != request.Children?.Count)
+                throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
+
             await dbContext.Equipments.AddAsync(newEquipment);
             await dbContext.SaveChangesAsync();
+            semaphore.Release();
             return mapper.Map<EquipmentView>(newEquipment);
+
         }
 
         [RequireRole(RoleNames.CanEditEquipment)]
@@ -110,12 +132,13 @@ namespace BackEnd.Controllers.Equipments
 
         private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
             => await dbContext.Equipments.Include(eq => eq.EquipmentType).FirstOrDefaultAsync(eq => eq.Id == id)
-              ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+              ?? NotFound<Equipment>();
 
         private async Task CheckNotExist(string serialNumber)
         {
-            var now = await dbContext.Equipments.FirstOrDefaultAsync(eq => eq.SerialNumber == serialNumber);
-            if (now != null)
+            if (await dbContext
+                .Equipments
+                .AnyAsync(eq => eq.SerialNumber == serialNumber))
                 throw ApiLogicException.Create(ResponseStatusCode.FieldExist);
         }
 
