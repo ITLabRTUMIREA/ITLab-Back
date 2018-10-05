@@ -34,6 +34,12 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
 using BackEnd.Models.Settings;
+using Models.People.Roles;
+using WebApp.Configure.Models;
+using BackEnd.Services.ConfigureServices;
+using WebApp.Configure.Models.Invokations;
+using Microsoft.AspNetCore.Http;
+using BackEnd.Services.UserProperties;
 
 namespace BackEnd
 {
@@ -50,6 +56,15 @@ namespace BackEnd
         public void ConfigureServices(IServiceCollection services)
         {
 #if DEBUG
+            if (Configuration.GetValue<bool>("IS_DOCKER"))
+            {
+                Console.WriteLine("IM IN IS DOCKER YAY");
+                services
+                     .AddEntityFrameworkNpgsql()
+                     .AddDbContext<DataBaseContext>(options =>
+                    options.UseInMemoryDatabase("local"));
+            }
+            else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 services
                     .AddDbContext<DataBaseContext>(options =>
@@ -65,9 +80,11 @@ namespace BackEnd
                     options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
 #endif
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
-            services.Configure<DBInitialize>(Configuration.GetSection(nameof(DBInitialize)));
+            services.Configure<DBInitializeSettings>(Configuration.GetSection(nameof(DBInitializeSettings)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
+            services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
+
             services.AddMvc(options =>
             {
                 options.Filters.Add<ValidateModelAttribute>();
@@ -89,9 +106,9 @@ namespace BackEnd
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 
-            services.AddSingleton<IJwtFactory, JwtFactory>();
+            services.AddTransient<IJwtFactory, JwtFactory>();
 
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
                 jwtAppSettingOptions.SecretKey));
 
             services.Configure<JwtIssuerOptions>(options =>
@@ -121,9 +138,12 @@ namespace BackEnd
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(configureOptions =>
             {
+
                 configureOptions.ClaimsIssuer = jwtAppSettingOptions.Issuer;
                 configureOptions.TokenValidationParameters = tokenValidationParameters;
                 configureOptions.SaveToken = true;
@@ -148,25 +168,29 @@ namespace BackEnd
             services.AddTransient<IUserRegisterTokens, DbUserRegisterTokens>();
             services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
-            services.AddTransient<DataBaseFiller>();
             services.AddSingleton<ISmsSender, SmsService>();
+
+
+            services.AddSingleton<IUserPropertiesConstants, InMemoryUserPropertiesConstants>();
+            services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
+
+
+            services.AddWebAppConfigure()
+                    .AddTransientConfigure<DBInitService>()
+                    .AddTransientConfigure<LoadCustomPropertiesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
             IApplicationBuilder app,
-            IHostingEnvironment env,
-            ILoggerFactory loggerFactory)
+            IHostingEnvironment env)
         {
-            if (Configuration.GetValue<bool>("db-init"))
-                using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-                    serviceScope.ServiceProvider.GetService<DataBaseFiller>().Fill().Wait();
-
             app.UseCors(config =>
                 config.AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowAnyOrigin()
                     .AllowCredentials());
+            app.UseWebAppConfigure();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

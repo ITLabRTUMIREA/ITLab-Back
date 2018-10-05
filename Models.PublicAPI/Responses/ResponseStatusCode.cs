@@ -22,6 +22,10 @@
         NoShifts,
         LastShift,
         YouAreInRole,
-        WrongLoginOrPassword
+        WrongLoginOrPassword,
+        IncorrectRefreshToken,
+        UserNowInSystem,
+        EventRoleNameExist,
+        Forbidden
     }
 }

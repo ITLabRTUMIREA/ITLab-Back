@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace Models.PublicAPI.Responses.Exceptions
 {
@@ -15,6 +17,18 @@ namespace Models.PublicAPI.Responses.Exceptions
         {
             IncorrectFields = incorrectFields;
         }
+
+        public static InputParameterIncorrectResponse Create(IEnumerable<IdentityError> errors)
+            => new InputParameterIncorrectResponse(
+                errors
+                    .Select(y =>
+                        new IncorrectingInfo
+                        {
+                            Fieldname = y.Code,
+                            Messages = new List<string> { y.Description }
+                        })
+                .ToList());
+        
     }
         public class IncorrectingInfo
         {

@@ -7,19 +7,31 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using BackEnd.DataBase;
+using Models.People;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace BackEnd.Authorize
 {
-    public class JwtFactory : IJwtFactory
+    public partial class JwtFactory : IJwtFactory
     {
         private readonly JwtIssuerOptions jwtOptions;
+        private readonly DataBaseContext dbContext;
+        private const string RefreshTokenChars = "ABCDEFGHIKLMNOPQRSTVXYZ1bcdefghiklmnoprstvxyz01234567890";
+        private readonly Random random = new Random();
 
-        public JwtFactory(IOptions<JwtIssuerOptions> jwtOptions)
+
+        public JwtFactory(
+            IOptions<JwtIssuerOptions> jwtOptions,
+            DataBaseContext dbContext)
         {
             this.jwtOptions = jwtOptions.Value;
             ThrowIfInvalidOptions(this.jwtOptions);
+            this.dbContext = dbContext;
         }
-        public string GenerateEncodedToken(string userName, ClaimsIdentity identity)
+        public string GenerateAccessToken(string userName, ClaimsIdentity identity)
         {
             var claims = new[]
             {
@@ -46,16 +58,12 @@ namespace BackEnd.Authorize
           => (long)Math.Round((date.ToUniversalTime() -
                                new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
                               .TotalSeconds);
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id /*string[] roles*/)
+        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<string> roles)
         {
-            //var claims = new Claim[roles.Length + 1];
-            //for (int i = 0; i < roles.Length; i++)
-            //{
-            //    claims[i] = new Claim(ClaimTypes.Role, roles[i]);
-            //}
-            //claims[claims.Length - 1] = new Claim(ClaimTypes.NameIdentifier, id);
             var identity = new ClaimsIdentity();
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id));
+            identity.AddClaims(roles
+                .Select(r => new Claim(ClaimTypes.Role, r)));
             return identity;
         }
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)
@@ -76,6 +84,82 @@ namespace BackEnd.Authorize
             {
                 throw new ArgumentNullException(nameof(JwtIssuerOptions.JtiGenerator));
             }
+        }
+
+        public async Task<string> GenerateRefreshToken(Guid userId, string userAgent)
+        {
+            var token = new RefreshToken
+            {
+                CreateTime = DateTime.UtcNow,
+                UserId = userId,
+                UserAgent = userAgent,
+                Token = RandomString(50)
+            };
+            var targetRow = await dbContext
+                .RefreshTokens
+                .SingleOrDefaultAsync(rt => rt.UserAgent == userAgent && rt.UserId == userId);
+
+            if (targetRow != null)
+            {
+                targetRow.CreateTime = token.CreateTime;
+                targetRow.Token = token.Token;
+            }
+            else
+            {
+                targetRow = token;
+                dbContext.RefreshTokens.Add(token);
+            }
+            await dbContext.SaveChangesAsync();
+            return ToBase64(new RefreshTokenData
+            {
+                UserId = userId,
+                Token = targetRow.Token,
+                UserAgent = userAgent
+            });
+        }
+
+        public IQueryable<RefreshToken> RefreshTokens(Guid userId)
+            => dbContext.RefreshTokens.Where(rt => rt.UserId == userId);
+
+
+        public Task<RefreshToken> GetRefreshToken(string refreshToken)
+        {
+            var tokenData = FromBase64<RefreshTokenData>(refreshToken);
+            return dbContext.RefreshTokens
+                                 .Where(rt => rt.UserId == tokenData.UserId)
+                                 .Where(rt => rt.Token == tokenData.Token)
+                                 .Where(rt => rt.UserAgent == tokenData.UserAgent)
+                                 .Include(rt => rt.User)
+                                 .SingleOrDefaultAsync();
+        }
+
+
+        public async Task DeleteRefreshTokens(List<Guid> tokenIds)
+        {
+            var tagetTokens = await dbContext
+                .RefreshTokens
+                .Where(rt => tokenIds.Contains(rt.Id))
+                .ToListAsync();
+            dbContext.RemoveRange(tagetTokens);
+            await dbContext.SaveChangesAsync();
+        }
+
+        private string RandomString(int length)
+            => new string(Enumerable.Repeat(RefreshTokenChars, length)
+                     .Select(chars => chars[random.Next(chars.Length)])
+                          .ToArray());
+
+        private string ToBase64<T>(T refreshTokenData)
+        {
+            var jsonView = JsonConvert.SerializeObject(refreshTokenData);
+            var bytes = Encoding.UTF8.GetBytes(jsonView);
+            return Convert.ToBase64String(bytes);
+        }
+        private T FromBase64<T>(string refreshTokenData)
+        {
+            var bytes = Convert.FromBase64String(refreshTokenData);
+            var jsonView = Encoding.UTF8.GetString(bytes);
+            return JsonConvert.DeserializeObject<T>(jsonView);
         }
     }
 }

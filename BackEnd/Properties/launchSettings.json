@@ -4,7 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "KEYVAULT_ENDPOINT": "https://labworkkeys.vault.azure.net/"
+        "DB_INIT": true 
       },
       "applicationUrl": "http://localhost:5000/"
     }

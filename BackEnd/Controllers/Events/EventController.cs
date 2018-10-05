@@ -16,6 +16,8 @@ using Models.PublicAPI.Responses;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Extensions;
+using BackEnd.Models.Roles;
+using Models.People.Roles;
 using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Controllers.Events
@@ -50,19 +52,17 @@ namespace BackEnd.Controllers.Events
         }
 
         [HttpGet("applications/{requestType}")]
-        public async Task<ListResponse<EventApplicationView>> GeInvites(string requestType)
+        public async Task<ListResponse<EventApplicationView>> GetInvites(string requestType)
             => await eventsManager
             .Events
             .Translate(requestType, out var userStatus,
-                    UserStatus.Unknown,
-                    ("wishes", UserStatus.Wisher),
-                    ("invitations", UserStatus.Invited))
-            .Where(e => e
-                   .Shifts
-                   .SelectMany(s => s.Places)
-                   .SelectMany(p => p.PlaceUserRoles)
-                   .Any(pur => pur.UserId == UserId && pur.UserStatus == userStatus))
-            .AttachUserId(UserId)
+                UserStatus.Unknown,
+                ("wishes", UserStatus.Wisher),
+                ("invitations", UserStatus.Invited))
+            .SelectMany(ev => ev.Shifts)
+            .SelectMany(s => s.Places)
+            .SelectMany(p => p.PlaceUserEventRoles)
+            .Where(pur => pur.UserId == UserId && pur.UserStatus == userStatus)
             .ProjectTo<EventApplicationView>()
             .ToListAsync();
 
@@ -72,7 +72,7 @@ namespace BackEnd.Controllers.Events
             .Events
             .SelectMany(e => e.Shifts)
             .SelectMany(s => s.Places)
-            .SelectMany(p => p.PlaceUserRoles)
+            .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserStatus == UserStatus.Wisher)
             .ProjectTo<WisherEventView>()
             .ToListAsync();
@@ -86,20 +86,21 @@ namespace BackEnd.Controllers.Events
                 .FirstOrDefaultAsync(ev => ev.Id == id)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost]
         public async Task<OneObjectResponse<EventView>> PostAsync([FromBody] EventCreateRequest request)
             => await (await eventsManager.AddAsync(request))
                 .ProjectTo<EventView>()
                 .SingleAsync();
 
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpPut]
         public async Task<OneObjectResponse<EventView>> PutAsync([FromBody] EventEditRequest request)
             => await (await eventsManager.EditAsync(request))
                 .ProjectTo<EventView>()
                 .SingleAsync();
 
-
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpDelete("{eventId:guid}")]
         public async Task<OneObjectResponse<Guid>> DeleteAsync(Guid eventId)
         {
@@ -128,6 +129,8 @@ namespace BackEnd.Controllers.Events
             await eventsManager.WishTo(UserId, roleId, placeId);
             return ResponseStatusCode.OK;
         }
+
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/accept")]
         public async Task<ResponseBase> AcceptWish(Guid placeId, Guid userId)
         {
@@ -135,6 +138,7 @@ namespace BackEnd.Controllers.Events
             return ResponseStatusCode.OK;
         }
 
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/reject")]
         public async Task<ResponseBase> RejectWish(Guid placeId, Guid userId)
         {

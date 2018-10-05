@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Extensions;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
 namespace BackEnd
@@ -22,7 +21,9 @@ namespace BackEnd
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseConfigFile("appsettings.Secret.json")
-                .ConfigureAppConfiguration(config => config.AddCommandLine(args))
+                   .ConfigureAppConfiguration(config => config
+                                              .AddCommandLine(args)
+                                              .AddEnvironmentVariables())
                 .UseStartup<Startup>()
                 .Build();
     }

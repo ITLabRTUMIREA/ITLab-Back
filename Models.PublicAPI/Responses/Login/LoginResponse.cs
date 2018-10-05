@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Models.PublicAPI.Responses.People;
 
 namespace Models.PublicAPI.Responses.Login
 {
     public class LoginResponse
     {
-        public Guid Id { get; set; }
-        public string Token { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string StudentID { get; set; }
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+        public UserView User { get; set; }
     }
 }

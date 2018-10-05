@@ -9,8 +9,8 @@ namespace Models.PublicAPI.Responses.Event
         public string Title { get; set; }
         public EventTypeView EventType { get; set; }
         public DateTime BeginTime { get; set; }
+        public DateTime EndTime { get; set; }
         public string Address { get; set; }
-        public double TotalDurationInMinutes { get; set; }
         public int ShiftsCount { get; set; }
         public int CurrentParticipantsCount { get; set; }
         public int TargetParticipantsCount { get; set; }

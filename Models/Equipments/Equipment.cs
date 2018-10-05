@@ -10,9 +10,15 @@ namespace Models.Equipments
     {
         public Guid Id { get; set; }
         public string SerialNumber { get; set; }
+        public string Description { get; set; }
+        public int Number { get; set; }
         // For many to many links, not ideal model
         public List<PlaceEquipment> PlaceEquipments { get; set; }
 
+        public Guid? ParentId { get; set; }
+        public Equipment Parent { get; set; }
+
+        public List<Equipment> Children { get; set; }
 
         public Guid EquipmentTypeId { get; set; }
         public EquipmentType EquipmentType { get; set; }

@@ -48,6 +48,8 @@ namespace Models
         /// </summary>
         public string SecretKey { get; set; }
 
+        public TimeSpan RefreshTokenValidFor { get; set; } = TimeSpan.FromDays(60);
+
         /// <summary>
         /// "jti" (JWT ID) Claim (default ID is a GUID)
         /// </summary>

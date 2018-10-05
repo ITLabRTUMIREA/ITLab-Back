@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Models;
+using Models.Events.Roles;
+using Models.People.Roles;
+using Models.People.UserProperties;
 
 namespace BackEnd.DataBase
 {
@@ -23,6 +26,11 @@ namespace BackEnd.DataBase
         public DbSet<Event> Events { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<RegisterTokenPair> RegisterTokenPairs { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<EventRole> EventRoles { get; set; }
+        public DbSet<UserProperty> UserProperties { get; set; }
+        public DbSet<UserPropertyType> UserPropertyTypes{ get; set; }
+
 
         public DataBaseContext(DbContextOptions options) : base(options)
         {
@@ -44,25 +52,27 @@ namespace BackEnd.DataBase
                 .HasOne(pe => pe.Equipment)
                 .WithMany(eq => eq.PlaceEquipments)
                 .HasForeignKey(pe => pe.EquipmentId);
+            ConfigurePlaceUserEventRole(modelBuilder);
+        }
 
-
-            modelBuilder.Entity<PlaceUserRole>()
-                .HasKey(t => new { t.UserId, t.PlaceId });
-
-            modelBuilder.Entity<PlaceUserRole>()
-                .HasOne(pur => pur.Place)
-                .WithMany(ev => ev.PlaceUserRoles)
-                .HasForeignKey(pur => pur.PlaceId);
-
-            modelBuilder.Entity<PlaceUserRole>()
+        private static void ConfigurePlaceUserEventRole(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PlaceUserEventRole>()
+                .HasKey(pur => new { pur.UserId, pur.PlaceId, pur.EventRoleId });
+            modelBuilder.Entity<PlaceUserEventRole>()
                 .HasOne(pur => pur.User)
-                .WithMany(u => u.PlaceUserRoles)
+                .WithMany(u => u.PlaceUserEventRoles)
                 .HasForeignKey(pur => pur.UserId);
 
-            modelBuilder.Entity<PlaceUserRole>()
-                .HasOne(pur => pur.Role)
-                .WithMany(r => r.PlaceUserRoles)
-                .HasForeignKey(pur => pur.RoleId);
+            modelBuilder.Entity<PlaceUserEventRole>()
+                .HasOne(pur => pur.Place)
+                .WithMany(p => p.PlaceUserEventRoles)
+                .HasForeignKey(pur => pur.PlaceId);
+
+            modelBuilder.Entity<PlaceUserEventRole>()
+                .HasOne(pur => pur.EventRole)
+                .WithMany(er => er.PlaceUserEventRoles)
+                .HasForeignKey(pur => pur.EventRoleId);
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
@@ -72,7 +82,7 @@ namespace BackEnd.DataBase
                 .Where(e => e.State != EntityState.Deleted)
                 .ToList()
                 .ForEach(e => e.Entity.BeginTime = e.Entity.Shifts?.Min(s => s.BeginTime) ?? e.Entity.BeginTime);
-                
+
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }
