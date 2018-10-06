@@ -13,8 +13,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper.QueryableExtensions;
+using BackEnd.DataBase;
 using BackEnd.Models.Roles;
+using Extensions;
 using Models.People.Roles;
+using Models.PublicAPI.Responses.People;
 
 namespace BackEnd.Controllers
 {
@@ -23,31 +27,41 @@ namespace BackEnd.Controllers
     public class RolesController : AuthorizeController
     {
         private readonly RoleManager<Role> roleManager;
+        private readonly DataBaseContext dbContext;
         private readonly IMapper mapper;
 
         public RolesController(
             RoleManager<Role> roleManager,
             UserManager<User> userManager,
+            DataBaseContext dbContext,
             IMapper mapper) : base(userManager)
         {
             this.roleManager = roleManager;
+            this.dbContext = dbContext;
             this.mapper = mapper;
         }
 
 
-        [HttpGet]
-        public async Task<ListResponse<Role>> GetAsync()
-            => await roleManager.Roles.ToListAsync();
+        [HttpGet("{userId:guid?}")]
+        public async Task<ListResponse<RoleView>> GetAsync(Guid? userId)
+            => await dbContext
+                .Roles
+                .If(userId.HasValue, rls =>
+                    rls.Variable(out var roleNames,
+                            async () => await UserManager.GetRolesAsync(await GetUser(userId)))
+                        .Where(r => roleNames.Contains(r.Name)))
+                .ProjectTo<RoleView>()
+                .ToListAsync();
 
         [HttpPost("{userId}/{roleId}")]
         public async Task<OneObjectResponse<bool>> AttachToRole(Guid userId, Guid roleId)
         {
             var role = await roleManager.FindByIdAsync(roleId.ToString()) ??
                        throw ResponseStatusCode.NotFound.ToApiException();
-            var user = await userManager.FindByIdAsync(userId.ToString()) ??
+            var user = await UserManager.FindByIdAsync(userId.ToString()) ??
                        throw ResponseStatusCode.NotFound.ToApiException();
 
-            var addRoleResult = await userManager.AddToRoleAsync(user, role.Name);
+            var addRoleResult = await UserManager.AddToRoleAsync(user, role.Name);
             return addRoleResult.Succeeded;
         }
 
@@ -56,10 +70,10 @@ namespace BackEnd.Controllers
         {
             var role = await roleManager.FindByIdAsync(roleId.ToString()) ??
                        throw ResponseStatusCode.NotFound.ToApiException();
-            var user = await userManager.FindByIdAsync(userId.ToString()) ??
+            var user = await UserManager.FindByIdAsync(userId.ToString()) ??
                        throw ResponseStatusCode.NotFound.ToApiException();
 
-            var addRoleResult = await userManager.RemoveFromRoleAsync(user, role.Name);
+            var addRoleResult = await UserManager.RemoveFromRoleAsync(user, role.Name);
             return addRoleResult.Succeeded;
         }
     }
