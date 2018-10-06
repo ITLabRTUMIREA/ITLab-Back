@@ -18,6 +18,8 @@ using Models.PublicAPI.Responses.Equipment;
 using AutoMapper.QueryableExtensions;
 using Models.PublicAPI.Requests;
 using AutoMapper;
+using BackEnd.Models.Roles;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -58,40 +60,41 @@ namespace BackEnd.Controllers.Equipments
                 .ToListAsync();
         }
 
+        [RequireRole(RoleNames.CanEditEquipmentOwner)]
         [HttpPost("{userId?}")]
         public async Task<OneObjectResponse<EquipmentView>> Post(
             [FromRoute]Guid? userId,
-            [FromBody] IdRequest equimentIdRequest)
+            [FromBody] IdRequest equipmentIdRequest)
         {
             var uId = await GetUserId(userId);
-            var targerEquipment = await dataBaseContext
+            var targetEquipment = await dataBaseContext
                 .Equipments
-                .SingleOrDefaultAsync(e => e.Id == equimentIdRequest.Id)
+                .SingleOrDefaultAsync(e => e.Id == equipmentIdRequest.Id)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-            if (targerEquipment.OwnerId.HasValue && targerEquipment.OwnerId != uId)
+            if (targetEquipment.OwnerId.HasValue && targetEquipment.OwnerId != uId)
                 throw ResponseStatusCode.EquipmentReserved.ToApiException();
 
-            targerEquipment.OwnerId = uId;
+            targetEquipment.OwnerId = uId;
             await dataBaseContext.SaveChangesAsync();
-            return mapper.Map<EquipmentView>(targerEquipment);
+            return mapper.Map<EquipmentView>(targetEquipment);
         }
-
+        [RequireRole(RoleNames.CanEditEquipmentOwner)]
         [HttpDelete("{userId?}")]
         public async Task<OneObjectResponse<EquipmentView>> Delete(
             [FromRoute]Guid? userId,
-            [FromBody] IdRequest equimentIdRequest)
+            [FromBody] IdRequest equipmentIdRequest)
         {
             var uId = await GetUserId(userId);
-            var targerEquipment = await dataBaseContext
+            var targetEquipment = await dataBaseContext
                 .Equipments
-                .Where(e => e.Id == equimentIdRequest.Id)
+                .Where(e => e.Id == equipmentIdRequest.Id)
                 .Where(e => e.OwnerId == uId)
                 .SingleOrDefaultAsync()
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
-            targerEquipment.OwnerId = null;
+            targetEquipment.OwnerId = null;
             await dataBaseContext.SaveChangesAsync();
-            return mapper.Map<EquipmentView>(targerEquipment);
+            return mapper.Map<EquipmentView>(targetEquipment);
         }
         private async Task<Guid> GetUserId(Guid? targetId)
         {

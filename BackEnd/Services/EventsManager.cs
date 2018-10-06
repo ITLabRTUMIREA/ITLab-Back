@@ -1,21 +1,17 @@
 ﻿using AutoMapper;
 using BackEnd.DataBase;
-using BackEnd.Exceptions;
 using BackEnd.Extensions;
 using BackEnd.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DataBaseLinks;
 using Models.Events;
-using Models.PublicAPI.Requests.Events.Event;
 using Models.PublicAPI.Responses;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Extensions;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
-using System.Runtime.Versioning;
 using Models.People;
 
 namespace BackEnd.Services
@@ -35,9 +31,6 @@ namespace BackEnd.Services
         }
 
         public IQueryable<Event> Events => dbContext.Events;
-
-        public Task<Event> FindAsync(Guid id)
-            => CheckAndGetEventAsync(id);
 
         public async Task<IQueryable<Event>> AddAsync(EventCreateRequest request)
         {
@@ -117,16 +110,22 @@ namespace BackEnd.Services
                    .FirstOrDefaultAsync(e => e.Id == id)
                    ?? throw ResponseStatusCode.NotFound.ToApiException();
 
-        public async Task WishTo(Guid userId, Guid eventRoleId, Guid placeId)
-        {
-            var targetPlace = await dbContext
-                .Events
-                .SelectMany(e => e.Shifts)
-                .SelectMany(s => s.Places)
-                .Include(p => p.PlaceUserEventRoles)
-                .SingleOrDefaultAsync(p => p.Id == placeId)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+        public Task WishTo(Guid userId, Guid eventRoleId, Guid placeId)
+            => AddUserToEvent(userId, eventRoleId, placeId, UserStatus.Wisher);
 
+        public Task InviteTo(Guid userId, Guid eventRoleId, Guid placeId)
+            => AddUserToEvent(userId, eventRoleId, placeId, UserStatus.Invited);
+
+        private async Task AddUserToEvent(Guid userId, Guid eventRoleId, Guid placeId, UserStatus userStatus)
+        {
+
+            var targetPlace = await dbContext
+                                  .Events
+                                  .SelectMany(e => e.Shifts)
+                                  .SelectMany(s => s.Places)
+                                  .Include(p => p.PlaceUserEventRoles)
+                                  .SingleOrDefaultAsync(p => p.Id == placeId)
+                              ?? throw ResponseStatusCode.NotFound.ToApiException();
             var nowInRole = targetPlace
                 .PlaceUserEventRoles
                 .Any(pur => pur.UserId == userId);
@@ -136,7 +135,7 @@ namespace BackEnd.Services
             {
                 UserId = userId,
                 EventRoleId = eventRoleId,
-                UserStatus = UserStatus.Wisher,
+                UserStatus = userStatus,
                 CreationTime = DateTime.UtcNow
             });
             await dbContext.SaveChangesAsync();

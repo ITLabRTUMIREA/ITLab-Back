@@ -19,9 +19,11 @@ using Extensions;
 using Models.PublicAPI.Responses.Equipment;
 using System.Collections.Generic;
 using BackEnd.Extensions;
+using BackEnd.Models.Roles;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -74,6 +76,7 @@ namespace BackEnd.Controllers.Equipments
             return mapper.Map<EquipmentTypeView>(all.Single(et => et.Id == id));
         }
 
+        [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentTypeView>> Post([FromBody]EquipmentTypeCreateRequest request)
         {
@@ -92,7 +95,7 @@ namespace BackEnd.Controllers.Equipments
             return mapper.Map<EquipmentTypeView>(added.Entity);
         }
 
-
+        [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpPut]
         public async Task<ListResponse<EquipmentTypeView>> Put([FromBody]List<EquipmentTypeEditRequest> request)
         {
@@ -128,6 +131,8 @@ namespace BackEnd.Controllers.Equipments
                 .ToListAsync();
         }
 
+
+        [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpDelete]
         public async Task<OneObjectResponse<Guid>> Delete([FromBody]IdRequest request)
         {

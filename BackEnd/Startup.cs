@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.Authorize;
 using BackEnd.DataBase;
@@ -12,22 +9,17 @@ using BackEnd.Formatting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Models;
 using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using BackEnd.Services;
-using Microsoft.CodeAnalysis.Options;
 using Models.People;
 using System.Runtime.InteropServices;
-using BackEnd.Extensions;
 using BackEnd.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -38,7 +30,6 @@ using Models.People.Roles;
 using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
 using WebApp.Configure.Models.Invokations;
-using Microsoft.AspNetCore.Http;
 using BackEnd.Services.UserProperties;
 
 namespace BackEnd
@@ -73,7 +64,7 @@ namespace BackEnd
                 services
                     .AddEntityFrameworkNpgsql()
                     .AddDbContext<DataBaseContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
+                    options.UseNpgsql(Configuration.GetConnectionString("PostgresDataBase")));
 #else
             services
                     .AddDbContext<DataBaseContext>(options =>

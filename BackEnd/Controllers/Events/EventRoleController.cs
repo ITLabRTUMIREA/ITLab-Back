@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
@@ -19,7 +16,6 @@ using Models.PublicAPI.Requests.Events.Event.Edit.Roles;
 using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Event;
 using Models.PublicAPI.Responses.General;
-using Models.PublicAPI.Responses.People;
 
 namespace BackEnd.Controllers.Events
 {
