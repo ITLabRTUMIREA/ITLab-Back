@@ -81,26 +81,33 @@ namespace BackEnd.Controllers.Equipments
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentView>> PostAsync([FromBody]EquipmentCreateRequest request)
         {
-            await semaphore.WaitAsync();
-            var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
-            await CheckNotExist(request.SerialNumber);
+            try
+            {
+                await semaphore.WaitAsync();
 
-            var newEquipment = mapper.Map<Equipment>(request);
-            newEquipment.Number = type.LastNumber++;
-            if (request.Children?.Count > 0)
-                newEquipment.Children =
-                    await dbContext
-                    .Equipments
-                    .Where(eq => request.Children.Contains(eq.Id))
-                    .ToListAsync();
+                var type = await CheckAndGetEquipmentTypeAsync(request.EquipmentTypeId);
+                await CheckNotExist(request.SerialNumber);
 
-            if (newEquipment.Children?.Count != request.Children?.Count)
-                throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
+                var newEquipment = mapper.Map<Equipment>(request);
+                newEquipment.Number = type.LastNumber++;
+                if (request.Children?.Count > 0)
+                    newEquipment.Children =
+                        await dbContext
+                        .Equipments
+                        .Where(eq => request.Children.Contains(eq.Id))
+                        .ToListAsync();
 
-            await dbContext.Equipments.AddAsync(newEquipment);
-            await dbContext.SaveChangesAsync();
-            semaphore.Release();
-            return mapper.Map<EquipmentView>(newEquipment);
+                if (newEquipment.Children?.Count != request.Children?.Count)
+                    throw ResponseStatusCode.IncorrectEquipmentIds.ToApiException();
+
+                await dbContext.Equipments.AddAsync(newEquipment);
+                await dbContext.SaveChangesAsync();
+                return mapper.Map<EquipmentView>(newEquipment);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
 
         }
 

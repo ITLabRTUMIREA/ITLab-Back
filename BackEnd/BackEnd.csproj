@@ -34,8 +34,6 @@
     </Content>
   </ItemGroup>
   <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Shema.json" />
-    </VisualStudio>
+    <VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" /></VisualStudio>
   </ProjectExtensions>
 </Project>

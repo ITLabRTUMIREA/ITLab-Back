@@ -175,9 +175,9 @@ namespace BackEnd
             services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
 
 
-            //services.AddWebAppConfigure()
-                    //.AddTransientConfigure<DBInitService>()
-                    //.AddTransientConfigure<LoadCustomPropertiesService>();
+            services.AddWebAppConfigure()
+                    .AddTransientConfigure<DBInitService>()
+                    .AddTransientConfigure<LoadCustomPropertiesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -190,7 +190,7 @@ namespace BackEnd
                     .AllowAnyMethod()
                     .AllowAnyOrigin()
                     .AllowCredentials());
-            //app.UseWebAppConfigure();
+            app.UseWebAppConfigure();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
