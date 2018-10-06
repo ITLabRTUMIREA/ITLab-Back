@@ -29,19 +29,27 @@ namespace BackEnd.DataBase
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EventRole> EventRoles { get; set; }
         public DbSet<UserProperty> UserProperties { get; set; }
-        public DbSet<UserPropertyType> UserPropertyTypes{ get; set; }
+        public DbSet<UserPropertyType> UserPropertyTypes { get; set; }
 
 
         public DataBaseContext(DbContextOptions options) : base(options)
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
+            ConfigurePlaceEquipment(builder);
+            ConfigurePlaceUserEventRole(builder);
+            ConfigureEquipmentType(builder);
+        }
+
+
+        private static void ConfigurePlaceEquipment(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<PlaceEquipment>()
-                .HasKey(t => new { t.EquipmentId, t.PlaceId });
+               .HasKey(t => new { t.EquipmentId, t.PlaceId });
 
             modelBuilder.Entity<PlaceEquipment>()
                 .HasOne(pe => pe.Place)
@@ -52,7 +60,6 @@ namespace BackEnd.DataBase
                 .HasOne(pe => pe.Equipment)
                 .WithMany(eq => eq.PlaceEquipments)
                 .HasForeignKey(pe => pe.EquipmentId);
-            ConfigurePlaceUserEventRole(modelBuilder);
         }
 
         private static void ConfigurePlaceUserEventRole(ModelBuilder modelBuilder)
@@ -73,6 +80,19 @@ namespace BackEnd.DataBase
                 .HasOne(pur => pur.EventRole)
                 .WithMany(er => er.PlaceUserEventRoles)
                 .HasForeignKey(pur => pur.EventRoleId);
+        }
+
+        private static void ConfigureEquipmentType(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EquipmentType>()
+                .HasMany(et => et.Children)
+                .WithOne(et => et.Parent)
+                .HasForeignKey(et => et.ParentId);
+
+            modelBuilder.Entity<EquipmentType>()
+                .HasMany(et => et.AllChildren)
+                .WithOne(et => et.Root)
+                .HasForeignKey(et => et.RootId);
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())

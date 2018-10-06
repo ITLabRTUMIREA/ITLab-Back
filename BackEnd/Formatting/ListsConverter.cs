@@ -7,33 +7,36 @@ using StackExchange.Redis;
 
 namespace BackEnd.Formatting
 {
-    public class ListsConverter<T, V> : ITypeConverter<List<T>, List<V>>
-        where T:DeletableRequest
-        
+    public class ListsConverter<T, TV> : ITypeConverter<List<T>, List<TV>>
     {
-        private readonly Func<V, Guid> getId;
-        private readonly Func<T, V, bool> isNeed;
+        private readonly Func<T, Guid> getTId;
+        private readonly Func<TV, Guid> getTvId;
+        private readonly Func<T, bool> needDelete;
+        private readonly Func<T, TV, bool> isNeed;
 
-        public ListsConverter(Func<V, Guid> getId, Func<T, V, bool> isNeed = null)
+        public ListsConverter(Func<TV, Guid> getTvId, Func<T, Guid> getTId = null, Func<T, TV, bool> isNeed = null, Func<T, bool> needDelete = null)
         {
-            this.getId = getId;
+            this.getTvId = getTvId;
+            this.getTId = getTId ?? (source => source is IdRequest idReq ? idReq.Id : throw new ArgumentException($"item {source} [{source.GetType()}] should be {typeof(IdRequest)} or func {nameof(getTId)} should be passed"));
+            
             this.isNeed = isNeed;
+            this.needDelete = needDelete ?? (source => source is DeletableRequest deletable ? deletable.Delete : throw new ArgumentException($"item {source} [{source.GetType()}] should be {typeof(DeletableRequest)} or func {nameof(needDelete)} should be passed"));
         }
 
 
-        public List<V> Convert(List<T> source, List<V> destination, ResolutionContext context)
+        public List<TV> Convert(List<T> source, List<TV> destination, ResolutionContext context)
         {
-            Console.WriteLine($"convert {typeof(T).Name} to {typeof(V).Name}");
-            destination = destination ?? new List<V>();
-            var toAdd = new List<V>();
+            Console.WriteLine($"convert {typeof(T).Name} to {typeof(TV).Name}");
+            destination = destination ?? new List<TV>();
+            var toAdd = new List<TV>();
             foreach (var sourceItem in source)
             {
-                if (sourceItem.Delete)
+                if (needDelete(sourceItem))
                 {
-                    destination.RemoveAll(i => getId(i) == sourceItem.Id);
+                    destination.RemoveAll(i => getTvId(i) == getTId(sourceItem));
                     continue;
                 }
-                var destItem = destination.FirstOrDefault(i => getId(i) == sourceItem.Id);
+                var destItem = destination.FirstOrDefault(i => getTvId(i) == getTId(sourceItem));
 
                 if (isNeed?.Invoke(sourceItem, destItem) == false)
                     continue;
@@ -44,7 +47,7 @@ namespace BackEnd.Formatting
                 }
                 else
                 {
-                    toAdd.Add(context.Mapper.Map<V>(sourceItem));
+                    toAdd.Add(context.Mapper.Map<TV>(sourceItem));
                 }
             }
             destination.AddRange(toAdd);

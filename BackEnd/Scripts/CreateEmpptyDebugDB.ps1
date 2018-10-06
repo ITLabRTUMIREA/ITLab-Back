@@ -1,7 +1,8 @@
 ﻿cd ..
-rm -rf Migrations/
-rm -rf DataBase/Migrations
-dotnet ef database drop -f
-dotnet ef migrations add EmptyDebugMigration --no-build
-dotnet ef database update
+Remove-Item -path Migrations\* -Recurse -Force
+Remove-Item DataBase\Migrations* -Recurse -Force
+dotnet ef database drop -f -v
+dotnet ef migrations add EmptyDebugMigration --no-build -v
+dotnet ef database update -v
 git checkout DataBase/Migrations/Production/
+cd Scripts

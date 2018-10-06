@@ -21,7 +21,7 @@ namespace BackEnd.Formatting.MapperProfiles.RequestProfiles
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
             CreateMap<List<EquipmentTypeEditRequest>, List<EquipmentType>>()
-                .ConvertUsing(new ListsConverter<EquipmentTypeEditRequest, EquipmentType>(s => s.Id));
+                .ConvertUsing(new ListsConverter<EquipmentTypeEditRequest, EquipmentType>(s => s.Id, needDelete: _ => false));
         }
     }
 
