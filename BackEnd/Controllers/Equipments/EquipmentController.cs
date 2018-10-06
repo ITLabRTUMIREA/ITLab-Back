@@ -56,7 +56,7 @@ namespace BackEnd.Controllers.Equipments
                 .Equipments
                 .ProjectTo<EquipmentView>()
                 .SingleOrDefaultAsync(eq => eq.Id == id)
-                ?? NotFound<EquipmentView>();
+                ?? throw NotFoundMyApi();
 
         [HttpGet]
         public async Task<ListResponse<CompactEquipmentView>> GetAsync(
@@ -132,7 +132,7 @@ namespace BackEnd.Controllers.Equipments
 
         private async Task<Equipment> CheckAndGetEquipmentAsync(Guid id)
             => await dbContext.Equipments.Include(eq => eq.EquipmentType).FirstOrDefaultAsync(eq => eq.Id == id)
-              ?? NotFound<Equipment>();
+              ?? throw NotFoundMyApi();
 
         private async Task CheckNotExist(string serialNumber)
         {
