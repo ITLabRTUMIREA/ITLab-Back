@@ -66,13 +66,12 @@ namespace BackEnd.Controllers.Equipments
         )
             => await dbContext
                 .Equipments
-                .If(eventId.HasValue,
-                    equipments =>
-                        equipments.Where(eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId)))
-                .If(equipmentTypeId.HasValue,
-                    equipments => equipments.Where(eq => eq.EquipmentTypeId == equipmentTypeId))
-                .IfNotNull(match, equipments => equipments.ForAll(match.Split(' '), (equipments2, matcher) =>
-                        equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher)
+                .WhereIf(eventId.HasValue,eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId))
+                .WhereIf(equipmentTypeId.HasValue,eq => eq.EquipmentTypeId == equipmentTypeId)
+                .IfNotNull(match, equipments => equipments.ForAll(
+                    match.Split(' '), 
+                    (equipments2, matcher) => 
+                        equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher) 
                                                 || eq.EquipmentType.Title.ToUpper().Contains(matcher))))
                 .ProjectTo<CompactEquipmentView>()
                 .ToListAsync();

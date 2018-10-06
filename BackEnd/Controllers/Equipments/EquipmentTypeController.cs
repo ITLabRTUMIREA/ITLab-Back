@@ -148,9 +148,12 @@ namespace BackEnd.Controllers.Equipments
             types.ForEach(t => t.Deep = 0);
             types.ForEach(t => t.Children = types
                           .Where(t1 => t1.ParentId == t.Id)
-                          .WithActions(t1 => t1.Deep++)
                           .ToList());
+            types.ForEach(UpdateDeep);
         }
+
+        private static void UpdateDeep(EquipmentType type)
+            => type?.Children?.WithActions(UpdateDeep).WithActions(t => t.Deep++).Iterate();
 
     }
 }

@@ -11,6 +11,6 @@ namespace Models.PublicAPI.Responses.Equipment
         public string Description { get; set; }
         public Guid? RootId { get; set; }
         public Guid? ParentId { get; set; }
-        public int Deep { get; set; }
+
     }
 }
