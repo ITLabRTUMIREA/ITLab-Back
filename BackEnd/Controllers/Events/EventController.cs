@@ -108,6 +108,14 @@ namespace BackEnd.Controllers.Events
             return eventId;
         }
 
+        [RequireRole(RoleNames.CanEditEvent)]
+        [HttpPost("invitation/{placeId:guid}/{roleId:guid}/{userId:guid}")]
+        public async Task<ResponseBase> Invite(Guid placeId, Guid roleId, Guid userId)
+        {
+            await eventsManager.InviteTo(placeId, roleId, userId);
+            return ResponseStatusCode.OK;
+        }
+
         [HttpPost("invitation/{placeId:guid}/accept")]
         public async Task<ResponseBase> AcceptInvite(Guid placeId)
         {

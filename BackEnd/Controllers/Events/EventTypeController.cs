@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 using Extensions;
 using Models.PublicAPI.Responses.Event;
 using AutoMapper.QueryableExtensions;
+using BackEnd.Models.Roles;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers.Events
 {
@@ -42,9 +44,9 @@ namespace BackEnd.Controllers.Events
            => await dbContext
                 .EventTypes
                 .OrderBy(et => et.Events.Count)
-                .IfNotNull(match, evtypes => 
-                    evtypes.Where(et => et.Title.ToUpper().Contains(match.ToUpper())))
-                .If(!all, evtypes => evtypes.Take(5))
+                .IfNotNull(match, types => 
+                    types.Where(et => et.Title.ToUpper().Contains(match.ToUpper())))
+                .If(!all, types => types.Take(5))
                 .ProjectTo<EventTypeView>()
                 .ToListAsync();
 
@@ -53,6 +55,7 @@ namespace BackEnd.Controllers.Events
         public async Task<OneObjectResponse<EventTypeView>> GetAsync(Guid id)
             => mapper.Map<EventTypeView>(await CheckAndGetEquipmentTypeAsync(id));
 
+        [RequireRole(RoleNames.CanEditEventType)]
         [HttpPost]
         public async Task<OneObjectResponse<EventTypeView>> Post([FromBody]EventTypeCreateRequest request)
         {
@@ -65,7 +68,7 @@ namespace BackEnd.Controllers.Events
             return mapper.Map<EventTypeView>(added.Entity);
         }
 
-
+        [RequireRole(RoleNames.CanEditEventType)]
         [HttpPut]
         public async Task<OneObjectResponse<EventTypeView>> Put([FromBody]EventTypeEditRequest request)
         {
@@ -75,6 +78,7 @@ namespace BackEnd.Controllers.Events
             return mapper.Map<EventTypeView>(now);
         }
 
+        [RequireRole(RoleNames.CanEditEventType)]
         [HttpDelete]
         public async Task<OneObjectResponse<Guid>> Delete([FromBody]IdRequest request)
         {

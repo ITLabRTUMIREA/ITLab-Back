@@ -19,9 +19,11 @@ using Extensions;
 using Models.PublicAPI.Responses.Equipment;
 using System.Collections.Generic;
 using BackEnd.Extensions;
+using BackEnd.Models.Roles;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -51,7 +53,7 @@ namespace BackEnd.Controllers.Equipments
                 .EquipmentTypes
                 .WhereIf(!all, t => t.ParentId == null)
                 .WhereIf(!string.IsNullOrEmpty(match), eq => eq.Title.ToUpper().Contains(match.ToUpper()))
-                .If(!all, eqtypes => eqtypes.Take(5))
+                .If(!all, types => types.Take(5))
                 .ProjectTo<CompactEquipmentTypeView>()
                 .ToListAsync();
 
@@ -74,6 +76,7 @@ namespace BackEnd.Controllers.Equipments
             return mapper.Map<EquipmentTypeView>(all.Single(et => et.Id == id));
         }
 
+        [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpPost]
         public async Task<OneObjectResponse<EquipmentTypeView>> Post([FromBody]EquipmentTypeCreateRequest request)
         {
@@ -92,17 +95,17 @@ namespace BackEnd.Controllers.Equipments
             return mapper.Map<EquipmentTypeView>(added.Entity);
         }
 
-
+        [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpPut]
         public async Task<ListResponse<EquipmentTypeView>> Put([FromBody]List<EquipmentTypeEditRequest> request)
         {
             var ids = request
-                .SelectMany(eter => (eter.Id, eter.ParentId))
+                .SelectMany(editRequest => (editRequest.Id, editRequest.ParentId))
                 .Where(id => id.HasValue)
                 .Select(id => id.Value)
                 .Distinct()
-                .ToArray();
-            var forEditids = await dbContext
+                .ToList();
+            var forEdits = await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
                 .SelectMany(et => et.Id, et => et.RootId)
@@ -110,18 +113,17 @@ namespace BackEnd.Controllers.Equipments
                 .Select(id => id.Value)
                 .Distinct()
                 .ToListAsync();
-            ids = ids.Concat(forEditids).ToArray();
+            ids.AddRange(forEdits);
+            ids = ids.Distinct().ToList();
             var forEdit = await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id) || ids.Contains(et.RootId.Value))
                 .ToListAsync();
 
-            if (ids.Length != forEdit.Count)
-                throw ResponseStatusCode.IncorrectRequestData.ToApiException($"incorrect ids, wait {ids.Length}, found {forEdit.Count}");
-
             mapper.Map(request, forEdit);
             BuildTree(forEdit);
             var result = await dbContext.SaveChangesAsync();
+            logger.LogDebug($"saved {result} items");
             return await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
@@ -129,23 +131,34 @@ namespace BackEnd.Controllers.Equipments
                 .ToListAsync();
         }
 
+
+        [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpDelete]
         public async Task<OneObjectResponse<Guid>> Delete([FromBody]IdRequest request)
         {
-            var now = await dbContext.EquipmentTypes.FindAsync(request.Id) ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
-            dbContext.Remove(now);
+            var now = await dbContext
+                          .EquipmentTypes
+                          .Where(et => et.Id == request.Id)
+                          .Select(et => new { equipmentType = et, childsCount = et.Children.Count, equipmentCount = et.Equipment.Count })
+                          .SingleOrDefaultAsync() ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+            if (now.childsCount == 0 || now.equipmentCount == 0)
+                throw ResponseStatusCode.ChildrenExists.ToApiException();
+            dbContext.EquipmentTypes.Remove(now.equipmentType);
             await dbContext.SaveChangesAsync();
-            return now.Id;
+            return now.equipmentType.Id;
         }
 
-        private void BuildTree(List<EquipmentType> types)
+        private static void BuildTree(List<EquipmentType> types)
         {
             types.ForEach(t => t.Deep = 0);
             types.ForEach(t => t.Children = types
                           .Where(t1 => t1.ParentId == t.Id)
-                          .WithActions(t1 => t1.Deep++)
                           .ToList());
+            types.ForEach(UpdateDeep);
         }
+
+        private static void UpdateDeep(EquipmentType type)
+            => type?.Children?.WithActions(UpdateDeep).WithActions(t => t.Deep++).Iterate();
 
     }
 }

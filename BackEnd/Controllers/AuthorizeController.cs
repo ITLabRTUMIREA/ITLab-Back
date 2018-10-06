@@ -15,15 +15,17 @@ namespace BackEnd.Controllers
 {
     public class AuthorizeController : Controller
     {
-        protected readonly UserManager<User> userManager;
+        protected readonly UserManager<User> UserManager;
 
         public AuthorizeController(UserManager<User> userManager)
         {
-            this.userManager = userManager;
+            UserManager = userManager;
         }
-        protected Guid UserId => Guid.Parse(userManager.GetUserId(User));
+        protected Guid UserId => Guid.Parse(UserManager.GetUserId(User));
         protected async Task<User> GetCurrentUser()
-            => await userManager.FindByIdAsync(userManager.GetUserId(User));
+            => await UserManager.FindByIdAsync(UserManager.GetUserId(User));
+        protected async Task<User> GetUser(Guid? userId)
+            => await UserManager.FindByIdAsync(userId.ToString());
 
         protected static Exception NotFoundMyApi() => ResponseStatusCode.NotFound.ToApiException();
     };

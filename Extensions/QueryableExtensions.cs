@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Extensions
 {
@@ -33,6 +34,16 @@ namespace Extensions
         {
             if (predicate(value))
                 value = defaultValue;
+            return source;
+        }
+
+        public static IQueryable<T> Variable<T, TV>(
+            this IQueryable<T> source,
+            out TV variable,
+            Func<Task<TV>> variableCreator
+        )
+        {
+            variable = variableCreator().Result;
             return source;
         }
 
