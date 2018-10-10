@@ -62,16 +62,19 @@ namespace BackEnd.Controllers.Equipments
         public async Task<ListResponse<CompactEquipmentView>> GetAsync(
             Guid? eventId,
             Guid? equipmentTypeId,
-            string match
+            string match,
+            bool all
         )
             => await dbContext
                 .Equipments
-                .WhereIf(eventId.HasValue,eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId))
-                .WhereIf(equipmentTypeId.HasValue,eq => eq.EquipmentTypeId == equipmentTypeId)
+                .WhereIf(string.IsNullOrEmpty(match) && !eventId.HasValue && !equipmentTypeId.HasValue && !all,
+                         eq => eq.ParentId == null)
+                .WhereIf(eventId.HasValue, eq => eq.PlaceEquipments.Any(pe => pe.Place.Shift.EventId == eventId))
+                .WhereIf(equipmentTypeId.HasValue, eq => eq.EquipmentTypeId == equipmentTypeId)
                 .IfNotNull(match, equipments => equipments.ForAll(
-                    match.Split(' '), 
-                    (equipments2, matcher) => 
-                        equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher) 
+                    match.Split(' '),
+                    (equipments2, matcher) =>
+                        equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(matcher)
                                                 || eq.EquipmentType.Title.ToUpper().Contains(matcher))))
                 .ProjectTo<CompactEquipmentView>()
                 .ToListAsync();
