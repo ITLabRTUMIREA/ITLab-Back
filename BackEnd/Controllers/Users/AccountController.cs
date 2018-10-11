@@ -37,7 +37,7 @@ namespace BackEnd.Controllers.Users
         [HttpPost]
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {
-            if (!await registerTokens.IsCorrectToken(account.Email, account.AccessToken))
+            if (!await registerTokens.IsCorrectRegisterToken(account.Email, account.AccessToken))
                 return ResponseStatusCode.IncorrectAccessToken;
             var user = mapper.Map<User>(account);
             user.EmailConfirmed = true;
