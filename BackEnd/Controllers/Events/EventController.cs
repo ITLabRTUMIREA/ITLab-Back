@@ -43,7 +43,7 @@ namespace BackEnd.Controllers.Events
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
                 .Events
-                .IfNotNull(begin, events => events.Where(e => e.BeginTime >= begin))
+                .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
                 .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
                 .AttachUserId(UserId)

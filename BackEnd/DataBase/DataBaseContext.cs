@@ -101,8 +101,11 @@ namespace BackEnd.DataBase
                 .Entries<Event>()
                 .Where(e => e.State != EntityState.Deleted)
                 .ToList()
-                .ForEach(e => e.Entity.BeginTime = e.Entity.Shifts?.Min(s => s.BeginTime) ?? e.Entity.BeginTime);
-
+                .ForEach(e => 
+                {
+                    e.Entity.BeginTime = e.Entity.Shifts?.Min(s => s.BeginTime) ?? e.Entity.BeginTime;
+                    e.Entity.EndTime = e.Entity.Shifts?.Max(s => s.EndTime) ?? e.Entity.EndTime;
+                });
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }
