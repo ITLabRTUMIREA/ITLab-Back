@@ -200,10 +200,12 @@ namespace BackEnd
                     .AllowAnyOrigin()
                     .AllowCredentials());
             app.UseWebAppConfigure();
-            app.UseSwagger();
+            app.UseSwagger(c => {
+                c.RouteTemplate = "api/{documentName}/swagger.json";
+            });
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint("/api/v1/swagger.json", "My API V1");
                 c.RoutePrefix = "api";
             });
             app.UseSignalR(routes =>
