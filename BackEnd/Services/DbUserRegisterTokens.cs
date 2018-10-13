@@ -15,10 +15,10 @@ namespace BackEnd.Services
     {
         private readonly DataBaseContext dbContext;
         private readonly List<RegisterTokenPair> defaultPairs;
-        private const string availableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        private static readonly Random random = new Random();
-        private Expression<Func<RegisterTokenPair, bool>> EqualsChecker(string email, string token)
-            => (RegisterTokenPair rtp) => rtp.Email == email && rtp.Token == token;
+        private const string AvailableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        private static readonly Random Random = new Random();
+        private static Expression<Func<RegisterTokenPair, bool>> EqualsChecker(string email, string token)
+            => rtp => rtp.Email == email && rtp.Token == token;
 
         public DbUserRegisterTokens(
             DataBaseContext dbContext,
@@ -41,7 +41,7 @@ namespace BackEnd.Services
             return code;
         }
 
-        public async Task<bool> IsCorrectToken(string email, string token)
+        public async Task<bool> IsCorrectRegisterToken(string email, string token)
             => defaultPairs.Any(EqualsChecker(email, token).Compile()) 
                            || await dbContext.RegisterTokenPairs.AnyAsync(EqualsChecker(email, token));
 
@@ -55,8 +55,21 @@ namespace BackEnd.Services
             await dbContext.SaveChangesAsync();
         }
 
-        private string RandomString(int length)
-            => new string(Enumerable.Repeat(availableChars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+        private static readonly HashSet<(Guid id, string token)> inMemoryVkTokens = new HashSet<(Guid id, string token)>();
+
+        public Task<string> AddVkToken(Guid userId)
+        {
+            var token = RandomString(20);
+            inMemoryVkTokens.Add((userId, token));
+            return Task.FromResult(token);
+        }
+
+        public Task<Guid?> CheckVkToken(string token)
+            => Task.FromResult(inMemoryVkTokens.Any(pair => token == pair.token) ? 
+                inMemoryVkTokens.FirstOrDefault(pair => token == pair.token).id : default(Guid?));
+
+        private static string RandomString(int length)
+            => new string(Enumerable.Repeat(AvailableChars, length)
+                .Select(s => s[Random.Next(s.Length)]).ToArray());
     }
 }

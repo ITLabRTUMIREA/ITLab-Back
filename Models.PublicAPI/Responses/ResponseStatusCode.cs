@@ -27,6 +27,7 @@
         UserNowInSystem,
         EventRoleNameExist,
         Forbidden,
-        ChildrenExists
+        ChildrenExists,
+        IncorrectVkToken
     }
 }

@@ -8,7 +8,11 @@ namespace BackEnd.Services.Interfaces
     public interface IUserRegisterTokens
     {
         Task<string> AddRegisterToken(string email);
-        Task<bool> IsCorrectToken(string email, string token);
+        Task<bool> IsCorrectRegisterToken(string email, string token);
         Task RemoveToken(string email);
+
+
+        Task<string> AddVkToken(Guid userId);
+        Task<Guid?> CheckVkToken(string token);
     }
 }

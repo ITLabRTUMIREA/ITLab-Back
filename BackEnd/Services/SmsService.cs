@@ -12,7 +12,7 @@ namespace BackEnd.Services
         const string accountSid = "AC3bfdaa516138e702b0b914bbd46387b4";
         const string authToken = "457c8801110c2bf2e440e3e6ea41bbd5";
 
-        public async Task SendSMSAsync(AccountCreateRequest model)
+        public Task SendSMSAsync(AccountCreateRequest model)
         {
             throw new NotImplementedException();
             //int code = new Random().Next(10000, 90000);
