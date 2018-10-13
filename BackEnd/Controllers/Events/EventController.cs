@@ -17,7 +17,9 @@ using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Extensions;
 using BackEnd.Models.Roles;
+using BackEnd.Services.Notify;
 using Models.People.Roles;
+using Models.PublicAPI.NotifyRequests;
 using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Controllers.Events
@@ -27,14 +29,17 @@ namespace BackEnd.Controllers.Events
     public class EventController : AuthorizeController
     {
         private readonly IEventsManager eventsManager;
+        private readonly INotifier notifier;
 
         public EventController(
             UserManager<User> userManager,
             IEventsManager eventsManager,
             ILogger<EventTypeController> logger,
-            IMapper mapper) : base(userManager)
+            IMapper mapper,
+            INotifier notifier) : base(userManager)
         {
             this.eventsManager = eventsManager;
+            this.notifier = notifier;
         }
 
         [HttpGet]
@@ -86,6 +91,7 @@ namespace BackEnd.Controllers.Events
                 .FirstOrDefaultAsync(ev => ev.Id == id)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
+        [Notify(NotifyType.EventNew)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost]
         public async Task<OneObjectResponse<EventView>> PostAsync([FromBody] EventCreateRequest request)

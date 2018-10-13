@@ -55,7 +55,7 @@ namespace BackEnd.Services
             await dbContext.SaveChangesAsync();
         }
 
-        private readonly HashSet<(Guid id, string token)> inMemoryVkTokens = new HashSet<(Guid id, string token)>();
+        private static readonly HashSet<(Guid id, string token)> inMemoryVkTokens = new HashSet<(Guid id, string token)>();
 
         public Task<string> AddVkToken(Guid userId)
         {

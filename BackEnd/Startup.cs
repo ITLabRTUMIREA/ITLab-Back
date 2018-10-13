@@ -29,8 +29,11 @@ using BackEnd.Models.Settings;
 using Models.People.Roles;
 using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
+using BackEnd.Services.Notify;
 using WebApp.Configure.Models.Invokations;
 using BackEnd.Services.UserProperties;
+using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 
 namespace BackEnd
 {
@@ -75,6 +78,7 @@ namespace BackEnd
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
+            services.Configure<NotifierSettings>(Configuration.GetSection(nameof(NotifierSettings)));
 
             services.AddMvc(options =>
             {
@@ -169,6 +173,14 @@ namespace BackEnd
             services.AddWebAppConfigure()
                     .AddTransientConfigure<DBInitService>()
                     .AddTransientConfigure<LoadCustomPropertiesService>();
+
+
+            services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
+            {
+                var configs = provider.GetService<IOptions<NotifierSettings>>();
+                client.BaseAddress = new Uri(configs.Value.Host);
+            });
+            services.AddTransient<INotifier, Notifier>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
