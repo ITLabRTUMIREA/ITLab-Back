@@ -32,7 +32,7 @@ namespace BackEnd.Controllers
                 .Select(v => (byte)v)
                 .ToArray();
 
-        private string RoleString(params RoleNames[] roleNames)
+        private static string RoleString(params RoleNames[] roleNames)
         {
             var rolesCount = Enum.GetNames(typeof(RoleNames)).Length;
             var bufferLength = rolesCount / 8
@@ -48,19 +48,15 @@ namespace BackEnd.Controllers
             return Convert.ToBase64String(buffer);
         }
 
-        private IEnumerable<RoleNames> GetNames(string encoded)
+        private static IEnumerable<RoleNames> GetNames(string encoded)
         {
             var buffer = Convert.FromBase64String(encoded);
             Console.WriteLine("length: " + buffer.Length);
             Console.WriteLine($"buffer 2: {string.Join(',', buffer)}");
-            var roles = new List<RoleNames>();
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                //TODO decode all bytes
-            }
-
-
-            return roles;
+            for (var i = 0; i < buffer.Length; i++)
+            for (var j = 0; j < powers.Length; j++)
+                if ((buffer[i] & powers[j]) != 0)
+                    yield return (RoleNames) (i * 8 + j);
         }
     }
 }
