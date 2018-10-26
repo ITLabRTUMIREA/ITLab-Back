@@ -10,5 +10,6 @@ namespace Models.PublicAPI.Responses.Login
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
         public UserView User { get; set; }
+        public List<string> Roles { get; set; }
     }
 }

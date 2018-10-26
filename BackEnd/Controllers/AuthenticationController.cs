@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.Authorize;
@@ -84,12 +85,14 @@ namespace BackEnd.Controllers
 
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
         {
-            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), await UserManager.GetRolesAsync(user));
+            var roles = await UserManager.GetRolesAsync(user);
+            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), roles);
             var loginInfo = new LoginResponse
             {
                 User = mapper.Map<UserView>(user),
                 AccessToken = jwtFactory.GenerateAccessToken(user.UserName, identity),
-                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent)
+                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent),
+                Roles = roles.ToList()
             };
             return loginInfo;
         }
