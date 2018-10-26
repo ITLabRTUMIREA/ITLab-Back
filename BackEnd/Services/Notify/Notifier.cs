@@ -27,7 +27,8 @@ namespace BackEnd.Services.Notify
         {
             var content = JsonConvert.SerializeObject(new NotifyRequest<EventView> {Type = NotifyType.EventNew.ToString(), Data = eventVew}, new JsonSerializerSettings
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc
             });
             var result = await httpClient.PostAsync("", new StringContent(content, Encoding.UTF8, "application/json"));
             if (result.StatusCode != HttpStatusCode.OK)
