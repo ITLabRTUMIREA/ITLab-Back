@@ -34,6 +34,7 @@ using WebApp.Configure.Models.Invokations;
 using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace BackEnd
 {
@@ -157,6 +158,11 @@ namespace BackEnd
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "IT Lab develop API", Version = "v1" });
+            });
+
             services.AddCors();
             services.AddSignalR();
 
@@ -194,10 +200,14 @@ namespace BackEnd
                     .AllowAnyOrigin()
                     .AllowCredentials());
             app.UseWebAppConfigure();
-            if (env.IsDevelopment())
+            app.UseSwagger(c => {
+                c.RouteTemplate = "api/{documentName}/swagger.json";
+            });
+            app.UseSwaggerUI(c =>
             {
-                app.UseDeveloperExceptionPage();
-            }
+                c.SwaggerEndpoint("/api/v1/swagger.json", "My API V1");
+                c.RoutePrefix = "api";
+            });
             app.UseSignalR(routes =>
             {
                 routes.MapHub<MirrorHub>("/chatHub");
