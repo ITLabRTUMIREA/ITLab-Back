@@ -16,10 +16,10 @@ namespace BackEnd.Services.Notify
         {
             this.logger = logger;
         }
-        public Task AddNewEvent(EventView eventVew)
+        public Task Notify(NotifyType notifyType, object data)
         {
             var message = "Event Add New Event, content: \n"
-                + JsonConvert.SerializeObject(eventVew, Newtonsoft.Json.Formatting.Indented);
+                + JsonConvert.SerializeObject(new { notifyType, data }, Newtonsoft.Json.Formatting.Indented);
             logger.LogInformation(message);
             return Task.CompletedTask;
         }

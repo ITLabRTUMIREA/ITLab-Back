@@ -35,7 +35,7 @@ namespace BackEnd.Services.Notify
         }
         public async Task Notify(NotifyType notifyType, object eventVew)
         {
-            var content = JsonConvert.SerializeObject(new NotifyRequest<object> {Type = notifyType, Data = eventVew}, SerializeSettings);
+            var content = JsonConvert.SerializeObject(new NotifyRequest<object> { Type = notifyType, Data = eventVew }, SerializeSettings);
             var result = await httpClient.PostAsync("", new StringContent(content, Encoding.UTF8, "application/json"));
             if (result.StatusCode != HttpStatusCode.OK)
                 logger.LogWarning($"error while send info to notify hub (bot) statusCode: {result.StatusCode}, base address: {httpClient.BaseAddress}, content: {content}");

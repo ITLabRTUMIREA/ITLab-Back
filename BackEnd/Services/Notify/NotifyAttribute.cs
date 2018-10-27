@@ -42,7 +42,16 @@ namespace BackEnd.Services.Notify
                 var resultContext = await next();
                 if (!(resultContext.Result is ObjectResult result))
                     return;
-                await notifier.Notify(type, result.Value);
+                if (result.Value == null)
+                    return;
+                var targetProperty = result.Value.GetType().GetProperty("Data");
+                if (targetProperty == null)
+                {
+                    await notifier.Notify(type, result.Value);
+                    return;
+                }
+                var date = targetProperty.GetValue(result.Value);
+                await notifier.Notify(type, date);
             }
         }
     }

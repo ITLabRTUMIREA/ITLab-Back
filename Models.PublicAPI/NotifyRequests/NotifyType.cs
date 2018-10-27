@@ -6,6 +6,8 @@ namespace Models.PublicAPI.NotifyRequests
 {
     public enum NotifyType
     {
-        EventNew
+        EventNew,
+        EventChange,
+        EventConfirm
     }
 }

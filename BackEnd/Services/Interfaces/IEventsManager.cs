@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Models.DataBaseLinks;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 
@@ -19,7 +20,7 @@ namespace BackEnd.Services.Interfaces
         Task InviteTo(Guid userId, Guid eventRoleId, Guid placeId);
         Task AcceptInvite(Guid placeId, Guid userId);
         Task RejectInvite(Guid placeId, Guid userId);
-        Task AcceptWish(Guid placeId, Guid userId);
+        Task<IQueryable<PlaceUserEventRole>> AcceptWish(Guid placeId, Guid userId);
         Task RejectWish(Guid placeId, Guid userId);
     }
 }

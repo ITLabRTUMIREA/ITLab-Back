@@ -187,7 +187,10 @@ namespace BackEnd
                 var configs = provider.GetService<IOptions<NotifierSettings>>();
                 client.BaseAddress = new Uri(configs.Value.Host);
             });
-            services.AddTransient<INotifier, Notifier>();
+            if (Configuration.GetValue<bool>("UseConsoleLogger"))
+                services.AddTransient<INotifier, DebugLogNotifier>();
+            else
+                services.AddTransient<INotifier, Notifier>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

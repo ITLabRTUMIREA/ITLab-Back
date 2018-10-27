@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Models.People.Roles;
@@ -25,14 +24,11 @@ namespace BackEnd.Models.Roles
             var roles = GetNames(targetClaim.Value);
             if (roles.Intersect(needRoles).Count() != needRoles.Length)
                 context.Result = new ForbidResult();
-
         }
 
         private static IEnumerable<RoleNames> GetNames(string encoded)
         {
             var buffer = Convert.FromBase64String(encoded);
-            Console.WriteLine("length: " + buffer.Length);
-            Console.WriteLine($"buffer 2: {string.Join(',', buffer)}");
             for (var i = 0; i < buffer.Length; i++)
             for (var j = 0; j < Powers.Length; j++)
                 if ((buffer[i] & Powers[j]) != 0)
