@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
@@ -35,6 +35,7 @@ using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using Swashbuckle.AspNetCore.Swagger;
+using Extensions;
 
 namespace BackEnd
 {
@@ -186,7 +187,10 @@ namespace BackEnd
                 var configs = provider.GetService<IOptions<NotifierSettings>>();
                 client.BaseAddress = new Uri(configs.Value.Host);
             });
-            services.AddTransient<INotifier, Notifier>();
+            if (Configuration.GetValue<bool>("UseConsoleLogger"))
+                services.AddTransient<INotifier, DebugLogNotifier>();
+            else
+                services.AddTransient<INotifier, Notifier>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

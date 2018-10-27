@@ -157,12 +157,14 @@ namespace BackEnd.Services
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task AcceptWish(Guid placeId, Guid userId)
+        public async Task<IQueryable<PlaceUserEventRole>> AcceptWish(Guid placeId, Guid userId)
         {
             var targetPlaceUserRole = await FindPlaceUserRole(placeId, userId, UserStatus.Wisher);
             targetPlaceUserRole.UserStatus = UserStatus.Accepted;
             targetPlaceUserRole.DoneTime = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
+            return PlaceUserEventRoles.Where(pue =>
+                pue.PlaceId == placeId && pue.UserId == userId && pue.UserStatus == UserStatus.Accepted);
         }
 
         public async Task RejectWish(Guid placeId, Guid userId)

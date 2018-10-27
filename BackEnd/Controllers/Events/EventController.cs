@@ -98,7 +98,7 @@ namespace BackEnd.Controllers.Events
             => await (await eventsManager.AddAsync(request))
                 .ProjectTo<EventView>()
                 .SingleAsync();
-
+        [Notify(NotifyType.EventChange)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPut]
         public async Task<OneObjectResponse<EventView>> PutAsync([FromBody] EventEditRequest request)
@@ -144,13 +144,14 @@ namespace BackEnd.Controllers.Events
             return ResponseStatusCode.OK;
         }
 
+        [Notify(NotifyType.EventConfirm)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/accept")]
-        public async Task<ResponseBase> AcceptWish(Guid placeId, Guid userId)
-        {
-            await eventsManager.AcceptWish(placeId, userId);
-            return ResponseStatusCode.OK;
-        }
+        public async Task<OneObjectResponse<WisherEventView>> AcceptWish(Guid placeId, Guid userId)
+            => await (await eventsManager
+                    .AcceptWish(placeId, userId))
+                    .ProjectTo<WisherEventView>()
+                    .SingleOrDefaultAsync();
 
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/reject")]
