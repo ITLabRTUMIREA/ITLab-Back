@@ -19,6 +19,7 @@ using BackEnd.Extensions;
 using Models.PublicAPI.Responses.People;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers
 {
@@ -86,7 +87,7 @@ namespace BackEnd.Controllers
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
         {
             var roles = await UserManager.GetRolesAsync(user);
-            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), roles);
+            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), roles.Select(r => Enum.Parse(typeof(RoleNames), r)).Cast<RoleNames>());
             var loginInfo = new LoginResponse
             {
                 User = mapper.Map<UserView>(user),

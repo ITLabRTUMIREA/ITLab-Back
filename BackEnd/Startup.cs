@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
@@ -35,6 +35,7 @@ using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using Swashbuckle.AspNetCore.Swagger;
+using Extensions;
 
 namespace BackEnd
 {

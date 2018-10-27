@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Models.People;
+using Models.People.Roles;
 
 namespace BackEnd.Authorize
 {
@@ -13,7 +14,7 @@ namespace BackEnd.Authorize
         Task<string> GenerateRefreshToken(Guid userId, string UserAgent);
         Task<RefreshToken> GetRefreshToken(string refreshToken);
         IQueryable<RefreshToken> RefreshTokens(Guid userId);
-        ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<string> roles);
+        ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<RoleNames> roles);
         Task DeleteRefreshTokens(List<Guid> tokenIds);
     }
 }
