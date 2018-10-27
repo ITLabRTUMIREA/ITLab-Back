@@ -42,14 +42,7 @@ namespace BackEnd.Services.Notify
                 var resultContext = await next();
                 if (!(resultContext.Result is ObjectResult result))
                     return;
-                switch (type)
-                {
-                    case NotifyType.EventNew:
-                        await notifier.AddNewEvent((result.Value as OneObjectResponse<EventView>)?.Data);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type));
-                }
+                await notifier.Notify(type, result.Value);
             }
         }
     }
