@@ -178,8 +178,10 @@ namespace BackEnd
 
 
             services.AddWebAppConfigure()
-                    .AddTransientConfigure<DBInitService>()
-                    .AddTransientConfigure<LoadCustomPropertiesService>();
+                .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
+                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
+                .AddTransientConfigure<LoadCustomPropertiesService>()
+                ;
 
 
             services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
@@ -204,7 +206,8 @@ namespace BackEnd
                     .AllowAnyOrigin()
                     .AllowCredentials());
             app.UseWebAppConfigure();
-            app.UseSwagger(c => {
+            app.UseSwagger(c =>
+            {
                 c.RouteTemplate = "api/{documentName}/swagger.json";
             });
             app.UseSwaggerUI(c =>

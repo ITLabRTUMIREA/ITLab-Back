@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using WebApp.Configure.Models.Configure.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,10 @@ namespace WebApp.Configure.Models
             serviceCollection.AddSingleton<IWorkPathGetter, WorkPathState>();
             serviceCollection.AddHostedService<ConfigureExecutorHostedService>();
         }
+
+        public ConfigureBuilder AddTransientConfigure<T>(bool condition)
+            where T : class, IConfigureWork
+            => condition ? AddTransientConfigure<T>() : this;
 
         public ConfigureBuilder AddTransientConfigure<T>()
             where T : class, IConfigureWork

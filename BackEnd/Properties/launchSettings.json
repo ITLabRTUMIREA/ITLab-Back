@@ -3,8 +3,8 @@
     "BackEnd": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DB_INIT": true 
+        "DB_INIT": "true",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000/"
     }

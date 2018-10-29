@@ -65,7 +65,7 @@ namespace BackEnd.DataBase
         private static void ConfigurePlaceUserEventRole(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PlaceUserEventRole>()
-                .HasKey(pur => new { pur.UserId, pur.PlaceId, pur.EventRoleId });
+                .HasKey(pur => new { pur.UserId, pur.PlaceId });
             modelBuilder.Entity<PlaceUserEventRole>()
                 .HasOne(pur => pur.User)
                 .WithMany(u => u.PlaceUserEventRoles)
