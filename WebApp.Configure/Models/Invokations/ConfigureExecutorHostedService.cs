@@ -64,9 +64,9 @@ namespace WebApp.Configure.Models.Invokations
                 var completed = await Task.WhenAny(tasks);
                 tasks.Remove(completed);
 
-
-                workPathState.SetHandlePath(builders
-                    .Select(b => b.WorkHandlePath)
+                var completedBuilds = work.Where(wi => !wi.task.IsCompleted);
+                workPathState.SetHandlePath(completedBuilds
+                    .Select(wi => wi.builder.WorkHandlePath)
                     .DefaultIfEmpty(Behavior.WorkHandlePath.Continue)
                     .Max());
                 logger.LogInformation(BuildStatus());
