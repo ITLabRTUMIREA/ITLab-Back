@@ -3,6 +3,7 @@ using Models.DataBaseLinks;
 using System;
 using System.Collections.Generic;
 using Models.Equipments;
+using Models.People.UserProperties;
 
 namespace Models.People
 {
@@ -14,5 +15,6 @@ namespace Models.People
         public List<Equipment> Equipment  { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; }
         public List<PlaceUserEventRole> PlaceUserEventRoles { get; set; }
+        public List<UserProperty> UserProperties { get; set; }
     }
 }

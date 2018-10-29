@@ -26,6 +26,8 @@
         IncorrectRefreshToken,
         UserNowInSystem,
         EventRoleNameExist,
-        Forbidden
+        Forbidden,
+        ChildrenExists,
+        IncorrectVkToken
     }
 }

@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.Authorize;
-using BackEnd.DataBase;
 using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -18,10 +16,10 @@ using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.Login;
 using BackEnd.Extensions;
-using Microsoft.AspNetCore.Authentication.Twitter;
 using Models.PublicAPI.Responses.People;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Models.People.Roles;
 
 namespace BackEnd.Controllers
 {
@@ -48,10 +46,10 @@ namespace BackEnd.Controllers
         [AllowAnonymous]
         public async Task<OneObjectResponse<LoginResponse>> Login([FromBody] AccountLoginRequest loginData)
         {
-            var user = await userManager.FindByNameAsync(loginData.Username) ??
+            var user = await UserManager.FindByNameAsync(loginData.Username) ??
                 throw ApiLogicException.Create(ResponseStatusCode.WrongLoginOrPassword);
 
-            if (!await userManager.CheckPasswordAsync(user, loginData.Password))
+            if (!await UserManager.CheckPasswordAsync(user, loginData.Password))
             {
                 throw ApiLogicException.Create(ResponseStatusCode.WrongLoginOrPassword);
             }
@@ -83,17 +81,19 @@ namespace BackEnd.Controllers
             return ResponseStatusCode.OK;
         }
 
-        private Exception IncorrectRefreshToken()
+        private static Exception IncorrectRefreshToken()
         => ResponseStatusCode.IncorrectRefreshToken.ToApiException();
 
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
         {
-            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), await userManager.GetRolesAsync(user));
+            var roles = await UserManager.GetRolesAsync(user);
+            var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), roles.Select(r => Enum.Parse(typeof(RoleNames), r)).Cast<RoleNames>());
             var loginInfo = new LoginResponse
             {
                 User = mapper.Map<UserView>(user),
                 AccessToken = jwtFactory.GenerateAccessToken(user.UserName, identity),
-                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent)
+                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent),
+                Roles = roles.ToList()
             };
             return loginInfo;
         }

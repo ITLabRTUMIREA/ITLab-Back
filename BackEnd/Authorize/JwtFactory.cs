@@ -12,6 +12,7 @@ using Models.People;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
+using Models.People.Roles;
 
 namespace BackEnd.Authorize
 {
@@ -21,7 +22,11 @@ namespace BackEnd.Authorize
         private readonly DataBaseContext dbContext;
         private const string RefreshTokenChars = "ABCDEFGHIKLMNOPQRSTVXYZ1bcdefghiklmnoprstvxyz01234567890";
         private readonly Random random = new Random();
-
+        private static readonly byte[] Powers = Enumerable
+            .Range(0, 8)
+            .Select(v => Math.Pow(2, v))
+            .Select(v => (byte)v)
+            .ToArray();
 
         public JwtFactory(
             IOptions<JwtIssuerOptions> jwtOptions,
@@ -58,12 +63,11 @@ namespace BackEnd.Authorize
           => (long)Math.Round((date.ToUniversalTime() -
                                new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
                               .TotalSeconds);
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<string> roles)
+        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<RoleNames> roles)
         {
             var identity = new ClaimsIdentity();
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id));
-            identity.AddClaims(roles
-                .Select(r => new Claim(ClaimTypes.Role, r)));
+            identity.AddClaim(new Claim(ClaimTypes.Role, RoleString(roles)));
             return identity;
         }
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)
@@ -149,17 +153,32 @@ namespace BackEnd.Authorize
                      .Select(chars => chars[random.Next(chars.Length)])
                           .ToArray());
 
-        private string ToBase64<T>(T refreshTokenData)
+        private static string ToBase64<T>(T refreshTokenData)
         {
             var jsonView = JsonConvert.SerializeObject(refreshTokenData);
             var bytes = Encoding.UTF8.GetBytes(jsonView);
             return Convert.ToBase64String(bytes);
         }
-        private T FromBase64<T>(string refreshTokenData)
+        private static T FromBase64<T>(string refreshTokenData)
         {
             var bytes = Convert.FromBase64String(refreshTokenData);
             var jsonView = Encoding.UTF8.GetString(bytes);
             return JsonConvert.DeserializeObject<T>(jsonView);
+        }
+
+        private static string RoleString(IEnumerable<RoleNames> roleNames)
+        {
+            var rolesCount = Enum.GetNames(typeof(RoleNames)).Length;
+            var bufferLength = rolesCount / 8
+                               + (rolesCount % 8 == 0 ? 0 : 1);
+            var buffer = new byte[bufferLength];
+
+            foreach (var role in roleNames)
+            {
+                var roleNum = (int)role;
+                buffer[roleNum / 8] |= Powers[roleNum % 8];
+            }
+            return Convert.ToBase64String(buffer);
         }
     }
 }

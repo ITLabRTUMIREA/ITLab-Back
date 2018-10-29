@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Linq;
 
 namespace Extensions
 {
@@ -19,8 +20,25 @@ namespace Extensions
         public static void Iterate<T>(this IEnumerable<T> source)
         {
             foreach (var variable in source)
-            {}
+            { }
         }
 
+        public static IQueryable<TV> SelectMany<T, TV>(
+            this IQueryable<T> source,
+            Func<T, TV> selector1,
+            Func<T, TV> selector2
+        ) => source.SelectMany(s => new[] { selector1(s), selector2(s) });
+
+        public static IEnumerable<TV> SelectMany<T, TV>(
+            this IEnumerable<T> source,
+            Func<T, (TV, TV)> selector
+        ) => source.SelectMany(i => selector(i).ToEnumerable());
+
+
+        private static IEnumerable<TV> ToEnumerable<TV>(this (TV, TV) source)
+        {
+            yield return source.Item1;
+            yield return source.Item2;
+        }
     }
 }

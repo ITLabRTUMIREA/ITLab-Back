@@ -19,7 +19,10 @@ RUN dotnet build -c Release -o /app
 FROM build AS publish
 RUN dotnet publish -c Release -o /app
 
+FROM rtuitlab/itlab-front-master AS front
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+COPY --from=front /usr/share/nginx/html ./wwwroot/
 ENTRYPOINT ["dotnet", "BackEnd.dll"]

@@ -66,7 +66,7 @@ namespace BackEnd.Exceptions
                     logger.LogInformation(dbUpdate, "error while update DB");
                     return new ResponseBase(ResponseStatusCode.IncorrectRequestData);
                 case ApiLogicException api:
-                    logger.LogInformation(ex, "exception in controller");
+                    logger.LogInformation(ex, $"exception in controller {api.ResponseModel.StatusCode}");
                     return api.ResponseModel;
                 case NotImplementedException nie:
                     logger.LogWarning(ex, "Not implement");

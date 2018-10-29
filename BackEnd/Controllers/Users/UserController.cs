@@ -61,12 +61,12 @@ namespace BackEnd.Controllers.Users
             => await GetUsersByParams(email, firstname, lastname, match)
                 .CountAsync();
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<OneObjectResponse<UserView>> GetAsync(Guid id)
-        => await userManager
+        => await UserManager
             .Users
             .ProjectTo<UserView>()
-            .FirstOrDefaultAsync(u => u.Id == id)
+            .SingleOrDefaultAsync(u => u.Id == id)
             ?? throw ResponseStatusCode.NotFound.ToApiException();
 
         [RequireRole(RoleNames.CanInviteToSystem)]
@@ -85,7 +85,7 @@ namespace BackEnd.Controllers.Users
             string firstname,
             string lastname,
             string match)
-            => userManager
+            => UserManager
                 .Users
                 .ResetToDefault(m => true, ref match, match?.ToUpper())
                 .IfNotNull(email, users => users.Where(u => u.Email.ToUpper().Contains(email.ToUpper())))

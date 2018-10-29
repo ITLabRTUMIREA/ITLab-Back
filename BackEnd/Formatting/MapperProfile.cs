@@ -36,10 +36,15 @@ namespace BackEnd.Formatting
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
-            CreateMap<EquipmentCreateRequest, Equipment>();
+            CreateMap<EquipmentCreateRequest, Equipment>()
+                .ForMember(eq => eq.Children, map => map.Ignore());
+
+
             CreateMap<Equipment, EquipmentView>();
 
             CreateMap<EquipmentType, EquipmentTypeView>();
+            CreateMap<EquipmentType, CompactEquipmentTypeView>();
+
             CreateMap<AccountCreateRequest, User>()
                 .ForMember(u => u.UserName, map => map.MapFrom(ac => ac.Email));
             CreateMap<User, LoginResponse>();
@@ -110,7 +115,6 @@ namespace BackEnd.Formatting
 
             CreateMap<PlaceUserEventRole, UserAndEventRole>();
 
-            CreateMap<User, UserView>();
             CreateMap<AccountEditRequest, User>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
@@ -133,9 +137,9 @@ namespace BackEnd.Formatting
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
 
             CreateMap<List<DeletableRequest>, List<PlaceEquipment>>()
-                .ConvertUsing(new ListsConverter<DeletableRequest, PlaceEquipment>(eq => eq.EquipmentId, (dl, pe) => dl.Id != pe?.EquipmentId));
+                .ConvertUsing(new ListsConverter<DeletableRequest, PlaceEquipment>(eq => eq.EquipmentId, isNeed: (dl, pe) => dl.Id != pe?.EquipmentId));
             CreateMap<List<PersonWorkRequest>, List<PlaceUserEventRole>>()
-                .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserEventRole>(pur => pur.UserId, (pwr, pur) => pwr.EventRoleId != pur?.EventRoleId || pwr.Id == pur?.UserId));
+                .ConvertUsing(new ListsConverter<PersonWorkRequest, PlaceUserEventRole>(pur => pur.UserId, isNeed: (pwr, pur) => pwr.EventRoleId != pur?.EventRoleId || pwr.Id == pur?.UserId));
 
             CreateMap<PlaceEditRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(per => per.Equipment))

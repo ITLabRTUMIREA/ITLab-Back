@@ -15,7 +15,7 @@ namespace BackEnd.DataBase.Migrations.Production
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.3-rtm-32065")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -135,15 +135,15 @@ namespace BackEnd.DataBase.Migrations.Production
 
                     b.Property<Guid>("PlaceId");
 
-                    b.Property<Guid>("EventRoleId");
-
                     b.Property<DateTime>("CreationTime");
 
                     b.Property<DateTime?>("DoneTime");
 
+                    b.Property<Guid>("EventRoleId");
+
                     b.Property<int>("UserStatus");
 
-                    b.HasKey("UserId", "PlaceId", "EventRoleId");
+                    b.HasKey("UserId", "PlaceId");
 
                     b.HasIndex("EventRoleId");
 
@@ -161,7 +161,11 @@ namespace BackEnd.DataBase.Migrations.Production
 
                     b.Property<Guid>("EquipmentTypeId");
 
+                    b.Property<int>("Number");
+
                     b.Property<Guid?>("OwnerId");
+
+                    b.Property<Guid?>("ParentId");
 
                     b.Property<string>("SerialNumber");
 
@@ -171,6 +175,8 @@ namespace BackEnd.DataBase.Migrations.Production
 
                     b.HasIndex("OwnerId");
 
+                    b.HasIndex("ParentId");
+
                     b.ToTable("Equipments");
                 });
 
@@ -179,15 +185,25 @@ namespace BackEnd.DataBase.Migrations.Production
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("Deep");
+
                     b.Property<string>("Description");
 
+                    b.Property<int>("LastNumber");
+
                     b.Property<Guid?>("ParentId");
+
+                    b.Property<Guid?>("RootId");
+
+                    b.Property<string>("ShortTitle");
 
                     b.Property<string>("Title");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("RootId");
 
                     b.ToTable("EquipmentTypes");
                 });
@@ -202,6 +218,8 @@ namespace BackEnd.DataBase.Migrations.Production
                     b.Property<DateTime>("BeginTime");
 
                     b.Property<string>("Description");
+
+                    b.Property<DateTime>("EndTime");
 
                     b.Property<Guid>("EventTypeId");
 
@@ -379,6 +397,44 @@ namespace BackEnd.DataBase.Migrations.Production
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("Models.People.UserProperties.UserProperty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Status");
+
+                    b.Property<Guid>("UserId");
+
+                    b.Property<Guid>("UserPropertyTypeId");
+
+                    b.Property<string>("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserPropertyTypeId");
+
+                    b.ToTable("UserProperties");
+                });
+
+            modelBuilder.Entity("Models.People.UserProperties.UserPropertyType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("DefaultStatus");
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserPropertyTypes");
+                });
+
             modelBuilder.Entity("Models.People.UserSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -476,20 +532,28 @@ namespace BackEnd.DataBase.Migrations.Production
             modelBuilder.Entity("Models.Equipments.Equipment", b =>
                 {
                     b.HasOne("Models.Equipments.EquipmentType", "EquipmentType")
-                        .WithMany()
+                        .WithMany("Equipment")
                         .HasForeignKey("EquipmentTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Models.People.User", "Owner")
                         .WithMany("Equipment")
                         .HasForeignKey("OwnerId");
+
+                    b.HasOne("Models.Equipments.Equipment", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId");
                 });
 
             modelBuilder.Entity("Models.Equipments.EquipmentType", b =>
                 {
                     b.HasOne("Models.Equipments.EquipmentType", "Parent")
-                        .WithMany("Childs")
+                        .WithMany("Children")
                         .HasForeignKey("ParentId");
+
+                    b.HasOne("Models.Equipments.EquipmentType", "Root")
+                        .WithMany("AllChildren")
+                        .HasForeignKey("RootId");
                 });
 
             modelBuilder.Entity("Models.Events.Event", b =>
@@ -521,6 +585,19 @@ namespace BackEnd.DataBase.Migrations.Production
                     b.HasOne("Models.People.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Models.People.UserProperties.UserProperty", b =>
+                {
+                    b.HasOne("Models.People.User", "User")
+                        .WithMany("UserProperties")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Models.People.UserProperties.UserPropertyType", "UserPropertyType")
+                        .WithMany("UserProperties")
+                        .HasForeignKey("UserPropertyTypeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 BackEnd/appsettings.Secret.json
 BackEnd/Migrations/*
+/BackEnd/wwwroot

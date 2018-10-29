@@ -14,6 +14,8 @@ namespace BackEnd.Extensions
             => new ApiLogicException(exceptionResponse);
         public static ApiLogicException ToApiException(this ResponseStatusCode statusCode)
             => ApiLogicException.Create(statusCode);
+        public static ApiLogicException ToApiException(this ResponseStatusCode statusCode, string message)
+            => ApiLogicException.Create(statusCode, message);
 
     }
 }

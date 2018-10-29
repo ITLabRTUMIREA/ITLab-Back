@@ -12,13 +12,16 @@ namespace BackEnd.Formatting.MapperProfiles.RequestProfiles
     {
         public EquipmentProfile()
         {
-            EquipmentTypeRules();
+            EquipmentTypeMaps();
         }
-        private void EquipmentTypeRules()
+        private void EquipmentTypeMaps()
         {
             CreateMap<EquipmentTypeEditRequest, EquipmentType>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
+
+            CreateMap<List<EquipmentTypeEditRequest>, List<EquipmentType>>()
+                .ConvertUsing(new ListsConverter<EquipmentTypeEditRequest, EquipmentType>(s => s.Id, needDelete: _ => false));
         }
     }
 

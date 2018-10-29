@@ -13,6 +13,8 @@ using Models.Events.Roles;
 using BackEnd.DataBase;
 using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
+using Models.People.UserProperties;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackEnd.Services.ConfigureServices
 {
@@ -43,9 +45,9 @@ namespace BackEnd.Services.ConfigureServices
             if (options.Users?.Any() == true)
                 await CreateUsers();
             await CreateRoles();
-            await CreateBaseEventRoles();
             if (options.WantedRoles?.Any() == true)
                 await ApplyRoles();
+            await CreateUserPropertyTypes();
         }
 
         private async Task CreateUsers()
@@ -63,23 +65,7 @@ namespace BackEnd.Services.ConfigureServices
             {
                 var result = await roleManager.CreateAsync(new Role { Name = roleName.ToString() });
                 logger.LogInformation(JsonConvert.SerializeObject(result));
-
             }
-        }
-
-        private async Task CreateBaseEventRoles()
-        {
-            foreach (var eventRoleName in Enum.GetValues(typeof(EventRoleNames)).Cast<EventRoleNames>())
-            {
-                var current = dbContext.EventRoles.SingleOrDefault(er => er.Title == eventRoleName.ToString());
-                if (current == null)
-                {
-                    await dbContext.EventRoles.AddAsync(new EventRole { Title = eventRoleName.ToString() });
-                    var result = dbContext.SaveChangesAsync();
-                    logger.LogInformation(JsonConvert.SerializeObject(result));
-                }
-            }
-
         }
 
         private async Task ApplyRoles()
@@ -90,13 +76,25 @@ namespace BackEnd.Services.ConfigureServices
                 var targetRole = await roleManager.FindByNameAsync(wantPair.RoleName);
                 if (targetUser == null || targetRole == null)
                     throw new Exception($"Can't find user {wantPair.Email} or role {wantPair.RoleName}");
-                if (!await userManager.IsInRoleAsync(targetUser, targetRole.Name))
-                {
-                    var result = await userManager.AddToRoleAsync(targetUser, targetRole.Name);
-                    logger.LogInformation(JsonConvert.SerializeObject(result));
-
-                }
+                if (await userManager.IsInRoleAsync(targetUser, targetRole.Name)) continue;
+                var result = await userManager.AddToRoleAsync(targetUser, targetRole.Name);
+                logger.LogInformation(JsonConvert.SerializeObject(result));
             }
         }
+
+        private async Task CreateUserPropertyTypes()
+        {
+            foreach (var typeName in Enum.GetValues(typeof(UserPropertyNames)).Cast<UserPropertyNames>())
+            {
+                if (await dbContext.UserPropertyTypes.AnyAsync(t => t.Name == typeName.ToString()))
+                    continue;
+                await dbContext.AddAsync(new UserPropertyType {
+                    Name = typeName.ToString(),
+                    DefaultStatus = UserPropertyStatus.NotConfirmed
+                });
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
     }
 }

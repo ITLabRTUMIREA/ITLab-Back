@@ -1,9 +1,6 @@
-﻿using System;
-using System.Buffers;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.Authorize;
 using BackEnd.DataBase;
@@ -12,22 +9,17 @@ using BackEnd.Formatting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Models;
 using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using BackEnd.Services;
-using Microsoft.CodeAnalysis.Options;
 using Models.People;
 using System.Runtime.InteropServices;
-using BackEnd.Extensions;
 using BackEnd.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -37,8 +29,13 @@ using BackEnd.Models.Settings;
 using Models.People.Roles;
 using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
+using BackEnd.Services.Notify;
 using WebApp.Configure.Models.Invokations;
-using Microsoft.AspNetCore.Http;
+using BackEnd.Services.UserProperties;
+using Microsoft.Extensions.Options;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
+using Swashbuckle.AspNetCore.Swagger;
+using Extensions;
 
 namespace BackEnd
 {
@@ -72,7 +69,7 @@ namespace BackEnd
                 services
                     .AddEntityFrameworkNpgsql()
                     .AddDbContext<DataBaseContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
+                    options.UseNpgsql(Configuration.GetConnectionString("PostgresDataBase")));
 #else
             services
                     .AddDbContext<DataBaseContext>(options =>
@@ -83,6 +80,7 @@ namespace BackEnd
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
+            services.Configure<NotifierSettings>(Configuration.GetSection(nameof(NotifierSettings)));
 
             services.AddMvc(options =>
             {
@@ -161,6 +159,11 @@ namespace BackEnd
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "IT Lab develop API", Version = "v1" });
+            });
+
             services.AddCors();
             services.AddSignalR();
 
@@ -169,15 +172,35 @@ namespace BackEnd
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddSingleton<ISmsSender, SmsService>();
 
+
+            services.AddSingleton<IUserPropertiesConstants, InMemoryUserPropertiesConstants>();
+            services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
+
+
             services.AddWebAppConfigure()
-                    .AddCongifure<DBInitService>(options => options.TransientImplementation<DBInitService>());
+                .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
+                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
+                .AddTransientConfigure<LoadCustomPropertiesService>()
+                ;
+
+
+            services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
+            {
+                var configs = provider.GetService<IOptions<NotifierSettings>>();
+                client.BaseAddress = new Uri(configs.Value.Host);
+            });
+            if (Configuration.GetValue<bool>("UseConsoleLogger"))
+                services.AddTransient<INotifier, DebugLogNotifier>();
+            else
+                services.AddTransient<INotifier, Notifier>();
+
+            services.AddSpaStaticFiles(spa => spa.RootPath = "wwwroot");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
             IApplicationBuilder app,
-            IHostingEnvironment env,
-            ILoggerFactory loggerFactory)
+            IHostingEnvironment env)
         {
             app.UseCors(config =>
                 config.AllowAnyHeader()
@@ -185,17 +208,18 @@ namespace BackEnd
                     .AllowAnyOrigin()
                     .AllowCredentials());
             app.UseWebAppConfigure();
-            if (env.IsDevelopment())
+            app.UseSwagger(c => { c.RouteTemplate = "api/{documentName}/swagger.json"; });
+            app.UseSwaggerUI(c =>
             {
-                app.UseDeveloperExceptionPage();
-            }
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<MirrorHub>("/chatHub");
+                c.SwaggerEndpoint("/api/v1/swagger.json", "My API V1");
+                c.RoutePrefix = "api";
             });
+            app.UseSignalR(routes => { routes.MapHub<MirrorHub>("/chatHub"); });
             app.UseExceptionHandlerMiddleware();
             app.UseAuthentication();
             app.UseMvc();
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa => {});
         }
     }
 }

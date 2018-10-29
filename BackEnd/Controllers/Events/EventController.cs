@@ -17,7 +17,9 @@ using Microsoft.AspNetCore.Identity;
 using Models.People;
 using BackEnd.Extensions;
 using BackEnd.Models.Roles;
+using BackEnd.Services.Notify;
 using Models.People.Roles;
+using Models.PublicAPI.NotifyRequests;
 using Models.PublicAPI.Responses.Event.Invitations;
 
 namespace BackEnd.Controllers.Events
@@ -27,14 +29,17 @@ namespace BackEnd.Controllers.Events
     public class EventController : AuthorizeController
     {
         private readonly IEventsManager eventsManager;
+        private readonly INotifier notifier;
 
         public EventController(
             UserManager<User> userManager,
             IEventsManager eventsManager,
             ILogger<EventTypeController> logger,
-            IMapper mapper) : base(userManager)
+            IMapper mapper,
+            INotifier notifier) : base(userManager)
         {
             this.eventsManager = eventsManager;
+            this.notifier = notifier;
         }
 
         [HttpGet]
@@ -43,7 +48,7 @@ namespace BackEnd.Controllers.Events
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
                 .Events
-                .IfNotNull(begin, events => events.Where(e => e.BeginTime >= begin))
+                .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
                 .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
                 .AttachUserId(UserId)
@@ -86,13 +91,14 @@ namespace BackEnd.Controllers.Events
                 .FirstOrDefaultAsync(ev => ev.Id == id)
                 ?? throw ResponseStatusCode.NotFound.ToApiException();
 
+        [Notify(NotifyType.EventNew)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost]
         public async Task<OneObjectResponse<EventView>> PostAsync([FromBody] EventCreateRequest request)
             => await (await eventsManager.AddAsync(request))
                 .ProjectTo<EventView>()
                 .SingleAsync();
-
+        [Notify(NotifyType.EventChange)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPut]
         public async Task<OneObjectResponse<EventView>> PutAsync([FromBody] EventEditRequest request)
@@ -106,6 +112,14 @@ namespace BackEnd.Controllers.Events
         {
             await eventsManager.DeleteAsync(eventId);
             return eventId;
+        }
+
+        [RequireRole(RoleNames.CanEditEvent)]
+        [HttpPost("invitation/{placeId:guid}/{roleId:guid}/{userId:guid}")]
+        public async Task<ResponseBase> Invite(Guid placeId, Guid roleId, Guid userId)
+        {
+            await eventsManager.InviteTo(placeId, roleId, userId);
+            return ResponseStatusCode.OK;
         }
 
         [HttpPost("invitation/{placeId:guid}/accept")]
@@ -130,13 +144,14 @@ namespace BackEnd.Controllers.Events
             return ResponseStatusCode.OK;
         }
 
+        [Notify(NotifyType.EventConfirm)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/accept")]
-        public async Task<ResponseBase> AcceptWish(Guid placeId, Guid userId)
-        {
-            await eventsManager.AcceptWish(placeId, userId);
-            return ResponseStatusCode.OK;
-        }
+        public async Task<OneObjectResponse<WisherEventView>> AcceptWish(Guid placeId, Guid userId)
+            => await (await eventsManager
+                    .AcceptWish(placeId, userId))
+                    .ProjectTo<WisherEventView>()
+                    .SingleOrDefaultAsync();
 
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/reject")]

@@ -14,6 +14,7 @@ using Models.People;
 using BackEnd.Models;
 using Models.Events.Roles;
 using Models.People.Roles;
+using Models.People.UserProperties;
 
 namespace BackEnd.DataBase
 {
@@ -27,18 +28,28 @@ namespace BackEnd.DataBase
         public DbSet<RegisterTokenPair> RegisterTokenPairs { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<EventRole> EventRoles { get; set; }
+        public DbSet<UserProperty> UserProperties { get; set; }
+        public DbSet<UserPropertyType> UserPropertyTypes { get; set; }
 
 
         public DataBaseContext(DbContextOptions options) : base(options)
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
+            ConfigurePlaceEquipment(builder);
+            ConfigurePlaceUserEventRole(builder);
+            ConfigureEquipmentType(builder);
+        }
+
+
+        private static void ConfigurePlaceEquipment(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<PlaceEquipment>()
-                .HasKey(t => new { t.EquipmentId, t.PlaceId });
+               .HasKey(t => new { t.EquipmentId, t.PlaceId });
 
             modelBuilder.Entity<PlaceEquipment>()
                 .HasOne(pe => pe.Place)
@@ -49,13 +60,12 @@ namespace BackEnd.DataBase
                 .HasOne(pe => pe.Equipment)
                 .WithMany(eq => eq.PlaceEquipments)
                 .HasForeignKey(pe => pe.EquipmentId);
-            ConfigurePlaceUserEventRole(modelBuilder);
         }
 
         private static void ConfigurePlaceUserEventRole(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PlaceUserEventRole>()
-                .HasKey(pur => new { pur.UserId, pur.PlaceId, pur.EventRoleId });
+                .HasKey(pur => new { pur.UserId, pur.PlaceId });
             modelBuilder.Entity<PlaceUserEventRole>()
                 .HasOne(pur => pur.User)
                 .WithMany(u => u.PlaceUserEventRoles)
@@ -72,14 +82,30 @@ namespace BackEnd.DataBase
                 .HasForeignKey(pur => pur.EventRoleId);
         }
 
+        private static void ConfigureEquipmentType(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EquipmentType>()
+                .HasMany(et => et.Children)
+                .WithOne(et => et.Parent)
+                .HasForeignKey(et => et.ParentId);
+
+            modelBuilder.Entity<EquipmentType>()
+                .HasMany(et => et.AllChildren)
+                .WithOne(et => et.Root)
+                .HasForeignKey(et => et.RootId);
+        }
+
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
         {
             ChangeTracker
                 .Entries<Event>()
                 .Where(e => e.State != EntityState.Deleted)
                 .ToList()
-                .ForEach(e => e.Entity.BeginTime = e.Entity.Shifts?.Min(s => s.BeginTime) ?? e.Entity.BeginTime);
-
+                .ForEach(e => 
+                {
+                    e.Entity.BeginTime = e.Entity.Shifts?.Min(s => s.BeginTime) ?? e.Entity.BeginTime;
+                    e.Entity.EndTime = e.Entity.Shifts?.Max(s => s.EndTime) ?? e.Entity.EndTime;
+                });
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
     }

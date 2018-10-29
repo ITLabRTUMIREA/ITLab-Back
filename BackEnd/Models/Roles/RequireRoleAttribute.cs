@@ -1,14 +1,15 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Models.People.Roles;
 
 namespace BackEnd.Models.Roles
 {
-    class RequireRoleAttribute : AuthorizeAttribute
+    class RequireRoleAttribute : TypeFilterAttribute
     {
-        public RequireRoleAttribute(params RoleNames[] roles)
+        public RequireRoleAttribute(params RoleNames[] roles) : base(typeof(RequireRoleFilter))
         {
-            Roles = string.Join(",", roles.Select(r => r.ToString()));
+            Arguments = new object[] { roles };
         }
     }
 }

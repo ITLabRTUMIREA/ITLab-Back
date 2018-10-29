@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
-using BackEnd.DataBase;
 using BackEnd.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Models.PublicAPI.Requests;
-using Models;
 using Models.PublicAPI.Requests.Account;
-using Microsoft.Azure.KeyVault.Models;
 using Models.PublicAPI.Responses;
 using Models.People;
 using BackEnd.Extensions;
@@ -40,32 +32,16 @@ namespace BackEnd.Controllers.Users
             this.emailSender = emailSender;
             this.registerTokens = registerTokens;
         }
-        [AllowAnonymous]
-        [HttpGet]
-        [Route("{id}/{*emailToken}")]
-        public async Task<ResponseBase> Get(string id, string emailToken)
-        {
-            var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.ConfirmEmailAsync(user, emailToken);
-            if (result.Succeeded)
-            {
-                return ResponseStatusCode.OK;
-            }
-            else
-            {
-                return ResponseStatusCode.InvalidToken;
-            }
-        }
 
         [AllowAnonymous]
         [HttpPost]
         public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
         {
-            if (!await registerTokens.IsCorrectToken(account.Email, account.AccessToken))
+            if (!await registerTokens.IsCorrectRegisterToken(account.Email, account.AccessToken))
                 return ResponseStatusCode.IncorrectAccessToken;
-            User user;
-            user = mapper.Map<User>(account);
-            var result = await userManager.CreateAsync(user, account.Password);
+            var user = mapper.Map<User>(account);
+            user.EmailConfirmed = true;
+            var result = await UserManager.CreateAsync(user, account.Password);
             if (result.Succeeded)
                 await registerTokens.RemoveToken(account.Email);
 
@@ -77,14 +53,15 @@ namespace BackEnd.Controllers.Users
         {
             var currentUser = await GetCurrentUser();
             mapper.Map(editRequest, currentUser);
-            await userManager.UpdateAsync(currentUser);
+            await UserManager.UpdateAsync(currentUser);
             return mapper.Map<UserView>(currentUser);
         }
+        
 
         [HttpPut("password")]
         public async Task<ResponseBase> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            var result = await userManager
+            var result = await UserManager
                 .ChangePasswordAsync(await GetCurrentUser(), request.CurrentPassword, request.NewPassword);
 
             if (result.Succeeded)
@@ -95,12 +72,12 @@ namespace BackEnd.Controllers.Users
         }
 
         [AllowAnonymous]
-        [HttpPost("password/requestreset")]
+        [HttpPost("password/requestReset")]
         public async Task<ResponseBase> ResetPassword([FromBody]RequestResetPasswordRequest request)
         {
-            var userByMail = await userManager.FindByEmailAsync(request.Email)
+            var userByMail = await UserManager.FindByEmailAsync(request.Email)
                                               ?? throw ResponseStatusCode.UserNotFound.ToApiException();
-            var token = await userManager.GeneratePasswordResetTokenAsync(userByMail);
+            var token = await UserManager.GeneratePasswordResetTokenAsync(userByMail);
             await emailSender.SendResetPasswordEmail(request.Email, request.RedirectUrl, token);
             return ResponseBase.OK;
         }
@@ -109,9 +86,9 @@ namespace BackEnd.Controllers.Users
         [HttpPost("password/reset")]
         public async Task<ResponseBase> ResetPassword([FromBody]ResetPasswordRequest request)
         {
-            var userByMail = await userManager.FindByEmailAsync(request.Email)
+            var userByMail = await UserManager.FindByEmailAsync(request.Email)
                                               ?? throw ResponseStatusCode.UserNotFound.ToApiException();
-            var result = await userManager.ResetPasswordAsync(userByMail, request.Token, request.NewPassword);
+            var result = await UserManager.ResetPasswordAsync(userByMail, request.Token, request.NewPassword);
             if (result.Succeeded)
                 return ResponseBase.OK;
 
