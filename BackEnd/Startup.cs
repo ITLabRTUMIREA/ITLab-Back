@@ -178,8 +178,10 @@ namespace BackEnd
 
 
             services.AddWebAppConfigure()
-                    .AddTransientConfigure<DBInitService>()
-                    .AddTransientConfigure<LoadCustomPropertiesService>();
+                .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
+                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
+                .AddTransientConfigure<LoadCustomPropertiesService>()
+                ;
 
 
             services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
@@ -191,6 +193,8 @@ namespace BackEnd
                 services.AddTransient<INotifier, DebugLogNotifier>();
             else
                 services.AddTransient<INotifier, Notifier>();
+
+            services.AddSpaStaticFiles(spa => spa.RootPath = "wwwroot");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -204,21 +208,18 @@ namespace BackEnd
                     .AllowAnyOrigin()
                     .AllowCredentials());
             app.UseWebAppConfigure();
-            app.UseSwagger(c => {
-                c.RouteTemplate = "api/{documentName}/swagger.json";
-            });
+            app.UseSwagger(c => { c.RouteTemplate = "api/{documentName}/swagger.json"; });
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/api/v1/swagger.json", "My API V1");
                 c.RoutePrefix = "api";
             });
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<MirrorHub>("/chatHub");
-            });
+            app.UseSignalR(routes => { routes.MapHub<MirrorHub>("/chatHub"); });
             app.UseExceptionHandlerMiddleware();
             app.UseAuthentication();
             app.UseMvc();
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa => {});
         }
     }
 }
