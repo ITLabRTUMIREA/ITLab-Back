@@ -59,6 +59,12 @@ namespace BackEnd.Services.ConfigureServices
             }
 
             await dbContext.SaveChangesAsync();
+
+            var events = await dbContext
+                .Events
+                .Include(ev => ev.Shifts)
+                .ToListAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 

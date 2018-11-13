@@ -21,7 +21,10 @@ RUN dotnet ef migrations add DevelopMigration
 FROM build AS publish
 RUN dotnet publish -o /app
 
+FROM rtuitlab/itlab-front-develop AS front
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+COPY --from=front /usr/share/nginx/html ./wwwroot/
 ENTRYPOINT ["dotnet", "BackEnd.dll"]

@@ -34,11 +34,18 @@ namespace Extensions
             Func<T, (TV, TV)> selector
         ) => source.SelectMany(i => selector(i).ToEnumerable());
 
+        public static int[] GetInts(this IEnumerable<string> source)
+            => source
+                .Select(s => (success: int.TryParse(s, out var result), result))
+                .Where(p => p.success)
+                .Select(p => p.result)
+                .ToArray();
 
         private static IEnumerable<TV> ToEnumerable<TV>(this (TV, TV) source)
         {
             yield return source.Item1;
             yield return source.Item2;
         }
+
     }
 }
