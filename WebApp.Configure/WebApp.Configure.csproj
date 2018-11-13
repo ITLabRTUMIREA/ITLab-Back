@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Library for apply some configures before app start</Description>
   </PropertyGroup>
 
   <ItemGroup>

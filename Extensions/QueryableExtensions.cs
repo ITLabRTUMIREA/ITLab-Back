@@ -40,12 +40,13 @@ namespace Extensions
         public static IQueryable<T> Variable<T, TV>(
             this IQueryable<T> source,
             out TV variable,
-            Func<Task<TV>> variableCreator
+            Func<TV> variableCreator
         )
         {
-            variable = variableCreator().Result;
+            variable = variableCreator();
             return source;
         }
+
 
         public static IQueryable<T> Translate<T, TI, TO>(this IQueryable<T> source, TI parameter, out TO result, Func<TI, TO> translateFunc)
         {

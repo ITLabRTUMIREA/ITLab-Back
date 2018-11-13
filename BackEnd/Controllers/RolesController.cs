@@ -48,7 +48,7 @@ namespace BackEnd.Controllers
                 .Roles
                 .If(userId.HasValue, rls =>
                     rls.Variable(out var roleNames,
-                            async () => await UserManager.GetRolesAsync(await GetUser(userId)))
+                            () => UserManager.GetRolesAsync(GetUser(userId).Result).Result)
                         .Where(r => roleNames.Contains(r.Name)))
                 .ProjectTo<RoleView>()
                 .ToListAsync();
