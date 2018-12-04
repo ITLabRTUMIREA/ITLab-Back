@@ -12,6 +12,7 @@ using Models.People;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Models.People.Roles;
 
 namespace BackEnd.Authorize
@@ -19,8 +20,9 @@ namespace BackEnd.Authorize
     public partial class JwtFactory : IJwtFactory
     {
         private readonly JwtIssuerOptions jwtOptions;
+        private readonly ILogger<JwtFactory> logger;
         private readonly DataBaseContext dbContext;
-        private const string RefreshTokenChars = "ABCDEFGHIKLMNOPQRSTVXYZ1bcdefghiklmnoprstvxyz01234567890";
+        private const string RefreshTokenChars = "ABCDEFGHIKLMNOPQRSTVXYZ";
         private readonly Random random = new Random();
         private static readonly byte[] Powers = Enumerable
             .Range(0, 8)
@@ -30,10 +32,12 @@ namespace BackEnd.Authorize
 
         public JwtFactory(
             IOptions<JwtIssuerOptions> jwtOptions,
+            ILogger<JwtFactory> logger,
             DataBaseContext dbContext)
         {
             this.jwtOptions = jwtOptions.Value;
             ThrowIfInvalidOptions(this.jwtOptions);
+            this.logger = logger;
             this.dbContext = dbContext;
         }
         public string GenerateAccessToken(string userName, ClaimsIdentity identity)
@@ -90,7 +94,7 @@ namespace BackEnd.Authorize
             }
         }
 
-        public async Task<string> GenerateRefreshToken(Guid userId, string userAgent)
+        public async Task<string> GenerateRefreshToken(Guid userId, string userAgent, Guid? refreshTokenId = default)
         {
             var token = new RefreshToken
             {
@@ -101,10 +105,11 @@ namespace BackEnd.Authorize
             };
             var targetRow = await dbContext
                 .RefreshTokens
-                .SingleOrDefaultAsync(rt => rt.UserAgent == userAgent && rt.UserId == userId);
+                .SingleOrDefaultAsync(rt => rt.Id == refreshTokenId && rt.UserId == userId);
 
             if (targetRow != null)
             {
+                targetRow.UserAgent = userAgent;
                 targetRow.CreateTime = token.CreateTime;
                 targetRow.Token = token.Token;
             }
@@ -116,6 +121,7 @@ namespace BackEnd.Authorize
             await dbContext.SaveChangesAsync();
             return ToBase64(new RefreshTokenData
             {
+                RefreshTokenId = targetRow.Id,
                 UserId = userId,
                 Token = targetRow.Token,
                 UserAgent = userAgent
@@ -130,9 +136,9 @@ namespace BackEnd.Authorize
         {
             var tokenData = FromBase64<RefreshTokenData>(refreshToken);
             return dbContext.RefreshTokens
+                                 .Where(rt => rt.Id == tokenData.RefreshTokenId)
                                  .Where(rt => rt.UserId == tokenData.UserId)
                                  .Where(rt => rt.Token == tokenData.Token)
-                                 .Where(rt => rt.UserAgent == tokenData.UserAgent)
                                  .Include(rt => rt.User)
                                  .SingleOrDefaultAsync();
         }
@@ -140,11 +146,11 @@ namespace BackEnd.Authorize
 
         public async Task DeleteRefreshTokens(List<Guid> tokenIds)
         {
-            var tagetTokens = await dbContext
+            var targetTokens = await dbContext
                 .RefreshTokens
                 .Where(rt => tokenIds.Contains(rt.Id))
                 .ToListAsync();
-            dbContext.RemoveRange(tagetTokens);
+            dbContext.RemoveRange(targetTokens);
             await dbContext.SaveChangesAsync();
         }
 

@@ -11,7 +11,7 @@ namespace BackEnd.Authorize
     public interface IJwtFactory
     {
         string GenerateAccessToken(string userName, ClaimsIdentity identity);
-        Task<string> GenerateRefreshToken(Guid userId, string UserAgent);
+        Task<string> GenerateRefreshToken(Guid userId, string userAgent, Guid? refreshTokenId = default);
         Task<RefreshToken> GetRefreshToken(string refreshToken);
         IQueryable<RefreshToken> RefreshTokens(Guid userId);
         ClaimsIdentity GenerateClaimsIdentity(string userName, string id, IEnumerable<RoleNames> roles);
