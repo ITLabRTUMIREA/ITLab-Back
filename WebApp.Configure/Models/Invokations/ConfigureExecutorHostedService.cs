@@ -22,7 +22,7 @@ namespace WebApp.Configure.Models.Invokations
 
         private readonly List<IConfigurationWorkBuilder> builders;
 
-        private List<(Task task, IConfigurationWorkBuilder builder, IConfigureWork work, IServiceScope scope)> work = new List<(Task task, IConfigurationWorkBuilder builder, IConfigureWork work, IServiceScope scope)>();
+        private List<(Task<int> task, IConfigurationWorkBuilder builder, IConfigureWork work, IServiceScope scope, int id)> work = new List<(Task<int> task, IConfigurationWorkBuilder builder, IConfigureWork work, IServiceScope scope, int id)>();
 
         public ConfigureExecutorHostedService(
             ConfigureBuilder configureBuilder,
@@ -43,6 +43,7 @@ namespace WebApp.Configure.Models.Invokations
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var lastWorkId = 0;
             work = configureBuilder
                 .Builders
                 .Select(builder =>
@@ -50,13 +51,14 @@ namespace WebApp.Configure.Models.Invokations
                     var scope = serviceProvider.CreateScope();
                     return new
                     {
+                        id = Interlocked.Increment(ref lastWorkId),
                         scope,
                         builder,
                         congifurator = scope.ServiceProvider.GetService(builder.ConfigureWorkType) as IConfigureWork
                     };
                 })
                 .Where(b => b.congifurator != null)
-                .Select(b => (b.congifurator.Configure(), b.builder, b.congifurator, b.scope))
+                .Select(b => (b.congifurator.Configure().ContinueWith(t => b.id, stoppingToken), b.builder, b.congifurator, b.scope, b.id))
                 .ToList();
             var tasks = work.Select(w => w.task).ToList();
             while (tasks.Count != 0)
@@ -70,7 +72,7 @@ namespace WebApp.Configure.Models.Invokations
                     .DefaultIfEmpty(Behavior.WorkHandlePath.Continue)
                     .Max());
                 logger.LogInformation(BuildStatus());
-                var workItem = work.SingleOrDefault(w => w.task.Id == completed.Id);
+                var workItem = work.SingleOrDefault(w => w.id == completed.Result);
                 workItem.scope?.Dispose();
             }
         }
@@ -80,7 +82,7 @@ namespace WebApp.Configure.Models.Invokations
         {
             var builder = new StringBuilder();
             builder.AppendLine("CURRENT CONFIGURE BUILD STATUS: ");
-            foreach (var (task, workBuilder, configureWork, _) in work)
+            foreach (var (task, workBuilder, configureWork, _, _) in work)
             {
                 builder.AppendLine(
                     $"{TaskIcon(task)} Work {configureWork.GetType().FullName} :: {workBuilder.WorkHandlePath} path");

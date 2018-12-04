@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Library for apply some configures before app start</Description>
+    <Version>1.0.1</Version>
+    <Company>RTU IT Lab</Company>
+    <Authors>CAPCHIK</Authors>
+    <PackageId>RTUITLab.WebApp.Configure</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

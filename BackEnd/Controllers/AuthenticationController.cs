@@ -19,6 +19,7 @@ using BackEnd.Extensions;
 using Models.PublicAPI.Responses.People;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Models.People.Roles;
 
 namespace BackEnd.Controllers
@@ -30,16 +31,19 @@ namespace BackEnd.Controllers
         private readonly IJwtFactory jwtFactory;
         private readonly IOptions<JwtIssuerOptions> jwtOptions;
         private readonly IMapper mapper;
+        private readonly ILogger logger;
 
         public AuthenticationController(
             UserManager<User> userManager,
             IJwtFactory jwtFactory,
             IOptions<JwtIssuerOptions> jwtOptions,
-            IMapper mapper) :base (userManager)
+            IMapper mapper,
+            ILogger<AuthenticationController> logger) :base (userManager)
         {
             this.jwtFactory = jwtFactory;
             this.jwtOptions = jwtOptions;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         [HttpPost("login")]
@@ -62,10 +66,14 @@ namespace BackEnd.Controllers
         {
             var token = await jwtFactory.GetRefreshToken(refreshToken)
                                         ?? throw IncorrectRefreshToken();
-            if (DateTime.UtcNow - token.CreateTime > jwtOptions.Value.RefreshTokenValidFor
-                || Request.Headers["User-Agent"].ToString() != token.UserAgent)
+            var httpUserAgent = Request.Headers["User-Agent"].ToString();
+
+            var now = DateTime.UtcNow;
+            var age = now - token.CreateTime;
+            logger.LogDebug($"Token age: {age}");
+            if (age > jwtOptions.Value.RefreshTokenValidFor)
                 throw IncorrectRefreshToken();
-            return await GenerateResponse(token.User, token.UserAgent);
+            return await GenerateResponse(token.User, httpUserAgent, token.Id);
         }
 
         [HttpGet("refresh")]
@@ -84,7 +92,7 @@ namespace BackEnd.Controllers
         private static Exception IncorrectRefreshToken()
         => ResponseStatusCode.IncorrectRefreshToken.ToApiException();
 
-        private async Task<LoginResponse> GenerateResponse(User user, string userAgent)
+        private async Task<LoginResponse> GenerateResponse(User user, string userAgent, Guid? oldRefreshTokenId = null)
         {
             var roles = await UserManager.GetRolesAsync(user);
             var identity = jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id.ToString(), roles.Select(r => Enum.Parse(typeof(RoleNames), r)).Cast<RoleNames>());
@@ -92,7 +100,7 @@ namespace BackEnd.Controllers
             {
                 User = mapper.Map<UserView>(user),
                 AccessToken = jwtFactory.GenerateAccessToken(user.UserName, identity),
-                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent),
+                RefreshToken = await jwtFactory.GenerateRefreshToken(user.Id, userAgent, oldRefreshTokenId),
                 Roles = roles.ToList()
             };
             return loginInfo;

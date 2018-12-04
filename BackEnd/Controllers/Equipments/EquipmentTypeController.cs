@@ -117,7 +117,7 @@ namespace BackEnd.Controllers.Equipments
             ids = ids.Distinct().ToList();
             var forEdit = await dbContext
                 .EquipmentTypes
-                .Where(et => ids.Contains(et.Id) || ids.Contains(et.RootId.Value))
+                .Where(et => ids.Contains(et.Id))
                 .ToListAsync();
 
             mapper.Map(request, forEdit);
