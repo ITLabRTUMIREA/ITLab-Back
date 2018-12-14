@@ -12,6 +12,8 @@ namespace Models.PublicAPI.Requests.Account
         [Required]
         public string LastName { get; set; }
         [Required]
+        public string MiddleName { get; set; }
+        [Required]
         public string Password { get; set; }
         [Required]
         [EmailAddress]

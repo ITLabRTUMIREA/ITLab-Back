@@ -44,10 +44,11 @@ namespace BackEnd.Controllers.Users
             string email,
             string firstname,
             string lastname,
+            string middleName,
             string match,
             int count = 5,
             int offset = 0)
-            => (await GetUsersByParams(email, firstname, lastname, match)
+            => (await GetUsersByParams(email, firstname, lastname, middleName, match)
                 .If(count > 0, users => users.Skip(offset * count).Take(count))
                 .ProjectTo<UserView>()
                 .ToListAsync()).ToPage(offset * count);
@@ -57,8 +58,9 @@ namespace BackEnd.Controllers.Users
             string email,
             string firstname,
             string lastname,
+            string middleName,
             string match)
-            => await GetUsersByParams(email, firstname, lastname, match)
+            => await GetUsersByParams(email, firstname, lastname, middleName, match)
                 .CountAsync();
 
         [HttpGet("{id:guid}")]
@@ -84,6 +86,7 @@ namespace BackEnd.Controllers.Users
         private IQueryable<User> GetUsersByParams(string email,
             string firstname,
             string lastname,
+            string middleName,
             string match)
             => UserManager
                 .Users
@@ -91,8 +94,10 @@ namespace BackEnd.Controllers.Users
                 .IfNotNull(email, users => users.Where(u => u.Email.ToUpper().Contains(email.ToUpper())))
                 .IfNotNull(firstname, users => users.Where(u => u.FirstName.ToUpper().Contains(firstname.ToUpper())))
                 .IfNotNull(lastname, users => users.Where(u => u.LastName.ToUpper().Contains(lastname.ToUpper())))
+                .IfNotNull(middleName, users => users.Where(u => u.MiddleName.ToUpper().Contains(middleName.ToUpper())))
                 .IfNotNull(match, users => users.ForAll(match.Split(' '), (us2, matcher) => us2.Where(u => u.LastName.ToUpper().Contains(matcher)
                                                            || u.FirstName.ToUpper().Contains(matcher)
+                                                           || u.MiddleName.ToUpper().Contains(matcher)
                                                            || u.Email.ToUpper().Contains(matcher)
                                                            || u.PhoneNumber.ToUpper().Contains(matcher))));
     }
