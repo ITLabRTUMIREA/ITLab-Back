@@ -11,6 +11,7 @@ namespace Models.People
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string MiddleName { get; set; }
         public List<UserSetting> UserSettings { get; set; }
         public List<Equipment> Equipment  { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; }
