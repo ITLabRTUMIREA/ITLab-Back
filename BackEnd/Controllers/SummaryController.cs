@@ -48,11 +48,10 @@ namespace BackEnd.Controllers
                 .OrderBy(s => s.BeginTime);
 
             IWorkbook workbook = new XSSFWorkbook();
-            var sheet = workbook.CreateSheet("Сводка");
-
+            var rolesTableSheet = workbook.CreateSheet("Сводка");
             int rowNum = 0;
 
-            var titleRow = sheet.CreateRow(rowNum++);
+            var titleRow = rolesTableSheet.CreateRow(rowNum++);
 
             int columnNum = 0;
             titleRow.CreateCell(columnNum++).SetCellValue("Фамилия");
@@ -69,7 +68,7 @@ namespace BackEnd.Controllers
                 .OrderBy(u => u.LastName))
             {
                 columnNum = 0;
-                var personRow = sheet.CreateRow(rowNum++);
+                var personRow = rolesTableSheet.CreateRow(rowNum++);
                 personRow.CreateCell(columnNum++).SetCellValue(user.LastName);
                 personRow.CreateCell(columnNum++).SetCellValue(user.FirstName);
                 foreach (var shift in events)
@@ -82,15 +81,21 @@ namespace BackEnd.Controllers
                         var role = puers.Select(puer => puer.EventRole.Title).Single();
                         personRow.CreateCell(columnNum++).SetCellValue(role[0].ToString());
                     }
+                    rolesTableSheet.AutoSizeColumn(columnNum);
                 }
             }
 
-            rowNum += 2;
+            rolesTableSheet.CreateFreezePane(2, 1);
+            rolesTableSheet.AutoSizeColumn(0);
+            rolesTableSheet.AutoSizeColumn(1);
 
+
+            var eventNamesSheet = workbook.CreateSheet("Названия событий");
+            rowNum = 0;
             foreach (var shift in events)
             {
                 columnNum = 0;
-                var personRow = sheet.CreateRow(rowNum++);
+                var personRow = eventNamesSheet.CreateRow(rowNum++);
                 personRow.CreateCell(columnNum++).SetDateValue(shift.BeginTime);
                 personRow.CreateCell(columnNum++).SetCellValue(shift.Event.Title);
 
