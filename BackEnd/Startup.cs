@@ -51,7 +51,12 @@ namespace BackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-#if DEBUG
+            if (Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == "Release" 
+                || Configuration.GetValue<bool>("USE_REMOTE"))
+            services
+                    .AddDbContext<DataBaseContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
+            else
             if (Configuration.GetValue<bool>("IS_DOCKER"))
             {
                 Console.WriteLine("IM IN IS DOCKER YAY");
@@ -70,11 +75,8 @@ namespace BackEnd
                     .AddEntityFrameworkNpgsql()
                     .AddDbContext<DataBaseContext>(options =>
                     options.UseNpgsql(Configuration.GetConnectionString("PostgresDataBase")));
-#else
-            services
-                    .AddDbContext<DataBaseContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
-#endif
+
+
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.Configure<DBInitializeSettings>(Configuration.GetSection(nameof(DBInitializeSettings)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
@@ -181,6 +183,7 @@ namespace BackEnd
                 .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
                 .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
                 .AddTransientConfigure<LoadCustomPropertiesService>()
+                .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 
 
@@ -219,7 +222,7 @@ namespace BackEnd
             app.UseAuthentication();
             app.UseMvc();
             app.UseSpaStaticFiles();
-            app.UseSpa(spa => {});
+            app.UseSpa(spa => { });
         }
     }
 }
