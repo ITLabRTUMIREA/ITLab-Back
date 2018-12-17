@@ -1,4 +1,5 @@
 FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+RUN apt-get update && apt-get install -y libgdiplus libc6-dev && ln -s /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 WORKDIR /app
 EXPOSE 80
 
