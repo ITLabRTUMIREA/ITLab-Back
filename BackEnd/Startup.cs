@@ -183,6 +183,7 @@ namespace BackEnd
                 .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
                 .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
                 .AddTransientConfigure<LoadCustomPropertiesService>()
+                .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 
 
