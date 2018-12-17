@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BackEnd.DataBase;
+using BackEnd.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.PublicAPI.Requests.Summary;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,13 +26,14 @@ namespace BackEnd.Controllers
             this.dbContext = dbContext;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAsync()
+        [HttpPost]
+        public async Task<IActionResult> GetAsync([FromBody]GetSummaryRequest request)
         {
-            var str = new StringBuilder("Фамилия,Имя,");
             var allrecords = await dbContext
                 .Users
                 .SelectMany(u => u.PlaceUserEventRoles)
+
+                .Where(puer => request.TargetEventTypes.Contains(puer.Place.Shift.Event.EventTypeId))
                 .Include(puer => puer.Place)
                     .ThenInclude(p => p.Shift)
                         .ThenInclude(s => s.Event)
@@ -39,41 +45,71 @@ namespace BackEnd.Controllers
                 .Select(r => r.Place)
                 .Select(r => r.Shift)
                 .Distinct()
-                .OrderBy(s => s.BeginTime)
-                //.Take(10)
-                ;
+                .OrderBy(s => s.BeginTime);
+
+            IWorkbook workbook = new XSSFWorkbook();
+            var sheet = workbook.CreateSheet("Сводка");
+
+            int rowNum = 0;
+
+            var titleRow = sheet.CreateRow(rowNum++);
+
+            int columnNum = 0;
+            titleRow.CreateCell(columnNum++).SetCellValue("Фамилия");
+            titleRow.CreateCell(columnNum++).SetCellValue("Имя");
+
             foreach (var shift in events)
             {
-                str.Append($"{shift.Event.Title.Replace(",", ";")},");
+                titleRow.CreateCell(columnNum++).SetDateValue(shift.BeginTime);
             }
-            str.Append("\n###,###,");
-            foreach (var shift in events)
-            {
-                str.Append($"{shift.BeginTime.ToString("dd.MM.yyyy")},");
-            }
-            str.Append('\n');
 
             foreach (var user in allrecords
                 .Select(r => r.User)
                 .Distinct()
                 .OrderBy(u => u.LastName))
             {
-                str.Append($"{user.LastName},{user.FirstName},");
+                columnNum = 0;
+                var personRow = sheet.CreateRow(rowNum++);
+                personRow.CreateCell(columnNum++).SetCellValue(user.LastName);
+                personRow.CreateCell(columnNum++).SetCellValue(user.FirstName);
                 foreach (var shift in events)
                 {
                     var puers = shift.Places.SelectMany(p => p.PlaceUserEventRoles).Where(puer => puer.UserId == user.Id).ToList();
                     if (puers.Count == 0)
-                        str.Append("-,");
+                        personRow.CreateCell(columnNum++).SetCellValue("-");
                     else
                     {
                         var role = puers.Select(puer => puer.EventRole.Title).Single();
-                        str.Append($"{role[0]},");
+                        personRow.CreateCell(columnNum++).SetCellValue(role[0].ToString());
                     }
                 }
-                str.Append('\n');
             }
-            var content = Encoding.UTF8.GetBytes(str.ToString());
-            return File(content, "text/csv", "summary.csv");
+
+            rowNum += 2;
+
+            foreach (var shift in events)
+            {
+                columnNum = 0;
+                var personRow = sheet.CreateRow(rowNum++);
+                personRow.CreateCell(columnNum++).SetDateValue(shift.BeginTime);
+                personRow.CreateCell(columnNum++).SetCellValue(shift.Event.Title);
+
+            }
+
+            var fileName = Path.GetTempFileName();
+            using (var writeStream = System.IO.File.OpenWrite(fileName))
+            {
+                workbook.Write(writeStream);
+            }
+            var memoryStream = new MemoryStream();
+            using (var readStream = System.IO.File.OpenRead(fileName))
+            {
+                await readStream.CopyToAsync(memoryStream);
+            }
+
+            memoryStream.Position = 0;
+
+            return File(memoryStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "summary.xlsx");
         }
     }
 }
