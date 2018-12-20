@@ -8,6 +8,7 @@ namespace BackEnd.Models.Settings
     public class NotifierSettings
     {
         public string Host { get; set; }
-        public  string AccessToken { get; set; }
+        public string AccessToken { get; set; }
+        public bool NeedChangeUrl { get; set; }
     }
 }

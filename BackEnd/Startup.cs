@@ -186,11 +186,16 @@ namespace BackEnd
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 
-
+            services.AddSingleton<NotifierHostSaver>();
             services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
             {
                 var configs = provider.GetService<IOptions<NotifierSettings>>();
-                client.BaseAddress = new Uri(configs.Value.Host);
+                var host = configs.Value.Host;
+                if (configs.Value.NeedChangeUrl)
+                {
+                    host = provider.GetService<NotifierHostSaver>().Host;
+                }
+                client.BaseAddress = new Uri(host);
             });
             if (Configuration.GetValue<bool>("UseConsoleLogger"))
                 services.AddTransient<INotifier, DebugLogNotifier>();
