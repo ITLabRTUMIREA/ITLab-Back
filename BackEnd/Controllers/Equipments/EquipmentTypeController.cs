@@ -141,7 +141,7 @@ namespace BackEnd.Controllers.Equipments
                           .Where(et => et.Id == request.Id)
                           .Select(et => new { equipmentType = et, childsCount = et.Children.Count, equipmentCount = et.Equipment.Count })
                           .SingleOrDefaultAsync() ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
-            if (now.childsCount == 0 || now.equipmentCount == 0)
+            if (now.childsCount != 0 || now.equipmentCount != 0)
                 throw ResponseStatusCode.ChildrenExists.ToApiException();
             dbContext.EquipmentTypes.Remove(now.equipmentType);
             await dbContext.SaveChangesAsync();
