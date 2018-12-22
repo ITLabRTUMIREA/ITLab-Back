@@ -47,11 +47,11 @@ namespace BackEnd.Services.Notify
                 var targetProperty = result.Value.GetType().GetProperty("Data");
                 if (targetProperty == null)
                 {
-                    await notifier.Notify(type, result.Value);
+                    notifier.Notify(type, result.Value);
                     return;
                 }
                 var date = targetProperty.GetValue(result.Value);
-                await notifier.Notify(type, date);
+                notifier.Notify(type, date);
             }
         }
     }
