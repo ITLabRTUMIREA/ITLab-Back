@@ -16,12 +16,11 @@ namespace BackEnd.Services.Notify
         {
             this.logger = logger;
         }
-        public Task Notify(NotifyType notifyType, object data)
+        public void Notify(NotifyType notifyType, object data)
         {
             var message = "Event Add New Event, content: \n"
                 + JsonConvert.SerializeObject(new { notifyType, data }, Newtonsoft.Json.Formatting.Indented);
             logger.LogInformation(message);
-            return Task.CompletedTask;
         }
     }
 }
