@@ -51,32 +51,7 @@ namespace BackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            if (Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == "Release" 
-                || Configuration.GetValue<bool>("USE_REMOTE"))
-            services
-                    .AddDbContext<DataBaseContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("RemoteDB")));
-            else
-            if (Configuration.GetValue<bool>("IS_DOCKER"))
-            {
-                Console.WriteLine("IM IN IS DOCKER YAY");
-                services
-                     .AddEntityFrameworkNpgsql()
-                     .AddDbContext<DataBaseContext>(options =>
-                    options.UseInMemoryDatabase("local"));
-            }
-            else
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                services
-                    .AddDbContext<DataBaseContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("LocalDBDataBase")));
-            else
-                services
-                    .AddEntityFrameworkNpgsql()
-                    .AddDbContext<DataBaseContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("PostgresDataBase")));
-
-
+            SetupDB(services);
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.Configure<DBInitializeSettings>(Configuration.GetSection(nameof(DBInitializeSettings)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
@@ -186,11 +161,16 @@ namespace BackEnd
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 
-
+            services.AddSingleton<NotifierHostSaver>();
             services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
             {
                 var configs = provider.GetService<IOptions<NotifierSettings>>();
-                client.BaseAddress = new Uri(configs.Value.Host);
+                var host = configs.Value.Host;
+                if (configs.Value.NeedChangeUrl)
+                {
+                    host = provider.GetService<NotifierHostSaver>().Host;
+                }
+                client.BaseAddress = new Uri(host);
             });
             if (Configuration.GetValue<bool>("UseConsoleLogger"))
                 services.AddTransient<INotifier, DebugLogNotifier>();
@@ -224,5 +204,29 @@ namespace BackEnd
             app.UseSpaStaticFiles();
             app.UseSpa(spa => { });
         }
+
+        private void SetupDB(IServiceCollection services)
+        {
+            services.AddEntityFrameworkNpgsql();
+            var dbType = Configuration.GetValue<DbType>("DB_TYPE");
+            services.AddDbContext<DataBaseContext>(GetOptionsBuilder(dbType));
+        }
+        private Action<DbContextOptionsBuilder> GetOptionsBuilder(DbType dbType)
+        {
+            switch (dbType)
+            {
+                case DbType.SQL_SERVER_REMOTE:
+                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_REMOTE)));
+                case DbType.SQL_SERVER_LOCAL:
+                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_LOCAL)));
+                case DbType.IN_MEMORY:
+                    return options => options.UseInMemoryDatabase(nameof(DbType.IN_MEMORY));
+                case DbType.POSTGRES_LOCAL:
+                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES_LOCAL)));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dbType));
+            }
+        }
+
     }
 }
