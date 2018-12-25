@@ -20,7 +20,7 @@ namespace BackEnd.Services.Notify
 
         private readonly INotifyMessagesQueue messagesQueue;
         private readonly ILogger<NotifierHostedService> logger;
-        private readonly HttpClient httpClient;
+        private readonly IHttpClientFactory httpClientFactory;
         private TimeSpan delay = TimeSpan.FromSeconds(5);
         private static readonly JsonSerializerSettings SerializeSettings = new JsonSerializerSettings
         {
@@ -35,13 +35,14 @@ namespace BackEnd.Services.Notify
         {
             this.messagesQueue = messagesQueue;
             this.logger = logger;
-            httpClient = httpClientFactory.CreateClient(HttpClientName);
+            this.httpClientFactory = httpClientFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                var httpClient = httpClientFactory.CreateClient(HttpClientName);
                 if (!messagesQueue.TryGetMessage(out (NotifyType notifyType, object data) message))
                 {
                     await Task.Delay(delay);
