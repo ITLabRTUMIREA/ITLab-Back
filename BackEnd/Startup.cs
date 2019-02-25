@@ -162,7 +162,7 @@ namespace BackEnd
                 ;
 
             services.AddSingleton<NotifierHostSaver>();
-            services.AddHttpClient(Notifier.HttpClientName, (provider, client) =>
+            services.AddHttpClient(NotifierHostedService.HttpClientName, (provider, client) =>
             {
                 var configs = provider.GetService<IOptions<NotifierSettings>>();
                 var host = configs.Value.Host;
@@ -172,10 +172,13 @@ namespace BackEnd
                 }
                 client.BaseAddress = new Uri(host);
             });
+
+            services.AddSingleton<INotifyMessagesQueue, CuncurrentBagMessagesQueue>();
+            services.AddHostedService<NotifierHostedService>();
             if (Configuration.GetValue<bool>("UseConsoleLogger"))
                 services.AddTransient<INotifier, DebugLogNotifier>();
             else
-                services.AddTransient<INotifier, Notifier>();
+                services.AddTransient<INotifier, MessageQueueNotifier>();
 
             services.AddSpaStaticFiles(spa => spa.RootPath = "wwwroot");
         }

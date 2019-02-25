@@ -9,6 +9,6 @@ namespace BackEnd.Services.Notify
 {
     public interface INotifier
     {
-        Task Notify(NotifyType notifyType, object data);
+        void Notify(NotifyType notifyType, object data);
     }
 }

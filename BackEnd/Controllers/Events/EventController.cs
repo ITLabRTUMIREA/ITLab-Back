@@ -29,17 +29,14 @@ namespace BackEnd.Controllers.Events
     public class EventController : AuthorizeController
     {
         private readonly IEventsManager eventsManager;
-        private readonly INotifier notifier;
 
         public EventController(
             UserManager<User> userManager,
             IEventsManager eventsManager,
             ILogger<EventTypeController> logger,
-            IMapper mapper,
-            INotifier notifier) : base(userManager)
+            IMapper mapper) : base(userManager)
         {
             this.eventsManager = eventsManager;
-            this.notifier = notifier;
         }
 
         [HttpGet]
