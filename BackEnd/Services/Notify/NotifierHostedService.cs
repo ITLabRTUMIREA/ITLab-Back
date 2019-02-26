@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using BackEnd.Models.Settings;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Models.PublicAPI.NotifyRequests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -21,6 +23,7 @@ namespace BackEnd.Services.Notify
         private readonly INotifyMessagesQueue messagesQueue;
         private readonly ILogger<NotifierHostedService> logger;
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<NotifierSettings> settings;
         private TimeSpan delay = TimeSpan.FromSeconds(5);
         private static readonly JsonSerializerSettings SerializeSettings = new JsonSerializerSettings
         {
@@ -31,11 +34,13 @@ namespace BackEnd.Services.Notify
         public NotifierHostedService(
             INotifyMessagesQueue messagesQueue,
             ILogger<NotifierHostedService> logger,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IOptions<NotifierSettings> settings)
         {
             this.messagesQueue = messagesQueue;
             this.logger = logger;
             this.httpClientFactory = httpClientFactory;
+            this.settings = settings;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,7 +55,12 @@ namespace BackEnd.Services.Notify
                 }
                 try
                 {
-                    var content = JsonConvert.SerializeObject(new NotifyRequest<object> { Type = message.notifyType, Data = message.data }, SerializeSettings);
+                    var content = JsonConvert.SerializeObject(new NotifyRequest<object>
+                    {
+                        Type = message.notifyType,
+                        Data = message.data,
+                        Secret = settings.Value.NotifySecret
+                    }, SerializeSettings);
                     var result = await httpClient.PostAsync("", new StringContent(content, Encoding.UTF8, "application/json"));
                     if (result.StatusCode != HttpStatusCode.OK)
                     {
@@ -58,7 +68,8 @@ namespace BackEnd.Services.Notify
                         messagesQueue.AddMessage(message);
                         await Task.Delay(delay);
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     logger.LogWarning(ex, $"error while send info to notify hub (bot) base address: {httpClient.BaseAddress}");
                     messagesQueue.AddMessage(message);

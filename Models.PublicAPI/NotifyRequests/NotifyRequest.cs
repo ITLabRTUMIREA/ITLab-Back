@@ -5,5 +5,6 @@ namespace Models.PublicAPI.NotifyRequests
     {
         public NotifyType Type { get; set; }
         public T Data { get; set; }
+        public string Secret { get; set; }
     }
 }
