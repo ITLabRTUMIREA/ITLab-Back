@@ -10,5 +10,6 @@ namespace BackEnd.Models.Settings
         public string Host { get; set; }
         public string AccessToken { get; set; }
         public bool NeedChangeUrl { get; set; }
+        public string NotifySecret { get; set; }
     }
 }
