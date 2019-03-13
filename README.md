@@ -71,7 +71,7 @@ PubliAPI | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RT
 
 **DB_INIT** - if true - database will be initialized from DBInitializeSettings section
 
-**UseSonsoleLogger** - if true - all notifications will be print in logger. If false - notifications will be send via notifier service
+**UseConsoleLogger** - if true - all notifications will be print in logger. If false - notifications will be send via notifier service
 
 ## Run
 ```bash
