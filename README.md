@@ -12,7 +12,7 @@ PubliAPI | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RT
 
 ## Configuration
 
-```appsettings.Secret.json``` must be placed on root of project
+```appsettings.Secret.json``` must be placed to the BackEnd folder
 
 ```json
 {
@@ -67,11 +67,11 @@ PubliAPI | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RT
 }
 ```
 
-**DB_TYPE** - type of database with will be used
+**DB_TYPE** - type of the database which will be used
 
 **DB_INIT** - if true - database will be initialized from DBInitializeSettings section
 
-**UseSonsoleLogger** - if true - all notifications will be print in logger. If false - will be send via notifier service
+**UseSonsoleLogger** - if true - all notifications will be print in logger. If false - notifications will be send via notifier service
 
 ## Run
 ```bash
