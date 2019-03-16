@@ -31,6 +31,7 @@ PubliAPI | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RT
             "Token": "ABCDEFG"
         }
     ],
+	"UseDebugEmailSender": true,
     "EmailSenderSettings": {
         "Email": "sender email",
         "Password": "password for sender email",
@@ -68,6 +69,8 @@ PubliAPI | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RT
 ```
 
 **DB_TYPE** - type of the database which will be used
+
+**UseDebugEmailSender** - if true app will use a debug email service
 
 **DB_INIT** - if true - database will be initialized from DBInitializeSettings section
 

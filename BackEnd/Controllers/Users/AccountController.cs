@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Models.PublicAPI.Responses.People;
 using Models.PublicAPI.Responses.General;
 using BackEnd.Exceptions;
+using BackEnd.Services.Email;
 using Models.PublicAPI.Responses.Exceptions;
 
 namespace BackEnd.Controllers.Users

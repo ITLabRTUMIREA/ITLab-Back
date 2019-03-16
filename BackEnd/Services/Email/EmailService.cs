@@ -1,16 +1,12 @@
-﻿using BackEnd.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using BackEnd.Models.Settings;
-using System.Net.Mail;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
+using System.Net.Mail;
+using System.Threading.Tasks;
+using BackEnd.Models.Settings;
+using BackEnd.Services.Interfaces;
+using Microsoft.Extensions.Options;
 
-namespace BackEnd.Services
+namespace BackEnd.Services.Email
 {
     public class EmailService : IEmailSender
     {
