@@ -19,7 +19,6 @@ using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using BackEnd.Services;
 using Models.People;
-using System.Runtime.InteropServices;
 using BackEnd.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -29,13 +28,12 @@ using BackEnd.Models.Settings;
 using Models.People.Roles;
 using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
+using BackEnd.Services.Email;
 using BackEnd.Services.Notify;
 using WebApp.Configure.Models.Invokations;
 using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Query.ExpressionTranslators.Internal;
 using Swashbuckle.AspNetCore.Swagger;
-using Extensions;
 
 namespace BackEnd
 {
@@ -144,8 +142,14 @@ namespace BackEnd
             services.AddCors();
             services.AddSignalR();
 
+
+            if (Configuration.GetValue<bool>("UseDebugEmailSender"))
+                services.AddTransient<IEmailSender, DebugEmailService>();
+            else
+                services.AddTransient<IEmailSender, EmailService>();
+
+
             services.AddTransient<IUserRegisterTokens, DbUserRegisterTokens>();
-            services.AddTransient<IEmailSender, EmailService>();
             services.AddTransient<IEventsManager, EventsManager>();
             services.AddSingleton<ISmsSender, SmsService>();
 
@@ -161,24 +165,26 @@ namespace BackEnd
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 
-            services.AddSingleton<NotifierHostSaver>();
-            services.AddHttpClient(NotifierHostedService.HttpClientName, (provider, client) =>
-            {
-                var configs = provider.GetService<IOptions<NotifierSettings>>();
-                var host = configs.Value.Host;
-                if (configs.Value.NeedChangeUrl)
-                {
-                    host = provider.GetService<NotifierHostSaver>().Host;
-                }
-                client.BaseAddress = new Uri(host);
-            });
 
-            services.AddSingleton<INotifyMessagesQueue, CuncurrentBagMessagesQueue>();
-            services.AddHostedService<NotifierHostedService>();
             if (Configuration.GetValue<bool>("UseConsoleLogger"))
                 services.AddTransient<INotifier, DebugLogNotifier>();
             else
+            {
+                services.AddSingleton<NotifierHostSaver>();
+                services.AddHttpClient(NotifierHostedService.HttpClientName, (provider, client) =>
+                {
+                    var configs = provider.GetService<IOptions<NotifierSettings>>();
+                    var host = configs.Value.Host;
+                    if (configs.Value.NeedChangeUrl)
+                    {
+                        host = provider.GetService<NotifierHostSaver>().Host;
+                    }
+                    client.BaseAddress = new Uri(host);
+                });
+                services.AddSingleton<INotifyMessagesQueue, CuncurrentBagMessagesQueue>();
+                services.AddHostedService<NotifierHostedService>();
                 services.AddTransient<INotifier, MessageQueueNotifier>();
+            }
 
             services.AddSpaStaticFiles(spa => spa.RootPath = "wwwroot");
         }
