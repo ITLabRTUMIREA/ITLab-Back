@@ -3,7 +3,7 @@ trigger:
 name: $(BuildID)
 
 variables:
-  nuget_package_number: '1.1.$(BuildID)'
+  nuget_package_number: '1.1.$(Build.BuildId)'
 
 pool:
   name: Default
