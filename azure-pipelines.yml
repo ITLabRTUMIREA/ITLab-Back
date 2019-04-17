@@ -1,6 +1,7 @@
 trigger:
   - master
 
+name: $(BuildID)
 pool:
   name: Default
 steps:

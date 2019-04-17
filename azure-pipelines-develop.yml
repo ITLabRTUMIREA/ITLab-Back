@@ -1,6 +1,7 @@
-trigger: 
+trigger:
   - develop
 
+name: $(BuildID)
 pool:
   name: Default
 steps:
