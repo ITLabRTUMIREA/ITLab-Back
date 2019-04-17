@@ -1,5 +1,5 @@
-trigger:
-  - master
+trigger: 
+  - develop
 
 pool:
   name: Default
@@ -15,6 +15,6 @@ steps:
     modifyOutputPath: false
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: itlab-back-master'
+  displayName: 'Publish Artifact: itlab-back-develop'
   inputs:
-    ArtifactName: 'itlab-back-master'
+    ArtifactName: 'itlab-back-develop'
