@@ -6,6 +6,7 @@ using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
 using BackEnd.Extensions;
 using BackEnd.Models.Roles;
+using BackEnd.Services.Email;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
