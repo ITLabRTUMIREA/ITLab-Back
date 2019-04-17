@@ -1,7 +1,10 @@
 trigger:
   - master
-
 name: $(BuildID)
+
+variables:
+  nuget_package_number: 1.1.$(BuildID)
+
 pool:
   name: Default
 steps:
@@ -25,7 +28,8 @@ steps:
   inputs:
     command: pack
     packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
-    versioningScheme: byBuildNumber
+    versioningScheme: byEnvVar
+    versionEnvVar: nuget_package_number
 
 - task: NuGetCommand@2
   displayName: 'Push to Nuget.org'
