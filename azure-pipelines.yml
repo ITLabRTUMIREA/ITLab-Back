@@ -19,3 +19,17 @@ steps:
   displayName: 'Publish Artifact: itlab-back-master'
   inputs:
     ArtifactName: 'itlab-back-master'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack'
+  inputs:
+    command: pack
+    packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
+    versioningScheme: byBuildNumber
+
+- task: NuGetCommand@2
+  displayName: 'Push to Nuget.org'
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: 'Nuget org'
