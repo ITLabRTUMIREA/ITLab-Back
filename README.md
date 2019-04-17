@@ -1,10 +1,16 @@
 # Backend for RTUITLab managing system
 
-Status | Master | Develop
---- | --- | ---
-Buid | [![Build Status](https://capchik.visualstudio.com/MTU%20Work/_apis/build/status/RTU%20ITLab%20back-master)](https://capchik.visualstudio.com/MTU%20Work/_build/latest?definitionId=32) | [![Build status](https://capchik.visualstudio.com/MTU%20Work/_apis/build/status/RTU%20BackEnd%20develop)](https://capchik.visualstudio.com/MTU%20Work/_build/latest?definitionId=19)
-PubliAPI | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RTUITLab.ITLab.Models.PublicAPI.svg)](https://www.nuget.org/packages/RTUITLab.ITLab.Models.PublicAPI/) | ---
 
+Status | master | develop
+--- | --- | ---
+Build |  [![Build Status][build-master-image]][build-master-link] | [![Build Status][build-dev-image]][build-dev-link]
+Public API | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RTUITLab.ITLab.Models.PublicAPI.svg)](https://www.nuget.org/packages/RTUITLab.ITLab.Models.PublicAPI/) | ---
+
+
+[build-dev-image]: https://dev.azure.com/rtuitlab/ITLab/_apis/build/status/itlab/ITLab-Back-develop?branchName=develop
+[build-dev-link]: https://dev.azure.com/rtuitlab/ITLab/_build/latest?definitionId=39&branchName=develop
+[build-master-image]: https://dev.azure.com/rtuitlab/ITLab/_apis/build/status/itlab/ITLab-Back-master?branchName=master
+[build-master-link]: https://dev.azure.com/rtuitlab/ITLab/_build/latest?definitionId=38&branchName=master
 
 ## Prerequriments
 
