@@ -3,7 +3,7 @@ trigger:
 name: $(BuildID)
 
 variables:
-  nuget_package_number: 1.1.$(BuildID)
+  nuget_package_number: '1.1.$(BuildID)'
 
 pool:
   name: Default
@@ -28,7 +28,7 @@ steps:
   inputs:
     command: pack
     packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
-    versioningScheme: byEnvVar
+    versioningScheme: byPrereleaseNumber
     versionEnvVar: nuget_package_number
 
 - task: NuGetCommand@2
