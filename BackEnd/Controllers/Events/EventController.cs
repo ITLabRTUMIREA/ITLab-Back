@@ -68,6 +68,7 @@ namespace BackEnd.Controllers.Events
             .ProjectTo<EventApplicationView>()
             .ToListAsync();
 
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpGet("wishers")]
         public async Task<ListResponse<WisherEventView>> GetWishers()
         => await eventsManager
@@ -119,6 +120,7 @@ namespace BackEnd.Controllers.Events
             return ResponseStatusCode.OK;
         }
 
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("invitation/{placeId:guid}/accept")]
         public async Task<ResponseBase> AcceptInvite(Guid placeId)
         {
@@ -126,7 +128,7 @@ namespace BackEnd.Controllers.Events
             return ResponseStatusCode.OK;
         }
 
-
+        [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("invitation/{placeId:guid}/reject")]
         public async Task<ResponseBase> RejectInvite(Guid placeId)
         {
