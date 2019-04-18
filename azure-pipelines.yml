@@ -23,6 +23,11 @@ steps:
   inputs:
     ArtifactName: 'itlab-back-master'
 
+- task: DeleteFiles@1
+  inputs:
+    SourceFolder: '$(Build.ArtifactStagingDirectory)'
+    Contents: '**'
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack'
   inputs:
@@ -31,9 +36,7 @@ steps:
     versioningScheme: byEnvVar
     versionEnvVar: nuget_package_number
 
-- task: NuGetCommand@2
-  displayName: 'Push to Nuget.org'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: itlab-back-master-nuget'
   inputs:
-    command: push
-    nuGetFeedType: external
-    publishFeedCredentials: 'Nuget org'
+    ArtifactName: 'itlab-back-master-nuget'
