@@ -34,6 +34,10 @@ using WebApp.Configure.Models.Invokations;
 using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using App.Metrics;
+using App.Metrics.AspNetCore.Endpoints;
+using App.Metrics.Formatters.Prometheus;
+using System.Linq;
 
 namespace BackEnd
 {
@@ -186,6 +190,16 @@ namespace BackEnd
                 services.AddTransient<INotifier, MessageQueueNotifier>();
             }
 
+            var metrics = AppMetrics.CreateDefaultBuilder()
+                .OutputMetrics.AsPrometheusPlainText()
+                .Build();
+
+            services.AddMetrics(metrics);
+            services.AddMetricsTrackingMiddleware();
+            services.AddMetricsEndpoints(options =>
+                options.MetricsTextEndpointOutputFormatter = metrics.OutputMetricsFormatters.OfType<MetricsPrometheusTextOutputFormatter>().First()
+            );
+
             services.AddSpaStaticFiles(spa => spa.RootPath = "wwwroot");
         }
 
@@ -199,6 +213,8 @@ namespace BackEnd
                     .AllowAnyMethod()
                     .AllowAnyOrigin()
                     .AllowCredentials());
+            app.UseMetricsAllEndpoints();
+            app.UseMetricsAllMiddleware();
             app.UseWebAppConfigure();
             app.UseSwagger(c => { c.RouteTemplate = "api/{documentName}/swagger.json"; });
             app.UseSwaggerUI(c =>
