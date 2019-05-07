@@ -60,6 +60,7 @@ namespace BackEnd
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
             services.Configure<NotifierSettings>(Configuration.GetSection(nameof(NotifierSettings)));
+            services.Configure<JwtIssuerOptions>(Configuration.GetSection(nameof(JwtIssuerOptions)));
 
             services.AddMvc(options =>
             {
