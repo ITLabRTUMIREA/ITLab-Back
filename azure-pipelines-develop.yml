@@ -1,7 +1,7 @@
 trigger:
   - develop
 
-name: $(BuildID)
+name: 
 pool:
   name: Default
 steps:
@@ -14,6 +14,15 @@ steps:
     arguments: '-o $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: false
     modifyOutputPath: false
+- task: file-creator@5
+  inputs:
+    fileoverwrite: true
+    filepath: '$(Build.ArtifactStagingDirectory)/build.json'
+    filecontent: '{
+        "BuildId": "$(BuildID)",
+        "BuildDateString": "01.07.2019"
+      }'
+
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: itlab-back-develop'
