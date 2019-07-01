@@ -18,14 +18,14 @@ steps:
 - task: file-creator@5
   inputs:
     fileoverwrite: true
+    filepath: '$(Build.ArtifactStagingDirectory)/build.json'
     filecontent: '{
-        "BuildInformation": {
-          "BuildId": "$(Build.BuildId)",
-          "BuildDateString": "01.07.2019"
+              "BuildInformation": {
+                "BuildId": "$(Build.BuildId)",
+      "BuildDateString": "
         }
       }'
     endWithNewLine: true
-
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: itlab-back-develop'
