@@ -85,13 +85,13 @@ namespace BackEnd.Controllers.Equipments
         /// </summary>
         /// <param name="request"></param>
         /// <returns>A newly created Equipment</returns>
-        /// <response code="200">Returns newly created Equipment</response>
+        /// <response code="201">Returns newly created equipment</response>
         /// <response code="400">If incorrect children id passed</response>
         /// <response code="404">If equipment type id don't exist</response>
         /// <response code="409">If serial number exists</response>
         [RequireRole(RoleNames.CanEditEquipment)]
         [HttpPost]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(409)]
@@ -122,18 +122,27 @@ namespace BackEnd.Controllers.Equipments
 
                 await dbContext.Equipments.AddAsync(newEquipment);
                 await dbContext.SaveChangesAsync();
-                return mapper.Map<EquipmentView>(newEquipment);
+                return CreatedAtAction(nameof(GetAsync), mapper.Map<EquipmentView>(newEquipment));
             }
             finally
             {
                 semaphore.Release();
             }
-
         }
-
+        /// <summary>
+        /// Edit equipment
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>Edited equipment</returns>
+        /// <response code="200">Returns edited equipment</response>
+        /// <response code="404">If equipment with passed id don't exists</response>
+        /// <response code="409">Id passed serial number exists</response>
         [RequireRole(RoleNames.CanEditEquipment)]
         [HttpPut]
-        public async Task<ActionResult<EquipmentView>> PutAsync(int id, [FromBody]EquipmentEditRequest request)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
+        public async Task<ActionResult<EquipmentView>> PutAsync([FromBody]EquipmentEditRequest request)
         {
             var toEdit = await CheckAndGetEquipmentAsync(request.Id);
             if (request.EquipmentTypeId.HasValue)
@@ -143,7 +152,7 @@ namespace BackEnd.Controllers.Equipments
             }
             if (string.IsNullOrEmpty(request.SerialNumber))
                 if (!await CheckNotExist(request.SerialNumber))
-                    return Conflict("Serial number exists");//TODO meta
+                    return Conflict("Serial number exists");
 
             mapper.Map(request, toEdit);
             await dbContext.SaveChangesAsync();

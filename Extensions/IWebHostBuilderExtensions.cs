@@ -5,12 +5,12 @@ namespace Extensions
 {
     public static class IWebHostBuilderExtensions
     {
-        public static IWebHostBuilder UseConfigFile(this IWebHostBuilder builder, string fileName)
+        public static IWebHostBuilder UseConfigFile(this IWebHostBuilder builder, string fileName, bool optional = false)
         {
             try
             {
                 return builder
-                    .ConfigureAppConfiguration(config => config.AddJsonFile(fileName, false));
+                    .ConfigureAppConfiguration(config => config.AddJsonFile(fileName, optional));
             }
             catch (Exception ex)
             {
