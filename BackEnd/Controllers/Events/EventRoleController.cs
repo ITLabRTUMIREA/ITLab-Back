@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
-using BackEnd.Extensions;
 using BackEnd.Models.Roles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +13,7 @@ using Models.People.Roles;
 using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Events.Event.Create.Roles;
 using Models.PublicAPI.Requests.Events.Event.Edit.Roles;
-using Models.PublicAPI.Responses;
 using Models.PublicAPI.Responses.Event;
-using Models.PublicAPI.Responses.General;
 
 namespace BackEnd.Controllers.Events
 {
@@ -35,27 +33,28 @@ namespace BackEnd.Controllers.Events
         }
 
         [HttpGet]
-        public async Task<ListResponse<EventRoleView>> Get()
+        public async Task<ActionResult<List<EventRoleView>>> Get()
             => await dbContext
                 .EventRoles
                 .ProjectTo<EventRoleView>()
                 .ToListAsync();
 
         [HttpPost]
-        public async Task<OneObjectResponse<EventRoleView>> Post([FromBody] EventRoleCreateRequest request)
+        public async Task<ActionResult<EventRoleView>> Post([FromBody] EventRoleCreateRequest request)
         {
             if (await dbContext.EventRoles.AnyAsync(er => er.Title == request.Title))
-                throw ResponseStatusCode.EventRoleNameExist.ToApiException();
+                return Conflict("Event role name exist");
             var newEventRole = mapper.Map<EventRole>(request);
             dbContext.Add(newEventRole);
             await dbContext.SaveChangesAsync();
             return mapper.Map<EventRoleView>(newEventRole);
         }
         [HttpPut]
-        public async Task<OneObjectResponse<EventRoleView>> Put([FromBody] EventRoleEditRequest request)
+        public async Task<ActionResult<EventRoleView>> Put([FromBody] EventRoleEditRequest request)
         {
-            var target = await dbContext.EventRoles.SingleOrDefaultAsync(er => er.Id == request.Id)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+            var target = await dbContext.EventRoles.SingleOrDefaultAsync(er => er.Id == request.Id);
+            if (target == null)
+                return NotFound();
             target = mapper.Map(request, target);
             await dbContext.SaveChangesAsync();
             return mapper.Map<EventRoleView>(target);
@@ -63,10 +62,11 @@ namespace BackEnd.Controllers.Events
 
         [RequireRole(RoleNames.CanDeleteEventRole)]
         [HttpDelete]
-        public async Task<OneObjectResponse<EventRoleView>> Delete([FromBody] IdRequest request)
+        public async Task<ActionResult<EventRoleView>> Delete([FromBody] IdRequest request)
         {
-            var target = await dbContext.EventRoles.SingleOrDefaultAsync(er => er.Id == request.Id)
-                         ?? throw ResponseStatusCode.NotFound.ToApiException();
+            var target = await dbContext.EventRoles.SingleOrDefaultAsync(er => er.Id == request.Id);
+            if (target == null)
+                return NotFound();
             dbContext.Remove(target);
             await dbContext.SaveChangesAsync();
             return mapper.Map<EventRoleView>(target);

@@ -1,12 +1,6 @@
-﻿using BackEnd.Exceptions;
-using BackEnd.Extensions;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.Exceptions;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace BackEnd.Formatting
 {
@@ -18,14 +12,7 @@ namespace BackEnd.Formatting
 
             if (!modelState.IsValid)
             {
-
-                throw new InputParameterIncorrectResponse(modelState.Select(kvp => new IncorrectingInfo
-                    {
-                        Fieldname = kvp.Key,
-                        Messages = kvp.Value.Errors.Select(e => e.ErrorMessage).ToList()
-                    }).ToList()
-                    ).ToApiException
-                    ();
+                context.Result = new BadRequestObjectResult(modelState);
             }
         }
     }

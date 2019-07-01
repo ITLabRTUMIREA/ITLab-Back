@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Models.PublicAPI.Responses;
 using BackEnd.Extensions;
 using AutoMapper;
+using BackEnd.Exceptions;
 
 namespace BackEnd.Services.UserProperties
 {
@@ -34,7 +35,7 @@ namespace BackEnd.Services.UserProperties
             var targetType = await dbContext
                 .UserPropertyTypes
                 .SingleOrDefaultAsync(upt => upt.Id == request.Id)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+                ?? throw ApiLogicException.NotFound();
             var newProperty = mapper.Map<UserProperty>(request);
             newProperty.Status = targetType.DefaultStatus;
             newProperty.UserId = userId;
@@ -50,7 +51,7 @@ namespace BackEnd.Services.UserProperties
                 .UserProperties
                 .Where(up => up.UserPropertyTypeId == typeId && up.UserId == userId)
                 .SingleOrDefaultAsync()
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+                ?? throw ApiLogicException.NotFound();
             dbContext.Remove(targetProperty);
             await dbContext.SaveChangesAsync();
             return typeId;

@@ -4,16 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Models.People;
 using BackEnd.DataBase;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
-using Models.PublicAPI.Responses;
-using BackEnd.Extensions;
-using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.Equipment;
 using AutoMapper.QueryableExtensions;
 using Models.PublicAPI.Requests;
@@ -40,7 +33,7 @@ namespace BackEnd.Controllers.Equipments
         }
 
         [HttpGet("free")]
-        public async Task<ListResponse<EquipmentView>> Get()
+        public async Task<ActionResult<List<EquipmentView>>> Get()
         {
             return await dataBaseContext
                 .Equipments
@@ -50,9 +43,11 @@ namespace BackEnd.Controllers.Equipments
         }
 
         [HttpGet("{userId?}")]
-        public async Task<ListResponse<EquipmentView>> Get(Guid? userId)
+        public async Task<ActionResult<List<EquipmentView>>> Get(Guid? userId)
         {
             var uId = await GetUserId(userId);
+            if (uId == null)
+                return NotFound();
             return await dataBaseContext
                 .Equipments
                 .Where(e => e.OwnerId == uId)
@@ -62,18 +57,21 @@ namespace BackEnd.Controllers.Equipments
 
         [RequireRole(RoleNames.CanEditEquipmentOwner)]
         [HttpPost("{userId?}")]
-        public async Task<OneObjectResponse<EquipmentView>> Post(
+        public async Task<ActionResult<EquipmentView>> Post(
             [FromRoute]Guid? userId,
             [FromBody] IdRequest equipmentIdRequest)
         {
             var uId = await GetUserId(userId);
+            if (uId == null)
+                return NotFound();
             var targetEquipment = await dataBaseContext
                 .Equipments
-                .SingleOrDefaultAsync(e => e.Id == equipmentIdRequest.Id)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+                .SingleOrDefaultAsync(e => e.Id == equipmentIdRequest.Id);
+            if (targetEquipment == null)
+                return NotFound();
 
             if (targetEquipment.OwnerId.HasValue && targetEquipment.OwnerId != uId)
-                throw ResponseStatusCode.EquipmentReserved.ToApiException();
+                return Conflict("Equipment reserved"); // TODO meta
 
             targetEquipment.OwnerId = uId;
             await dataBaseContext.SaveChangesAsync();
@@ -81,27 +79,30 @@ namespace BackEnd.Controllers.Equipments
         }
         [RequireRole(RoleNames.CanEditEquipmentOwner)]
         [HttpDelete("{userId?}")]
-        public async Task<OneObjectResponse<EquipmentView>> Delete(
+        public async Task<ActionResult<EquipmentView>> Delete(
             [FromRoute]Guid? userId,
             [FromBody] IdRequest equipmentIdRequest)
         {
             var uId = await GetUserId(userId);
+            if (uId == null)
+                return NotFound();
             var targetEquipment = await dataBaseContext
                 .Equipments
                 .Where(e => e.Id == equipmentIdRequest.Id)
                 .Where(e => e.OwnerId == uId)
-                .SingleOrDefaultAsync()
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+                .SingleOrDefaultAsync();
+            if (targetEquipment == null)
+                return NotFound();
             targetEquipment.OwnerId = null;
             await dataBaseContext.SaveChangesAsync();
             return mapper.Map<EquipmentView>(targetEquipment);
         }
-        private async Task<Guid> GetUserId(Guid? targetId)
+        private async Task<Guid?> GetUserId(Guid? targetId)
         {
             return !targetId.HasValue ? UserId :
                               await dataBaseContext.Users
                               .AnyAsync(u => u.Id == targetId) ? targetId.Value :
-                              throw ResponseStatusCode.UserNotFound.ToApiException();
+                               null as Guid?;
         }
     }
 }

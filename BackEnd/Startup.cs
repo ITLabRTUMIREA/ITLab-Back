@@ -4,7 +4,6 @@ using System.Text;
 using AutoMapper;
 using BackEnd.Authorize;
 using BackEnd.DataBase;
-using BackEnd.Exceptions;
 using BackEnd.Formatting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -19,7 +18,6 @@ using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using BackEnd.Services;
 using Models.People;
-using BackEnd.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json.Serialization;
@@ -35,9 +33,12 @@ using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using App.Metrics;
-using App.Metrics.AspNetCore.Endpoints;
 using App.Metrics.Formatters.Prometheus;
 using System.Linq;
+using BackEnd.Exceptions;
+using System.Reflection;
+using System.IO;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BackEnd
 {
@@ -69,6 +70,7 @@ namespace BackEnd
                      .AddAuthenticationSchemes("Bearer")
                      .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
+                options.Filters.Add(new ProducesAttribute("application/json"));
             }).AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -119,7 +121,6 @@ namespace BackEnd
             })
             .AddJwtBearer(configureOptions =>
             {
-
                 configureOptions.ClaimsIssuer = jwtAppSettingOptions.Issuer;
                 configureOptions.TokenValidationParameters = tokenValidationParameters;
                 configureOptions.SaveToken = true;
@@ -141,10 +142,12 @@ namespace BackEnd
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "IT Lab develop API", Version = "v1" });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddCors();
-            services.AddSignalR();
 
 
             if (Configuration.GetValue<bool>("UseDebugEmailSender"))
@@ -205,8 +208,7 @@ namespace BackEnd
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
-            IApplicationBuilder app,
-            IHostingEnvironment env)
+            IApplicationBuilder app)
         {
             app.UseCors(config =>
                 config.AllowAnyHeader()
@@ -222,7 +224,6 @@ namespace BackEnd
                 c.SwaggerEndpoint("/api/v1/swagger.json", "My API V1");
                 c.RoutePrefix = "api";
             });
-            app.UseSignalR(routes => { routes.MapHub<MirrorHub>("/chatHub"); });
             app.UseExceptionHandlerMiddleware();
             app.UseAuthentication();
             app.UseMvc();

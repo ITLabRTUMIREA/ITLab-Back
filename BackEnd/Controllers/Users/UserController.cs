@@ -1,25 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
-using BackEnd.Extensions;
 using BackEnd.Models.Roles;
-using BackEnd.Services.Email;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.People;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.People;
 using Extensions;
-using Newtonsoft.Json;
 using BackEnd.Services.Interfaces;
 using Models.People.Roles;
 using Models.PublicAPI.Requests.User;
+using System.Collections.Generic;
 
 namespace BackEnd.Controllers.Users
 {
@@ -41,7 +35,7 @@ namespace BackEnd.Controllers.Users
             this.emailSender = emailSender;
         }
         [HttpGet]
-        public async Task<PageOfListResponse<UserView>> GetAsync(
+        public async Task<ActionResult<List<UserView>>> GetAsync(
             string email,
             string firstname,
             string lastname,
@@ -49,13 +43,13 @@ namespace BackEnd.Controllers.Users
             string match,
             int count = 5,
             int offset = 0)
-            => (await GetUsersByParams(email, firstname, lastname, middleName, match)
+            => await GetUsersByParams(email, firstname, lastname, middleName, match)
                 .If(count > 0, users => users.Skip(offset * count).Take(count))
                 .ProjectTo<UserView>()
-                .ToListAsync()).ToPage(offset * count);
+                .ToListAsync();
 
         [HttpGet("count")]
-        public async Task<OneObjectResponse<int>> GetCountAsync(
+        public async Task<ActionResult<int>> GetCountAsync(
             string email,
             string firstname,
             string lastname,
@@ -65,22 +59,26 @@ namespace BackEnd.Controllers.Users
                 .CountAsync();
 
         [HttpGet("{id:guid}")]
-        public async Task<OneObjectResponse<UserView>> GetAsync(Guid id)
-        => await UserManager
-            .Users
-            .ProjectTo<UserView>()
-            .SingleOrDefaultAsync(u => u.Id == id)
-            ?? throw ResponseStatusCode.NotFound.ToApiException();
+        public async Task<ActionResult<UserView>> GetAsync(Guid id)
+        {
+            var userView = await UserManager
+                       .Users
+                       .ProjectTo<UserView>()
+                       .SingleOrDefaultAsync(u => u.Id == id);
+            if (userView == null)
+                return NotFound();
+            return userView;
+        }
 
         [RequireRole(RoleNames.CanInviteToSystem)]
         [HttpPost]
-        public async Task<ResponseBase> InviteUser([FromBody]InviteUserRequest inviteRequest)
+        public async Task<ActionResult> InviteUser([FromBody]InviteUserRequest inviteRequest)
         {
             if (await dbContext.Users.AnyAsync(u => u.NormalizedEmail == inviteRequest.Email.ToUpper()))
-                throw ResponseStatusCode.UserNowInSystem.ToApiException();
+                return Conflict();
             var token = await registerTokens.AddRegisterToken(inviteRequest.Email);
             await emailSender.SendInvitationEmail(inviteRequest.Email, inviteRequest.RedirectUrl, token);
-            return ResponseStatusCode.OK;
+            return Ok();
         }
 
 
