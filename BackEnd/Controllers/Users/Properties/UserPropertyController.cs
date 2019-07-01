@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackEnd.DataBase;
-using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.People.Properties;
 using System.Linq;
 using AutoMapper.QueryableExtensions;
@@ -13,6 +12,7 @@ using System.Threading.Tasks;
 using Models.PublicAPI.Requests.User.Properties.UserProperty;
 using BackEnd.Services.UserProperties;
 using Models.PublicAPI.Requests;
+using System.Collections.Generic;
 
 namespace BackEnd.Controllers.Users.Properties
 {
@@ -33,7 +33,7 @@ namespace BackEnd.Controllers.Users.Properties
         }
 
         [HttpGet]
-        public async Task<ListResponse<UserPropertyView>> GetAsync()
+        public async Task<ActionResult<List<UserPropertyView>>> GetAsync()
             => await dbContext
                 .Users
                 .Where(u => u.Id == UserId)
@@ -42,14 +42,14 @@ namespace BackEnd.Controllers.Users.Properties
                 .ToListAsync();
 
         [HttpPut]
-        public async Task<OneObjectResponse<UserPropertyView>> PutAsync(
+        public async Task<ActionResult<UserPropertyView>> PutAsync(
             [FromBody] UserPropertyEditRequest request)
             => await (await userPropertiesManager.PutUserProperty(request, UserId))
                     .ProjectTo<UserPropertyView>()
                     .SingleAsync();
 
         [HttpDelete]
-        public async Task<OneObjectResponse<Guid>> DeleteAsync(
+        public async Task<ActionResult<Guid>> DeleteAsync(
             [FromBody] IdRequest request)
             => await userPropertiesManager.DeleteUserProperty(request.Id, UserId);
 

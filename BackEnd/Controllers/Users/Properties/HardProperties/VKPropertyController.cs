@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
-using BackEnd.Extensions;
 using BackEnd.Models.Settings;
 using BackEnd.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,8 +12,6 @@ using Microsoft.Extensions.Options;
 using Models.People;
 using Models.People.UserProperties;
 using Models.PublicAPI.Requests.User.Properties.HardProperties;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.People;
 
 namespace BackEnd.Controllers.Users.Properties.HardProperties
@@ -40,20 +35,21 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<OneObjectResponse<string>> GetVkToken()
+        public async Task<ActionResult<string>> GetVkToken()
             => $"L:{await registerTokens.AddVkToken(UserId)}";
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<OneObjectResponse<UserView>> VerifyToken(
+        public async Task<ActionResult<UserView>> VerifyToken(
             [FromBody] VkVerifyRequest request)
         {
             if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var accessToken))
-                throw ResponseStatusCode.Unauthorized.ToApiException();
+                return Unauthorized();
             if (accessToken != config.Value.AccessToken)
-                throw ResponseStatusCode.Forbidden.ToApiException();
-            var userId = await registerTokens.CheckVkToken(request.Token)
-                       ?? throw ResponseStatusCode.IncorrectVkToken.ToApiException();
+                return Forbid();
+            var userId = await registerTokens.CheckVkToken(request.Token);
+            if (userId == null)
+                return BadRequest("Incorrect vk token");
 
 
             //TODO performance
@@ -71,7 +67,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             {    vkProp = new UserProperty
                 {
                     UserPropertyTypeId = vkPropType.Id,
-                    UserId = userId,
+                    UserId = userId.Value,
                     Value = request.VkId.ToString(),
                     Status = UserPropertyStatus.Confirmed
                 };
