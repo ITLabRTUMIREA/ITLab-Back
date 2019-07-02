@@ -22,7 +22,7 @@ steps:
     filecontent: '{
               "BuildInformation": {
                 "BuildId": "$(Build.BuildId)",
-      "BuildDateString": "
+      "BuildDateString": ""
         }
       }'
     endWithNewLine: true
