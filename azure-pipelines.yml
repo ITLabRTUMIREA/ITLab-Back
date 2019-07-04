@@ -1,6 +1,8 @@
 trigger:
   - master
-name: $(BuildID)
+  - develop
+
+name: $(BuildID)-$(Build.SourceBranchName)
 
 variables:
   nuget_package_number: '1.1.$(Build.BuildId)'
@@ -19,9 +21,9 @@ steps:
     modifyOutputPath: false
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: itlab-back-master'
+  displayName: 'Publish Artifact: itlab-back-$(Build.SourceBranchName)'
   inputs:
-    ArtifactName: 'itlab-back-master'
+    ArtifactName: 'itlab-back-$(Build.SourceBranchName)'
 
 - task: DeleteFiles@1
   inputs:
@@ -37,6 +39,6 @@ steps:
     versionEnvVar: nuget_package_number
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: itlab-back-master-nuget'
+  displayName: 'Publish Artifact: itlab-back-$(Build.SourceBranchName)-nuget'
   inputs:
-    ArtifactName: 'itlab-back-master-nuget'
+    ArtifactName: 'itlab-back-$(Build.SourceBranchName)-nuget'
