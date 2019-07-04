@@ -105,7 +105,7 @@ namespace BackEnd.Controllers.Equipments
                 if (type == null)
                     return NotFound();
 
-                if (!await CheckNotExist(request.SerialNumber))
+                if (await CheckExist(request.SerialNumber))
                     return Conflict("Serial number exists");
 
                 var newEquipment = mapper.Map<Equipment>(request);
@@ -151,7 +151,7 @@ namespace BackEnd.Controllers.Equipments
                     return NotFound();
             }
             if (string.IsNullOrEmpty(request.SerialNumber))
-                if (!await CheckNotExist(request.SerialNumber))
+                if (!await CheckExist(request.SerialNumber))
                     return Conflict("Serial number exists");
 
             mapper.Map(request, toEdit);
@@ -177,7 +177,7 @@ namespace BackEnd.Controllers.Equipments
             return dbContext.Equipments.Include(eq => eq.EquipmentType).FirstOrDefaultAsync(eq => eq.Id == id);
         }
 
-        private Task<bool> CheckNotExist(string serialNumber)
+        private Task<bool> CheckExist(string serialNumber)
         {
             return dbContext
                 .Equipments
