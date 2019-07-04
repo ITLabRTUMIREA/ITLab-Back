@@ -26,7 +26,5 @@ namespace BackEnd.Controllers
             => await UserManager.FindByIdAsync(UserManager.GetUserId(User));
         protected async Task<User> GetUser(Guid? userId)
             => await UserManager.FindByIdAsync(userId.ToString());
-
-        protected static Exception NotFoundMyApi() => ResponseStatusCode.NotFound.ToApiException();
     };
 }

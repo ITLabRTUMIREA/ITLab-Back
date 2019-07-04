@@ -4,15 +4,9 @@ using BackEnd.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.PublicAPI.Requests.Account;
-using Models.PublicAPI.Responses;
 using Models.People;
-using BackEnd.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Models.PublicAPI.Responses.People;
-using Models.PublicAPI.Responses.General;
-using BackEnd.Exceptions;
-using BackEnd.Services.Email;
-using Models.PublicAPI.Responses.Exceptions;
 
 namespace BackEnd.Controllers.Users
 {
@@ -36,21 +30,21 @@ namespace BackEnd.Controllers.Users
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ResponseBase> Post([FromBody]AccountCreateRequest account)
+        public async Task<ActionResult> Post([FromBody]AccountCreateRequest account)
         {
             if (!await registerTokens.IsCorrectRegisterToken(account.Email, account.AccessToken))
-                return ResponseStatusCode.IncorrectAccessToken;
+                return BadRequest("Incorrect access token");
             var user = mapper.Map<User>(account);
             user.EmailConfirmed = true;
             var result = await UserManager.CreateAsync(user, account.Password);
             if (result.Succeeded)
                 await registerTokens.RemoveToken(account.Email);
 
-            return ResponseStatusCode.OK;
+            return Ok();
         }
 
         [HttpPut]
-        public async Task<OneObjectResponse<UserView>> EditUser([FromBody]AccountEditRequest editRequest)
+        public async Task<ActionResult<UserView>> EditUser([FromBody]AccountEditRequest editRequest)
         {
             var currentUser = await GetCurrentUser();
             mapper.Map(editRequest, currentUser);
@@ -60,41 +54,42 @@ namespace BackEnd.Controllers.Users
         
 
         [HttpPut("password")]
-        public async Task<ResponseBase> ChangePassword([FromBody] ChangePasswordRequest request)
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var result = await UserManager
                 .ChangePasswordAsync(await GetCurrentUser(), request.CurrentPassword, request.NewPassword);
 
             if (result.Succeeded)
-                return ResponseBase.OK;
+                return Ok();
 
-            throw ApiLogicException.Create(
-                InputParameterIncorrectResponse.Create(result.Errors));
+            return BadRequest(result.Errors);
         }
 
         [AllowAnonymous]
         [HttpPost("password/requestReset")]
-        public async Task<ResponseBase> ResetPassword([FromBody]RequestResetPasswordRequest request)
+        public async Task<ActionResult> ResetPassword([FromBody]RequestResetPasswordRequest request)
         {
-            var userByMail = await UserManager.FindByEmailAsync(request.Email)
-                                              ?? throw ResponseStatusCode.UserNotFound.ToApiException();
+            var userByMail = await UserManager.FindByEmailAsync(request.Email);
+            if (userByMail == null)
+                return NotFound();
             var token = await UserManager.GeneratePasswordResetTokenAsync(userByMail);
             await emailSender.SendResetPasswordEmail(request.Email, request.RedirectUrl, token);
-            return ResponseBase.OK;
+            return Ok();
         }
 
         [AllowAnonymous]
         [HttpPost("password/reset")]
-        public async Task<ResponseBase> ResetPassword([FromBody]ResetPasswordRequest request)
+        public async Task<ActionResult> ResetPassword([FromBody]ResetPasswordRequest request)
         {
-            var userByMail = await UserManager.FindByEmailAsync(request.Email)
-                                              ?? throw ResponseStatusCode.UserNotFound.ToApiException();
+            var userByMail = await UserManager.FindByEmailAsync(request.Email);
+            if (userByMail == null)
+                return NotFound();
+
             var result = await UserManager.ResetPasswordAsync(userByMail, request.Token, request.NewPassword);
             if (result.Succeeded)
-                return ResponseBase.OK;
+                return Ok();
 
-            throw ApiLogicException.Create(
-                InputParameterIncorrectResponse.Create(result.Errors));
+            return BadRequest(result.Errors);
         }
 
     }

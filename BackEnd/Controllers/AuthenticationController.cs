@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using BackEnd.Authorize;
-using BackEnd.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +11,7 @@ using Microsoft.Extensions.Options;
 using Models;
 using Models.People;
 using Models.PublicAPI.Requests.Account;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.Login;
-using BackEnd.Extensions;
 using Models.PublicAPI.Responses.People;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +34,7 @@ namespace BackEnd.Controllers
             IJwtFactory jwtFactory,
             IOptions<JwtIssuerOptions> jwtOptions,
             IMapper mapper,
-            ILogger<AuthenticationController> logger) :base (userManager)
+            ILogger<AuthenticationController> logger) : base(userManager)
         {
             this.jwtFactory = jwtFactory;
             this.jwtOptions = jwtOptions;
@@ -48,49 +44,52 @@ namespace BackEnd.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<OneObjectResponse<LoginResponse>> Login([FromBody] AccountLoginRequest loginData)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] AccountLoginRequest loginData)
         {
-            var user = await UserManager.FindByNameAsync(loginData.Username) ??
-                throw ApiLogicException.Create(ResponseStatusCode.WrongLoginOrPassword);
+            var user = await UserManager.FindByNameAsync(loginData.Username);
+            if (user == null)
+                return Unauthorized();
 
             if (!await UserManager.CheckPasswordAsync(user, loginData.Password))
             {
-                throw ApiLogicException.Create(ResponseStatusCode.WrongLoginOrPassword);
+                return Unauthorized();
             }
             return await GenerateResponse(user, HttpContext.Request.Headers["User-Agent"].ToString());
         }
 
         [HttpPost("refresh")]
         [AllowAnonymous]
-        public async Task<OneObjectResponse<LoginResponse>> Refresh([FromBody]string refreshToken)
+        public async Task<ActionResult<LoginResponse>> Refresh([FromBody]string refreshToken)
         {
-            var token = await jwtFactory.GetRefreshToken(refreshToken)
-                                        ?? throw IncorrectRefreshToken();
+            var token = await jwtFactory.GetRefreshToken(refreshToken);
+            if (token == null)
+                return IncorrectRefreshToken();
+
             var httpUserAgent = Request.Headers["User-Agent"].ToString();
 
             var now = DateTime.UtcNow;
             var age = now - token.CreateTime;
             logger.LogDebug($"Token age: {age}");
             if (age > jwtOptions.Value.RefreshTokenValidFor)
-                throw IncorrectRefreshToken();
+                return IncorrectRefreshToken();
             return await GenerateResponse(token.User, httpUserAgent, token.Id);
         }
 
         [HttpGet("refresh")]
-        public async Task<ListResponse<RefreshTokenView>> RefreshList()
+        public async Task<ActionResult<List<RefreshTokenView>>> RefreshList()
         => await jwtFactory.RefreshTokens(UserId)
                      .ProjectTo<RefreshTokenView>()
                      .ToListAsync();
 
         [HttpDelete("refresh")]
-        public async Task<ResponseBase> DeleteRefreshTokens([FromBody]List<Guid> tokenIds)
+        public async Task<List<Guid>> DeleteRefreshTokens([FromBody]List<Guid> tokenIds)
         {
             await jwtFactory.DeleteRefreshTokens(tokenIds);
-            return ResponseStatusCode.OK;
+            return tokenIds;
         }
 
-        private static Exception IncorrectRefreshToken()
-        => ResponseStatusCode.IncorrectRefreshToken.ToApiException();
+        private BadRequestObjectResult IncorrectRefreshToken()
+            => BadRequest("Incorrect refresh token");
 
         private async Task<LoginResponse> GenerateResponse(User user, string userAgent, Guid? oldRefreshTokenId = null)
         {

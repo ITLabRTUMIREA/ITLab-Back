@@ -1,19 +1,16 @@
-﻿using System;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Models.People;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Models.PublicAPI.Responses.People.Properties;
-using Models.PublicAPI.Responses.General;
 using BackEnd.DataBase;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Models.PublicAPI.Requests.User.Properties.UserPropertyType;
 using System.Threading.Tasks;
-using Models.PublicAPI.Responses;
-using BackEnd.Extensions;
 using AutoMapper;
 using Models.People.UserProperties;
+using System.Collections.Generic;
 
 namespace BackEnd.Controllers.Users.Properties
 {
@@ -33,7 +30,7 @@ namespace BackEnd.Controllers.Users.Properties
         }
 
         [HttpGet]
-        public async Task<ListResponse<UserPropertyTypeView>> GetAsync()
+        public async Task<ActionResult<List<UserPropertyTypeView>>> GetAsync()
             => await dbContext
                 .UserPropertyTypes
                 .ProjectTo<UserPropertyTypeView>()
@@ -41,11 +38,11 @@ namespace BackEnd.Controllers.Users.Properties
 
         //TODO Lock (semaphore) on method
         [HttpPost]
-        public async Task<OneObjectResponse<UserPropertyTypeView>> PostAsync(
+        public async Task<ActionResult<UserPropertyTypeView>> PostAsync(
             [FromBody]UserPropertyTypeCreateRequest request)
         {
             if (await dbContext.UserPropertyTypes.AnyAsync(upt => upt.Name == request.Name))
-                throw ResponseStatusCode.FieldExist.ToApiException();
+                return Conflict("Field exists");
             var newType = mapper.Map<UserPropertyType>(request);
             await dbContext.AddAsync(newType);
             await dbContext.SaveChangesAsync();

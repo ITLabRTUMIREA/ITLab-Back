@@ -13,6 +13,7 @@ using Extensions;
 using Models.PublicAPI.Requests.Events.Event.Create;
 using Models.PublicAPI.Requests.Events.Event.Edit;
 using Models.People;
+using BackEnd.Exceptions;
 
 namespace BackEnd.Services
 {
@@ -74,7 +75,7 @@ namespace BackEnd.Services
                 .Iterate();
 
             if (toEdit.Shifts?.Count < 1)
-                throw ResponseStatusCode.LastShift.ToApiException();
+                throw ApiLogicException.Conflict("Last shift");
             await dbContext.SaveChangesAsync();
             return dbContext.Events.Where(ev => ev.Id == toEdit.Id);
         }
@@ -88,7 +89,7 @@ namespace BackEnd.Services
 
         private async Task<EventType> CheckAndGetEventTypeAsync(Guid typeId)
             => await dbContext.EventTypes.FindAsync(typeId)
-               ?? throw ResponseStatusCode.EventTypeNotFound.ToApiException();
+               ?? throw ApiLogicException.NotFound("Event type not found");
 
         private async Task<Event> CheckAndGetEventAsync(Guid id)
             => await dbContext.Events
@@ -108,7 +109,7 @@ namespace BackEnd.Services
                    .ThenInclude(p => p.PlaceUserEventRoles)
                    .ThenInclude(pur => pur.User)
                    .FirstOrDefaultAsync(e => e.Id == id)
-                   ?? throw ResponseStatusCode.NotFound.ToApiException();
+                   ?? throw ApiLogicException.NotFound();
 
         public Task WishTo(Guid userId, Guid eventRoleId, Guid placeId)
             => AddUserToEvent(userId, eventRoleId, placeId, UserStatus.Wisher);
@@ -125,12 +126,12 @@ namespace BackEnd.Services
                                   .SelectMany(s => s.Places)
                                   .Include(p => p.PlaceUserEventRoles)
                                   .SingleOrDefaultAsync(p => p.Id == placeId)
-                              ?? throw ResponseStatusCode.NotFound.ToApiException();
+                              ?? throw ApiLogicException.NotFound();
             var nowInRole = targetPlace
                 .PlaceUserEventRoles
                 .Any(pur => pur.UserId == userId);
             if (nowInRole)
-                throw ResponseStatusCode.YouAreInRole.ToApiException();
+                throw ApiLogicException.Conflict("You are in role");
             targetPlace.PlaceUserEventRoles.Add(new PlaceUserEventRole
             {
                 UserId = userId,
@@ -178,7 +179,7 @@ namespace BackEnd.Services
         private async Task<PlaceUserEventRole> FindPlaceUserRole(Guid placeId, Guid userId, UserStatus status)
             => await PlaceUserEventRoles
                 .SingleOrDefaultAsync(pur => pur.PlaceId == placeId && pur.UserId == userId && pur.UserStatus == status)
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+                ?? throw ApiLogicException.NotFound();
 
         private IQueryable<PlaceUserEventRole> PlaceUserEventRoles =>
             dbContext
