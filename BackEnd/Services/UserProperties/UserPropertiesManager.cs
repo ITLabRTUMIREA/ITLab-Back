@@ -36,14 +36,25 @@ namespace BackEnd.Services.UserProperties
                 .UserPropertyTypes
                 .SingleOrDefaultAsync(upt => upt.Id == request.Id)
                 ?? throw ApiLogicException.NotFound();
-            var newProperty = mapper.Map<UserProperty>(request);
-            newProperty.Status = targetType.DefaultStatus;
-            newProperty.UserId = userId;
-            await dbContext.AddAsync(newProperty);
+            var currentProperty = await dbContext
+                .UserProperties
+                .Where(up => up.UserId == userId)
+                .Where(up => up.UserPropertyTypeId == targetType.Id)
+                .SingleOrDefaultAsync();
+            if (currentProperty == null)
+            {
+                currentProperty = mapper.Map<UserProperty>(request);
+                dbContext.UserProperties.Add(currentProperty);
+            }
+            else
+                mapper.Map(request, currentProperty);
+
+            currentProperty.Status = targetType.DefaultStatus;
+            currentProperty.UserId = userId;
             await dbContext.SaveChangesAsync();
             return dbContext
                 .UserProperties
-                .Where(up => up.Id == newProperty.Id);
+                .Where(up => up.Id == currentProperty.Id);
         }
         public async Task<Guid> DeleteUserProperty(Guid typeId, Guid userId)
         {

@@ -16,6 +16,9 @@ using System.Collections.Generic;
 
 namespace BackEnd.Controllers.Users.Properties
 {
+    /// <summary>
+    /// Controller for manage user properties
+    /// </summary>
     [Route("api/account/property")]
     public class UserPropertyController : AuthorizeController
     {
@@ -32,23 +35,44 @@ namespace BackEnd.Controllers.Users.Properties
             this.userPropertiesManager = userPropertiesManager;
         }
 
+        /// <summary>
+        /// Return all users properties
+        /// </summary>
+        /// <returns>Users properties</returns>
+        /// <response code="200">Success</response>
         [HttpGet]
+        [ProducesResponseType(200)]
         public async Task<ActionResult<List<UserPropertyView>>> GetAsync()
             => await dbContext
-                .Users
-                .Where(u => u.Id == UserId)
-                .SelectMany(u => u.UserProperties)
+                .UserProperties
+                .Where(u => u.UserId == UserId)
                 .ProjectTo<UserPropertyView>()
                 .ToListAsync();
 
+        /// <summary>
+        /// Edit property
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <response code="200">Success</response>
+        /// <response code="404">When property type id is not found</response>
         [HttpPut]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public async Task<ActionResult<UserPropertyView>> PutAsync(
             [FromBody] UserPropertyEditRequest request)
             => await (await userPropertiesManager.PutUserProperty(request, UserId))
                     .ProjectTo<UserPropertyView>()
                     .SingleAsync();
 
+        /// <summary>
+        /// Remove user property from user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <response code="200">Success</response>
         [HttpDelete]
+        [ProducesResponseType(200)]
         public async Task<ActionResult<Guid>> DeleteAsync(
             [FromBody] IdRequest request)
             => await userPropertiesManager.DeleteUserProperty(request.Id, UserId);
