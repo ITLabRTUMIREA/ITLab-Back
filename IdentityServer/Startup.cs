@@ -59,6 +59,18 @@ namespace IdentityServer
                 throw new Exception("need to configure key material");
             }
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("default", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5500")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
+
+
             //services.AddAuthentication()
             //    .AddGoogle(options =>
             //    {
@@ -82,6 +94,7 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseCors("default");
             app.UseStaticFiles();
             app.UseIdentityServer();
             app.UseMvcWithDefaultRoute();

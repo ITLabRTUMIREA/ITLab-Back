@@ -266,3 +266,5 @@ BackEnd/Migrations/*
 /IdentityServer/tempkey.rsa
 
 IdentityServer/identityserver4_log\.txt
+
+IdentityServer/appsettings\.Secret\.json
