@@ -262,3 +262,7 @@ __pycache__/
 BackEnd/appsettings.Secret.json
 BackEnd/Migrations/*
 /BackEnd/wwwroot
+/IdentityServer/AspIdUsers.db
+/IdentityServer/tempkey.rsa
+
+IdentityServer/identityserver4_log\.txt
