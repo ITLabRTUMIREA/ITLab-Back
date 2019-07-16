@@ -25,6 +25,10 @@ namespace IdentityServer
         {
             return WebHost.CreateDefaultBuilder(args)
                     .UseStartup<Startup>()
+                    .ConfigureAppConfiguration(config =>
+                    {
+                        config.AddJsonFile("appsettings.Secret.json", false);
+                    })
                     .UseSerilog((context, configuration) =>
                     {
                         configuration

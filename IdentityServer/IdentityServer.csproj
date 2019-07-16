@@ -23,4 +23,10 @@
   <ItemGroup>
     <ProjectReference Include="..\BackEnd\BackEnd.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.Secret.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

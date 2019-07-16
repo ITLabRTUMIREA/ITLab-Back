@@ -47,7 +47,7 @@ namespace IdentityServer
             })
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApis())
-                .AddInMemoryClients(Config.GetClients())
+                .AddInMemoryClients(Configuration.GetSection("Clients"))
                 .AddAspNetIdentity<User>();
 
             if (Environment.IsDevelopment())
