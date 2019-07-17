@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BackEnd\BackEnd.csproj" />
+    <ProjectReference Include="..\WebApp.Configure\WebApp.Configure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

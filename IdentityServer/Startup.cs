@@ -3,6 +3,7 @@
 
 
 using BackEnd.DataBase;
+using IdentityServer.Services.Configure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Models.People;
 using Models.People.Roles;
 using System;
+using WebApp.Configure.Models;
 
 namespace IdentityServer
 {
@@ -28,8 +30,16 @@ namespace IdentityServer
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataBaseContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            if (Configuration.GetValue<bool>("IN_MEMORY"))
+            {
+                services.AddDbContext<DataBaseContext>(options =>
+                    options.UseInMemoryDatabase("memory"));
+            }
+            else
+            {
+                services.AddDbContext<DataBaseContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            }
 
             services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<DataBaseContext>()
@@ -69,7 +79,8 @@ namespace IdentityServer
                 });
             });
 
-
+            services.AddWebAppConfigure()
+                .AddTransientConfigure<DefaultUserConfigureWork>(Configuration.GetValue<bool>("DEFAULT_USER"));
 
             //services.AddAuthentication()
             //    .AddGoogle(options =>

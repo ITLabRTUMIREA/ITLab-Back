@@ -1,5 +1,14 @@
 ﻿@model LoginViewModel
 
+@using Microsoft.AspNetCore.Hosting
+@inject IHostingEnvironment environment
+
+@{
+    var login = IdentityServer.Services.Configure.DefaultUserConfigureWork.UserEmail;
+    var password = IdentityServer.Services.Configure.DefaultUserConfigureWork.Password;
+}
+
+
 <div class="login-page">
     <div class="page-header">
         <h1>Login</h1>
@@ -39,10 +48,12 @@
                                         </label>
                                     </div>
                                 }
-
-                                <div>
-                                    <p>The default users are alice/bob, password: Pass123$</p>
-                                </div>
+                                @if (environment.IsDevelopment())
+                                {
+                                    <div>
+                                        <p>The default user are @login, password: @password</p>
+                                    </div>
+                                }
 
                                 <div class="form-group">
                                     <button class="btn btn-primary" name="button" value="login">Login</button>
