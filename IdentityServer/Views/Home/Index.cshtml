@@ -1,7 +1,7 @@
 @using  IdentityServer.Services.News
 @inject INewsSource NewsSource
 
-@{ 
+@{
     var news = await NewsSource.GetLastNews();
 }
 
@@ -20,10 +20,10 @@
     {
         <p>should be hidden @oneNews.Id</p>
         <h3>@oneNews.Title</h3>
-        <p>@oneNews.Description</p>
-        <img src="@oneNews.ImageUri"/>
+        @Markdown.ParseHtmlString(oneNews.Description)
+        <img src="@oneNews.ImageUri" />
         <p>@oneNews.Date</p>
-        
+
     }
 
     <div class="row">

@@ -16,10 +16,15 @@ namespace IdentityServer.Services.News
                 Title = "Junction TOKYO",
                 ImageUri = "https://live.staticflickr.com/787/41003506121_9141ece9ae_o.jpg",
                 Date = new DateTime(2018, 3, 5),
-                Description = @"# Titile
-                                ## lilte title
+                Description = @"
+# Titile
 
-                                > Paragraph
+## lilte title
+
+> Paragraph
+
+* list
+* items
                                "
             },
             new NewsView
@@ -28,11 +33,14 @@ namespace IdentityServer.Services.News
                 Title = "Fun Hack",
                 ImageUri = "https://it-events.com/system/ckeditor/pictures/16776/content_zagruzhennoe_1.jpg",
                 Date = new DateTime(2018, 3, 5),
-                Description = @"# Titile
-                                ## lilte title
+                Description = @"
+# Titile
+
+## lilte title
                                 
-                                some text, many text
-                                > Paragraph
+some text, many text
+
+> Paragraph
                                "
             }
         };
