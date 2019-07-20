@@ -1,9 +1,6 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
 using BackEnd.DataBase;
 using IdentityServer.Services.Configure;
+using IdentityServer.Services.News;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Models.People;
 using Models.People.Roles;
 using System;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using WebApp.Configure.Models;
 
 namespace IdentityServer
@@ -60,20 +59,23 @@ namespace IdentityServer
                 .AddInMemoryClients(Configuration.GetSection("Clients"))
                 .AddAspNetIdentity<User>();
 
-            if (Environment.IsDevelopment())
+            if (Configuration.GetValue<bool>("DEBUG_CREDENTIAL"))
             {
                 builder.AddDeveloperSigningCredential();
             }
             else
             {
-                throw new Exception("need to configure key material");
+                builder.AddSigningCredential(new X509Certificate2(
+                    Configuration.GetValue<string>("ISKeyPath"),
+                    Configuration.GetValue<string>("ISKeyPassword")));
             }
 
+            var corsOrigins = Configuration.GetSection("CORS:Origins").AsEnumerable().Skip(1).Select(kvp => kvp.Value).ToArray();
             services.AddCors(options =>
             {
                 options.AddPolicy("default", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5500")
+                    policy.WithOrigins(corsOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
@@ -81,6 +83,10 @@ namespace IdentityServer
 
             services.AddWebAppConfigure()
                 .AddTransientConfigure<DefaultUserConfigureWork>(Configuration.GetValue<bool>("DEFAULT_USER"));
+
+
+            services.AddSingleton<INewsSource, DebugNewsSource>();
+
 
             //services.AddAuthentication()
             //    .AddGoogle(options =>
@@ -105,6 +111,13 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            // TODO use custom domain
+            app.Use(async (ctx, next) =>
+            {
+                ctx.Response.Headers.Add("Content-Security-Policy",
+                                         "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; img-src *; base-uri 'self'");
+                await next();
+            });
             app.UseCors("default");
             app.UseStaticFiles();
             app.UseIdentityServer();
