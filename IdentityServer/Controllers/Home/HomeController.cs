@@ -1,7 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -28,14 +24,7 @@ namespace IdentityServer.Controllers.Home
 
         public IActionResult Index()
         {
-            if (_environment.IsDevelopment())
-            {
-                // only show in development
-                return View();
-            }
-
-            _logger.LogInformation("Homepage is disabled in production. Returning 404.");
-            return NotFound();
+            return View();
         }
 
         /// <summary>
