@@ -1,5 +1,8 @@
-@{
-    var version = typeof(IdentityServer4.Hosting.IdentityServerMiddleware).Assembly.GetName().Version.ToString();
+@using  IdentityServer.Services.News
+@inject INewsSource NewsSource
+
+@{ 
+    var news = await NewsSource.GetLastNews();
 }
 
 <div class="welcome-page">
@@ -7,11 +10,21 @@
         <div class="col-sm-10">
             <h1>
                 <img class="icon" src="~/icon.jpg">
-                Welcome to RTU IT Lab IdentityServer4
-                <small>(version @version)</small>
+                Welcome to RTU IT Lab site
             </h1>
         </div>
     </div>
+
+    <h2>DEBUG NEWS</h2>
+    @foreach (var oneNews in news)
+    {
+        <p>should be hidden @oneNews.Id</p>
+        <h3>@oneNews.Title</h3>
+        <p>@oneNews.Description</p>
+        <img src="@oneNews.ImageUri"/>
+        <p>@oneNews.Date</p>
+        
+    }
 
     <div class="row">
         <div class="col-sm-8">

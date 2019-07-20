@@ -4,6 +4,7 @@
 
 using BackEnd.DataBase;
 using IdentityServer.Services.Configure;
+using IdentityServer.Services.News;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -82,6 +83,10 @@ namespace IdentityServer
             services.AddWebAppConfigure()
                 .AddTransientConfigure<DefaultUserConfigureWork>(Configuration.GetValue<bool>("DEFAULT_USER"));
 
+
+            services.AddSingleton<INewsSource, DebugNewsSource>();
+
+
             //services.AddAuthentication()
             //    .AddGoogle(options =>
             //    {
@@ -105,6 +110,13 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            // TODO use custom domain
+            app.Use(async (ctx, next) =>
+            {
+                ctx.Response.Headers.Add("Content-Security-Policy",
+                                         "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; img-src *; base-uri 'self'");
+                await next();
+            });
             app.UseCors("default");
             app.UseStaticFiles();
             app.UseIdentityServer();
