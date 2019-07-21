@@ -3,6 +3,7 @@ using IdentityServer.Services.Configure;
 using IdentityServer.Services.News;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -87,6 +88,11 @@ namespace IdentityServer
 
             services.AddSingleton<INewsSource, DebugNewsSource>();
 
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
 
             //services.AddAuthentication()
             //    .AddGoogle(options =>
@@ -101,6 +107,8 @@ namespace IdentityServer
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseForwardedHeaders();
+
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
