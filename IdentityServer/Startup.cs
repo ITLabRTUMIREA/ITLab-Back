@@ -50,6 +50,7 @@ namespace IdentityServer
 
             var builder = services.AddIdentityServer(options =>
             {
+                options.PublicOrigin = Configuration.GetValue<string>("PublicOrigin");
                 options.Events.RaiseErrorEvents = true;
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
