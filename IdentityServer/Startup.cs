@@ -1,4 +1,5 @@
 using BackEnd.DataBase;
+using IdentityServer.Services;
 using IdentityServer.Services.Configure;
 using IdentityServer.Services.News;
 using Microsoft.AspNetCore.Builder;
@@ -59,7 +60,8 @@ namespace IdentityServer
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApis())
                 .AddInMemoryClients(Configuration.GetSection("Clients"))
-                .AddAspNetIdentity<User>();
+                .AddAspNetIdentity<User>()
+                .AddProfileService<IdentityProfileService>();
 
             if (Configuration.GetValue<bool>("DEBUG_CREDENTIAL"))
             {
@@ -124,7 +126,7 @@ namespace IdentityServer
             app.Use(async (ctx, next) =>
             {
                 ctx.Response.Headers.Add("Content-Security-Policy",
-                                         "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; img-src *; base-uri 'self'");
+                                         "default-src 'self'; object-src 'none'; frame-ancestors *; sandbox allow-forms allow-same-origin allow-scripts; img-src *; base-uri 'self'");
                 await next();
             });
             app.UseCors("default");
