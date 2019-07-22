@@ -115,15 +115,14 @@ namespace BackEnd
             services.AddAuthentication("Bearer")
             .AddJwtBearer("Bearer", options =>
             {
-                options.Authority = "http://localhost:5000";
+                options.Authority = Configuration.GetValue<string>("Authority");
                 options.RequireHttpsMetadata = false;
                 options.Audience = "api1";
             });
 
-            // add identity
+
             services.AddIdentity<User, Role>(identityOptions =>
             {
-                // configure identity options
                 identityOptions.Password.RequireDigit = false;
                 identityOptions.Password.RequireLowercase = false;
                 identityOptions.Password.RequireUppercase = false;

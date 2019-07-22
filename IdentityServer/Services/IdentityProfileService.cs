@@ -27,15 +27,10 @@ namespace IdentityServer.Services
             var user = await _userManager.FindByIdAsync(sub);
             if (user == null)
             {
-                throw new ArgumentException($"Canno find user by id {sub}");
+                throw new ArgumentException($"Can not find user by id {sub}");
             }
-
             var principal = await _claimsFactory.CreateAsync(user);
             var claims = principal.Claims.ToList();
-
-            //Add more claims like this
-            claims.Add(new System.Security.Claims.Claim("MyProfileID", "Some"));
-
             context.IssuedClaims = claims;
         }
 
