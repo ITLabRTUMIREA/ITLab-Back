@@ -6,6 +6,7 @@ using Models.People;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace IdentityServer.Services
@@ -31,6 +32,9 @@ namespace IdentityServer.Services
             }
             var principal = await _claimsFactory.CreateAsync(user);
             var claims = principal.Claims.ToList();
+            claims.Add(new Claim("first_name", user.FirstName));
+            claims.Add(new Claim("last_name", user.LastName));
+            claims.Add(new Claim("middle_name", user.MiddleName));
             context.IssuedClaims = claims;
         }
 
