@@ -5,11 +5,11 @@ using Models.People.Roles;
 
 namespace BackEnd.Models.Roles
 {
-    class RequireRoleAttribute : TypeFilterAttribute
+    class RequireRoleAttribute : AuthorizeAttribute
     {
-        public RequireRoleAttribute(params RoleNames[] roles) : base(typeof(RequireRoleFilter))
+        public RequireRoleAttribute(params RoleNames[] roles) : base()
         {
-            Arguments = new object[] { roles };
+            Roles = string.Join(',', roles.Select(r => r.ToString()));
         }
     }
 }
