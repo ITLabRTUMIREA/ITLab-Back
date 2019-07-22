@@ -112,24 +112,17 @@ namespace BackEnd
                 ClockSkew = TimeSpan.Zero
             };
 
-            services.AddAuthentication(options =>
+            services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(configureOptions =>
-            {
-                configureOptions.ClaimsIssuer = jwtAppSettingOptions.Issuer;
-                configureOptions.TokenValidationParameters = tokenValidationParameters;
-                configureOptions.SaveToken = true;
+                options.Authority = Configuration.GetValue<string>("Authority");
+                options.RequireHttpsMetadata = false;
+                options.Audience = "api1";
             });
 
-            // add identity
+
             services.AddIdentity<User, Role>(identityOptions =>
             {
-                // configure identity options
                 identityOptions.Password.RequireDigit = false;
                 identityOptions.Password.RequireLowercase = false;
                 identityOptions.Password.RequireUppercase = false;

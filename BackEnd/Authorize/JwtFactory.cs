@@ -24,11 +24,6 @@ namespace BackEnd.Authorize
         private readonly DataBaseContext dbContext;
         private const string RefreshTokenChars = "ABCDEFGHIKLMNOPQRSTVXYZ";
         private readonly Random random = new Random();
-        private static readonly byte[] Powers = Enumerable
-            .Range(0, 8)
-            .Select(v => Math.Pow(2, v))
-            .Select(v => (byte)v)
-            .ToArray();
 
         public JwtFactory(
             IOptions<JwtIssuerOptions> jwtOptions,
@@ -71,7 +66,7 @@ namespace BackEnd.Authorize
         {
             var identity = new ClaimsIdentity();
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, id));
-            identity.AddClaim(new Claim(ClaimTypes.Role, RoleString(roles)));
+            identity.AddClaim(new Claim(ClaimTypes.Role, RolesHelper.RoleString(roles)));
             return identity;
         }
         private static void ThrowIfInvalidOptions(JwtIssuerOptions options)
@@ -172,20 +167,7 @@ namespace BackEnd.Authorize
             return JsonConvert.DeserializeObject<T>(jsonView);
         }
 
-        private static string RoleString(IEnumerable<RoleNames> roleNames)
-        {
-            var rolesCount = Enum.GetNames(typeof(RoleNames)).Length;
-            var bufferLength = rolesCount / 8
-                               + (rolesCount % 8 == 0 ? 0 : 1);
-            var buffer = new byte[bufferLength];
-
-            foreach (var role in roleNames)
-            {
-                var roleNum = (int)role;
-                buffer[roleNum / 8] |= Powers[roleNum % 8];
-            }
-            return Convert.ToBase64String(buffer);
-        }
+        
     }
 }
 

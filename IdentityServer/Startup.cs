@@ -1,4 +1,5 @@
 using BackEnd.DataBase;
+using IdentityServer.Services;
 using IdentityServer.Services.Configure;
 using IdentityServer.Services.News;
 using Microsoft.AspNetCore.Builder;
@@ -59,7 +60,8 @@ namespace IdentityServer
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApis())
                 .AddInMemoryClients(Configuration.GetSection("Clients"))
-                .AddAspNetIdentity<User>();
+                .AddAspNetIdentity<User>()
+                .AddProfileService<IdentityProfileService>();
 
             if (Configuration.GetValue<bool>("DEBUG_CREDENTIAL"))
             {
@@ -84,8 +86,7 @@ namespace IdentityServer
             });
 
             services.AddWebAppConfigure()
-                .AddTransientConfigure<DefaultUserConfigureWork>(Configuration.GetValue<bool>("DEFAULT_USER"));
-
+                .AddTransientConfigure<DefaultUserConfigureWork>(Environment.IsDevelopment() && Configuration.GetValue<bool>("DEFAULT_USER"));
 
             services.AddSingleton<INewsSource, DebugNewsSource>();
 
@@ -120,13 +121,6 @@ namespace IdentityServer
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            // TODO use custom domain
-            app.Use(async (ctx, next) =>
-            {
-                ctx.Response.Headers.Add("Content-Security-Policy",
-                                         "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; img-src *; base-uri 'self'");
-                await next();
-            });
             app.UseCors("default");
             app.UseStaticFiles();
             app.UseIdentityServer();
