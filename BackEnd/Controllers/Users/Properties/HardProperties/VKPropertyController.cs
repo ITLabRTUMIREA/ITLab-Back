@@ -55,7 +55,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             //TODO performance
             var vkPropType = await dbContext
                 .UserPropertyTypes
-                .SingleOrDefaultAsync(pt => pt.Name == UserPropertyNames.VKID.ToString());
+                .SingleOrDefaultAsync(pt => pt.InternalName == UserPropertyNames.VKID.ToString());
             var vkProp = await dbContext
                 .UserProperties
                 .Include(u => u.UserPropertyType)

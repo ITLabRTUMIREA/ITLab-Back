@@ -40,6 +40,7 @@ namespace BackEnd.Exceptions
             }
             catch (Exception ex)
             {
+                context.Response.StatusCode = 500;
                 if (ex is ApiLogicException apiEx)
                 {
                     context.Response.StatusCode = (int)apiEx.StatusCode;

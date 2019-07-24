@@ -86,10 +86,10 @@ namespace BackEnd.Services.ConfigureServices
         {
             foreach (var typeName in Enum.GetValues(typeof(UserPropertyNames)).Cast<UserPropertyNames>())
             {
-                if (await dbContext.UserPropertyTypes.AnyAsync(t => t.Name == typeName.ToString()))
+                if (await dbContext.UserPropertyTypes.AnyAsync(t => t.InternalName == typeName.ToString()))
                     continue;
                 await dbContext.AddAsync(new UserPropertyType {
-                    Name = typeName.ToString(),
+                    InternalName = typeName.ToString(),
                     DefaultStatus = UserPropertyStatus.NotConfirmed
                 });
                 await dbContext.SaveChangesAsync();

@@ -7,11 +7,9 @@ namespace Models.People.UserProperties
     {
         [Description("Учебная группа")]
         StudyGroup,
-        [Description("Страничка ВК")]
+        [Description("Id стираницы Вконтакте")]
         VKID,
-        [Description("Skype")]
-        SkypeLogin,
-        [Description("Отчеcтво")]
-        Patronymic
+        [Description("Логин в Skype")]
+        SkypeLogin
     }
 }

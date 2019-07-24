@@ -128,6 +128,7 @@ namespace BackEnd
                 identityOptions.Password.RequireUppercase = false;
                 identityOptions.Password.RequireNonAlphanumeric = false;
                 identityOptions.Password.RequiredLength = 6;
+                identityOptions.User.RequireUniqueEmail = true;
             })
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();

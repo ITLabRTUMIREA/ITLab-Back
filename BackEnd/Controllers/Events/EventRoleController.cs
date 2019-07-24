@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -7,6 +8,7 @@ using BackEnd.Models.Roles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Models.Events.Roles;
 using Models.People;
 using Models.People.Roles;
@@ -21,14 +23,17 @@ namespace BackEnd.Controllers.Events
     public class EventRoleController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;
+        private readonly ILogger<EventRoleController> logger;
         private readonly IMapper mapper;
 
         public EventRoleController(
             UserManager<User> userManager,
             DataBaseContext dbContext,
+            ILogger<EventRoleController> logger,
             IMapper mapper) : base(userManager)
         {
             this.dbContext = dbContext;
+            this.logger = logger;
             this.mapper = mapper;
         }
 
@@ -60,16 +65,35 @@ namespace BackEnd.Controllers.Events
             return mapper.Map<EventRoleView>(target);
         }
 
+        /// <summary>
+        /// Delete event role
+        /// </summary>
+        /// <param name="request">Id of deleting role</param>
+        /// <returns>Id of deleted role</returns>
+        /// <response code="200">Event role deleted</response>
+        /// <response code="404">Not found event role</response>
+        /// <response code="409">Can't delete event role</response>
         [RequireRole(RoleNames.CanDeleteEventRole)]
         [HttpDelete]
-        public async Task<ActionResult<EventRoleView>> Delete([FromBody] IdRequest request)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
+        public async Task<ActionResult<Guid>> Delete([FromBody] IdRequest request)
         {
             var target = await dbContext.EventRoles.SingleOrDefaultAsync(er => er.Id == request.Id);
             if (target == null)
                 return NotFound();
             dbContext.Remove(target);
-            await dbContext.SaveChangesAsync();
-            return mapper.Map<EventRoleView>(target);
+            try
+            {
+                await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                logger.LogWarning(dbEx, "Error while deleting event role");
+                return Conflict("Can't delete event role");
+            }
+            return request.Id;
         }
     }
 }

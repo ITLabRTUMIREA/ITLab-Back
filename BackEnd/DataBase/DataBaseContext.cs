@@ -43,6 +43,7 @@ namespace BackEnd.DataBase
             ConfigurePlaceEquipment(builder);
             ConfigurePlaceUserEventRole(builder);
             ConfigureEquipmentType(builder);
+            ConfigureUserProperties(builder);
         }
 
 
@@ -79,7 +80,9 @@ namespace BackEnd.DataBase
             modelBuilder.Entity<PlaceUserEventRole>()
                 .HasOne(pur => pur.EventRole)
                 .WithMany(er => er.PlaceUserEventRoles)
-                .HasForeignKey(pur => pur.EventRoleId);
+                .HasForeignKey(pur => pur.EventRoleId)
+                //Need change user role defore removing role
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private static void ConfigureEquipmentType(ModelBuilder modelBuilder)
@@ -93,6 +96,13 @@ namespace BackEnd.DataBase
                 .HasMany(et => et.AllChildren)
                 .WithOne(et => et.Root)
                 .HasForeignKey(et => et.RootId);
+        }
+
+        private static void ConfigureUserProperties(ModelBuilder builder)
+        {
+            builder.Entity<UserPropertyType>()
+                .HasIndex(up => up.InternalName)
+                .IsUnique();
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
