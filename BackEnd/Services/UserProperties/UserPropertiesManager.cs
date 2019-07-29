@@ -17,17 +17,14 @@ namespace BackEnd.Services.UserProperties
     {
         private readonly DataBaseContext dbContext;
         private readonly IMapper mapper;
-        private readonly IUserPropertiesConstants constants;
 
         public UserPropertiesManager(
             DataBaseContext dbContext,
-            IMapper mapper,
-            IUserPropertiesConstants constants
+            IMapper mapper
         )
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
-            this.constants = constants;
         }
 
         public async Task<IQueryable<UserProperty>> PutUserProperty(UserPropertyEditRequest request, Guid userId)

@@ -86,7 +86,7 @@ namespace BackEnd.Controllers.Users.Properties
         public async Task<ActionResult<UserPropertyTypeView>> PostAsync(
             [FromBody]UserPropertyTypeCreateRequest request)
         {
-            if (await dbContext.UserPropertyTypes.AnyAsync(upt => upt.InternalName == request.Name))
+            if (await dbContext.UserPropertyTypes.AnyAsync(upt => upt.PublicName == request.Title))
                 return Conflict("Field exists");
             var newType = mapper.Map<UserPropertyType>(request);
             await dbContext.AddAsync(newType);

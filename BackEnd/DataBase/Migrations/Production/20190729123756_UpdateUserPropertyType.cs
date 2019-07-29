@@ -2,7 +2,7 @@
 
 namespace BackEnd.DataBase.Migrations.Production
 {
-    public partial class UserPropertyTypesUpdate : Migration
+    public partial class UpdateUserPropertyType : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,19 +13,7 @@ namespace BackEnd.DataBase.Migrations.Production
             migrationBuilder.RenameColumn(
                 name: "Name",
                 table: "UserPropertyTypes",
-                newName: "PublicName");
-
-            migrationBuilder.AddColumn<string>(
-                name: "InternalName",
-                table: "UserPropertyTypes",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserPropertyTypes_InternalName",
-                table: "UserPropertyTypes",
-                column: "InternalName",
-                unique: true,
-                filter: "[InternalName] IS NOT NULL");
+                newName: "InternalName");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_PlaceUserEventRole_EventRoles_EventRoleId",
@@ -42,16 +30,8 @@ namespace BackEnd.DataBase.Migrations.Production
                 name: "FK_PlaceUserEventRole_EventRoles_EventRoleId",
                 table: "PlaceUserEventRole");
 
-            migrationBuilder.DropIndex(
-                name: "IX_UserPropertyTypes_InternalName",
-                table: "UserPropertyTypes");
-
-            migrationBuilder.DropColumn(
-                name: "InternalName",
-                table: "UserPropertyTypes");
-
             migrationBuilder.RenameColumn(
-                name: "PublicName",
+                name: "InternalName",
                 table: "UserPropertyTypes",
                 newName: "Name");
 

@@ -20,9 +20,9 @@ namespace BackEnd.Formatting.MapperProfiles.RequestProfiles
                 .ForMember(up => up.UserPropertyTypeId, map => map.MapFrom(uper => uper.Id))
                 .ForMember(up => up.Id, map => map.Ignore());
 
-            CreateMap<UserPropertyTypeCreateRequest, UserPropertyType>();
-
-
+            CreateMap<UserPropertyTypeCreateRequest, UserPropertyType>()
+                .ForMember(up => up.PublicName, map => map.MapFrom(upcr => upcr.Title))
+                .ForMember(up => up.InternalName, map => map.MapFrom(upcr => upcr.Title));
         }
     }
 }

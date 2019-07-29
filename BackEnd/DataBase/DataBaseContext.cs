@@ -81,7 +81,7 @@ namespace BackEnd.DataBase
                 .HasOne(pur => pur.EventRole)
                 .WithMany(er => er.PlaceUserEventRoles)
                 .HasForeignKey(pur => pur.EventRoleId)
-                //Need change user role defore removing role
+                //Need change user role before removing role
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
@@ -103,6 +103,13 @@ namespace BackEnd.DataBase
             builder.Entity<UserPropertyType>()
                 .HasIndex(up => up.InternalName)
                 .IsUnique();
+            builder.Entity<UserPropertyType>()
+                .Property(up => up.InternalName)
+                .IsRequired(true);
+            builder.Entity<UserPropertyType>()
+                .Property(up => up.PublicName)
+                .IsRequired(true)
+                .HasDefaultValue("Не определено");
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())

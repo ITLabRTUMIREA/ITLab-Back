@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackEnd.DataBase.Migrations.Production
 {
     [DbContext(typeof(DataBaseContext))]
-    [Migration("20190723122854_UserPropertyTypesUpdate")]
-    partial class UserPropertyTypesUpdate
+    [Migration("20190729124031_AddUniqueueAndRequiredField")]
+    partial class AddUniqueueAndRequiredField
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -432,15 +432,13 @@ namespace BackEnd.DataBase.Migrations.Production
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("InternalName");
-
-                    b.Property<string>("PublicName");
+                    b.Property<string>("InternalName")
+                        .IsRequired();
 
                     b.HasKey("Id");
 
                     b.HasIndex("InternalName")
-                        .IsUnique()
-                        .HasFilter("[InternalName] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("UserPropertyTypes");
                 });

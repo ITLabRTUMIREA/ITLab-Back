@@ -38,8 +38,13 @@ namespace BackEnd.Exceptions
             {
                 await _next(context);
             }
+            catch (InvalidOperationException invalidOperationException) when (invalidOperationException.Message.Contains("SPA"))
+            {
+                context.Response.StatusCode = 404;
+            }
             catch (Exception ex)
             {
+                logger.LogWarning(ex, "error in application");
                 context.Response.StatusCode = 500;
                 if (ex is ApiLogicException apiEx)
                 {
