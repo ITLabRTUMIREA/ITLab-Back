@@ -10,6 +10,7 @@ namespace BackEnd.Models.Roles
         public RequireRoleAttribute(params RoleNames[] roles) : base()
         {
             Roles = string.Join(',', roles.Select(r => r.ToString()));
+            AuthenticationSchemes = "Bearer";
         }
     }
 }

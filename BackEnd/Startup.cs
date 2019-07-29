@@ -128,6 +128,7 @@ namespace BackEnd
                 identityOptions.Password.RequireUppercase = false;
                 identityOptions.Password.RequireNonAlphanumeric = false;
                 identityOptions.Password.RequiredLength = 6;
+                identityOptions.User.RequireUniqueEmail = true;
             })
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();
@@ -166,14 +167,12 @@ namespace BackEnd
             services.AddSingleton<ISmsSender, SmsService>();
 
 
-            services.AddSingleton<IUserPropertiesConstants, InMemoryUserPropertiesConstants>();
             services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
 
 
             services.AddWebAppConfigure()
                 .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
                 .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
-                .AddTransientConfigure<LoadCustomPropertiesService>()
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 

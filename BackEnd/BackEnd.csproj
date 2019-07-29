@@ -45,6 +45,6 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ProjectExtensions>
-    <VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" /></VisualStudio>
+    <VisualStudio><UserProperties appsettings_1json__JSONSchema="appsettings.Shema.json" appsettings_1secret_1json__JsonSchema="http://json.schemastore.org/bootstraprc" /></VisualStudio>
   </ProjectExtensions>
 </Project>

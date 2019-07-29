@@ -4,14 +4,16 @@ using BackEnd.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace BackEnd.Migrations
+namespace BackEnd.DataBase.Migrations.Production
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190729124031_AddUniqueueAndRequiredField")]
+    partial class AddUniqueueAndRequiredField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -432,11 +434,6 @@ namespace BackEnd.Migrations
 
                     b.Property<string>("InternalName")
                         .IsRequired();
-
-                    b.Property<string>("PublicName")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValue("Не определено");
 
                     b.HasKey("Id");
 
