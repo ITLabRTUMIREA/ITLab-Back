@@ -14,6 +14,7 @@ using BackEnd.Services.Interfaces;
 using Models.People.Roles;
 using Models.PublicAPI.Requests.User;
 using System.Collections.Generic;
+using Models.People.UserProperties;
 
 namespace BackEnd.Controllers.Users
 {
@@ -40,23 +41,14 @@ namespace BackEnd.Controllers.Users
             string firstname,
             string lastname,
             string middleName,
+            string vkId,
             string match,
             int count = 5,
             int offset = 0)
-            => await GetUsersByParams(email, firstname, lastname, middleName, match)
+            => await GetUsersByParams(email, firstname, lastname, middleName, vkId, match)
                 .If(count > 0, users => users.Skip(offset * count).Take(count))
                 .ProjectTo<UserView>()
                 .ToListAsync();
-
-        [HttpGet("count")]
-        public async Task<ActionResult<int>> GetCountAsync(
-            string email,
-            string firstname,
-            string lastname,
-            string middleName,
-            string match)
-            => await GetUsersByParams(email, firstname, lastname, middleName, match)
-                .CountAsync();
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserView>> GetAsync(Guid id)
@@ -82,10 +74,12 @@ namespace BackEnd.Controllers.Users
         }
 
 
-        private IQueryable<User> GetUsersByParams(string email,
+        private IQueryable<User> GetUsersByParams(
+            string email,
             string firstname,
             string lastname,
             string middleName,
+            string vkId,
             string match)
             => UserManager
                 .Users
@@ -94,6 +88,8 @@ namespace BackEnd.Controllers.Users
                 .IfNotNull(firstname, users => users.Where(u => u.FirstName.ToUpper().Contains(firstname.ToUpper())))
                 .IfNotNull(lastname, users => users.Where(u => u.LastName.ToUpper().Contains(lastname.ToUpper())))
                 .IfNotNull(middleName, users => users.Where(u => u.MiddleName.ToUpper().Contains(middleName.ToUpper())))
+                .IfNotNull(vkId, users => users
+                    .Where(u => u.UserProperties.Select(up => up.UserPropertyType.InternalName).SingleOrDefault(pn => pn == UserPropertyNames.VKID.ToString()) == vkId))
                 .IfNotNull(match, users => users.ForAll(match.Split(' '), (us2, matcher) => us2.Where(u => u.LastName.ToUpper().Contains(matcher)
                                                            || u.FirstName.ToUpper().Contains(matcher)
                                                            || u.MiddleName.ToUpper().Contains(matcher)
