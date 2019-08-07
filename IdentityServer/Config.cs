@@ -18,7 +18,8 @@ namespace IdentityServer
         {
             return new ApiResource[]
             {
-                new ApiResource("api1", "My API #1")
+                new ApiResource("api1", "My API #1"),
+                new ApiResource("itlab.prpjects", "Projects API")
             };
         }
     }
