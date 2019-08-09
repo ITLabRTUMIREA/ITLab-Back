@@ -20,37 +20,29 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
     public class VkPropertyController : AuthorizeController
     {
         private readonly IUserRegisterTokens registerTokens;
-        private readonly IOptions<NotifierSettings> config;
         private readonly DataBaseContext dbContext;
 
         public VkPropertyController(
             UserManager<User> userManager,
             IUserRegisterTokens registerTokens,
-            IOptions<NotifierSettings> config,
             DataBaseContext dbContext) 
             : base(userManager)
         {
             this.registerTokens = registerTokens;
-            this.config = config;
             this.dbContext = dbContext;
         }
         [HttpGet]
         public async Task<ActionResult<string>> GetVkToken()
             => $"L:{await registerTokens.AddVkToken(UserId)}";
 
+        // TODO use audience for VK
         [HttpPost]
-        [AllowAnonymous]
         public async Task<ActionResult<UserView>> VerifyToken(
             [FromBody] VkVerifyRequest request)
         {
-            if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var accessToken))
-                return Unauthorized();
-            if (accessToken != config.Value.AccessToken)
-                return Forbid();
             var userId = await registerTokens.CheckVkToken(request.Token);
             if (userId == null)
                 return BadRequest("Incorrect vk token");
-
 
             //TODO performance
             var vkPropType = await dbContext
