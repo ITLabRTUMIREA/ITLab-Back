@@ -109,7 +109,7 @@ namespace BackEnd.Controllers.Users.Properties
         [ProducesResponseType(404)]
         [ProducesResponseType(409)]
         [HttpPut("{id:guid}")]
-        [RequireRole(RoleNames.CanEditUserPropertyTypes)]
+        //[RequireRole(RoleNames.CanEditUserPropertyTypes)]
         public async Task<ActionResult<Guid>> PutAsync(Guid id, [FromBody] UserPropertyTypeEditRequest request)
         {
             var targetUserPropertyType = await dbContext.UserPropertyTypes

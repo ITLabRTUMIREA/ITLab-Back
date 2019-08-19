@@ -26,7 +26,10 @@ namespace BackEnd.Formatting.MapperProfiles.RequestProfiles
 
             CreateMap<UserPropertyTypeEditRequest, UserPropertyType>()
                 .ForMember(up => up.PublicName, map => map.MapFrom(uper => uper.Title))
-                .ForMember(up => up.InternalName, map => map.MapFrom(upcr => upcr.Title));
+                .ForMember(up => up.PublicName, map => map.Condition(uper => uper.Title != null))
+                .ForMember(up => up.InternalName, map => map.MapFrom(upcr => upcr.Title))
+                .ForMember(up => up.InternalName, map => map.Condition(uper => uper.Title != null))
+                .ForMember(up => up.Description, map => map.Condition(uper => uper.Description != null));
         }
     }
 }
