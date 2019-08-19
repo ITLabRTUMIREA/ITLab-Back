@@ -67,13 +67,14 @@ namespace BackEnd.Controllers.Events
         }
 
         /// <summary>
-        /// Get list og events
+        /// Get events list for specific user
         /// </summary>
+        /// <param name="userId">Id of finding user</param>
         /// <param name="begin">Biggest end time. If not defined end time equals infinity</param>
         /// <param name="end">Smallest begin time. If not defined begin time equals zero</param>
         /// <returns>List of events</returns>
         /// <response code="200">Success</response>
-        /// <response code="400">Incorrect begin or end parameter format</response>
+        /// <response code="400">Incorrect userId, begin or end parameter format</response>
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [HttpGet("user/{userId:Guid}")]
@@ -94,10 +95,12 @@ namespace BackEnd.Controllers.Events
         }
 
         /// <summary>
-        /// 
+        /// Get invites or wishes of authorized user
         /// </summary>
-        /// <param name="requestType"></param>
-        /// <returns></returns>
+        /// <param name="requestType">type of request, "wishes" for wishes, "invitations" for invitations</param>
+        /// <returns>List of invites</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Success</response>
         [HttpGet("applications/{requestType}")]
         public async Task<ActionResult<List<EventApplicationView>>> GetInvites(string requestType)
             => await eventsManager
@@ -113,6 +116,11 @@ namespace BackEnd.Controllers.Events
             .ProjectTo<EventApplicationView>(mapper.ConfigurationProvider)
             .ToListAsync();
 
+        /// <summary>
+        /// Get all wishers
+        /// </summary>
+        /// <returns>List of ishers</returns>
+        /// <response code="200">Success</response>
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpGet("wishers")]
         public async Task<ActionResult<List<WisherEventView>>> GetWishers()
@@ -125,7 +133,13 @@ namespace BackEnd.Controllers.Events
             .ProjectTo<WisherEventView>(mapper.ConfigurationProvider)
             .ToListAsync();
 
-
+        /// <summary>
+        /// Get event information
+        /// </summary>
+        /// <returns>Event with specific id</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Event id is not GUID</response>
+        /// <response code="404">Event not found</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<EventView>> GetAsync(Guid id)
         {
