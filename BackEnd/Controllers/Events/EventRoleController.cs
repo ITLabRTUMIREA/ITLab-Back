@@ -41,7 +41,7 @@ namespace BackEnd.Controllers.Events
         public async Task<ActionResult<List<EventRoleView>>> Get()
             => await dbContext
                 .EventRoles
-                .ProjectTo<EventRoleView>()
+                .ProjectTo<EventRoleView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
         [HttpPost]

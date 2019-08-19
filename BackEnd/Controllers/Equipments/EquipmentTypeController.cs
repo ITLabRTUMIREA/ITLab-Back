@@ -47,7 +47,7 @@ namespace BackEnd.Controllers.Equipments
                 .WhereIf(!all, t => t.ParentId == null)
                 .WhereIf(!string.IsNullOrEmpty(match), eq => eq.Title.ToUpper().Contains(match.ToUpper()))
                 .If(!all, types => types.Take(5))
-                .ProjectTo<CompactEquipmentTypeView>()
+                .ProjectTo<CompactEquipmentTypeView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
 
@@ -123,7 +123,7 @@ namespace BackEnd.Controllers.Equipments
             return await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
-                .ProjectTo<EquipmentTypeView>()
+                .ProjectTo<EquipmentTypeView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 

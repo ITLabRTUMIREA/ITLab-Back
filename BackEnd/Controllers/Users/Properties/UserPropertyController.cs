@@ -13,6 +13,7 @@ using Models.PublicAPI.Requests.User.Properties.UserProperty;
 using BackEnd.Services.UserProperties;
 using Models.PublicAPI.Requests;
 using System.Collections.Generic;
+using AutoMapper;
 
 namespace BackEnd.Controllers.Users.Properties
 {
@@ -24,15 +25,18 @@ namespace BackEnd.Controllers.Users.Properties
     {
         private readonly DataBaseContext dbContext;
         private readonly IUserPropertiesManager userPropertiesManager;
+        private readonly IMapper mapper;
 
         public UserPropertyController(
             UserManager<User> userManager,
             DataBaseContext dbContext,
-            IUserPropertiesManager userPropertiesManager
+            IUserPropertiesManager userPropertiesManager,
+            IMapper mapper
         ) : base(userManager)
         {
             this.dbContext = dbContext;
             this.userPropertiesManager = userPropertiesManager;
+            this.mapper = mapper;
         }
 
         /// <summary>
@@ -46,7 +50,7 @@ namespace BackEnd.Controllers.Users.Properties
             => await dbContext
                 .UserProperties
                 .Where(u => u.UserId == UserId)
-                .ProjectTo<UserPropertyView>()
+                .ProjectTo<UserPropertyView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
         /// <summary>
@@ -62,7 +66,7 @@ namespace BackEnd.Controllers.Users.Properties
         public async Task<ActionResult<UserPropertyView>> PutAsync(
             [FromBody] UserPropertyEditRequest request)
             => await (await userPropertiesManager.PutUserProperty(request, UserId))
-                    .ProjectTo<UserPropertyView>()
+                    .ProjectTo<UserPropertyView>(mapper.ConfigurationProvider)
                     .SingleAsync();
 
         /// <summary>
