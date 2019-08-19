@@ -94,7 +94,7 @@ namespace BackEnd.Controllers.Users
                 .IfNotNull(lastname, users => users.Where(u => u.LastName.ToUpper().Contains(lastname.ToUpper())))
                 .IfNotNull(middleName, users => users.Where(u => u.MiddleName.ToUpper().Contains(middleName.ToUpper())))
                 .IfNotNull(vkId, users => users
-                    .Where(u => u.UserProperties.Select(up => up.UserPropertyType.InternalName).SingleOrDefault(pn => pn == UserPropertyNames.VKID.ToString()) == vkId))
+                    .Where(u => u.UserProperties.Any(up => up.UserPropertyType.InternalName == UserPropertyNames.VKID.ToString() && up.Value == vkId)))
                 .IfNotNull(match, users => users.ForAll(match.Split(' '), (us2, matcher) => us2.Where(u => u.LastName.ToUpper().Contains(matcher)
                                                            || u.FirstName.ToUpper().Contains(matcher)
                                                            || u.MiddleName.ToUpper().Contains(matcher)
