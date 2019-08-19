@@ -17,7 +17,6 @@ namespace BackEnd.Formatting.MapperProfiles.RequestProfiles
             CreateMap<EventRoleEditRequest, EventRole>()
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
-
         }
     }
 }
