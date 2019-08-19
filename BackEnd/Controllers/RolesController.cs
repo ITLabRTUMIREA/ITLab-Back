@@ -40,7 +40,7 @@ namespace BackEnd.Controllers
         public async Task<ActionResult<List<RoleView>>> GetAsync()
         {
             return await dbContext.Roles
-                .ProjectTo<RoleView>()
+                .ProjectTo<RoleView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
@@ -58,7 +58,7 @@ namespace BackEnd.Controllers
         {
             var roles = await dbContext
                 .Roles
-                .ProjectTo<RoleView>()
+                .ProjectTo<RoleView>(mapper.ConfigurationProvider)
                 .ToListAsync();
             var roleIds = await dbContext.UserRoles.Where(ur => ur.UserId == userId).Select(ur => ur.RoleId).ToListAsync();
             if (roleIds.Count == 0)

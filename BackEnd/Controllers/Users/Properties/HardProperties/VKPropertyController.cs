@@ -13,6 +13,7 @@ using Models.People;
 using Models.People.UserProperties;
 using Models.PublicAPI.Requests.User.Properties.HardProperties;
 using Models.PublicAPI.Responses.People;
+using AutoMapper;
 
 namespace BackEnd.Controllers.Users.Properties.HardProperties
 {
@@ -21,15 +22,18 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
     {
         private readonly IUserRegisterTokens registerTokens;
         private readonly DataBaseContext dbContext;
+        private readonly IMapper mapper;
 
         public VkPropertyController(
             UserManager<User> userManager,
             IUserRegisterTokens registerTokens,
-            DataBaseContext dbContext) 
+            DataBaseContext dbContext,
+            IMapper mapper) 
             : base(userManager)
         {
             this.registerTokens = registerTokens;
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
         [HttpGet]
         public async Task<ActionResult<string>> GetVkToken()
@@ -71,7 +75,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             return await dbContext
                 .Users
                 .Where(u => u.Id == userId)
-                .ProjectTo<UserView>()
+                .ProjectTo<UserView>(mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }
     }

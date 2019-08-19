@@ -39,6 +39,7 @@ using BackEnd.Exceptions;
 using System.Reflection;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using BackEnd.Formatting.MapperProfiles;
 
 namespace BackEnd
 {
@@ -80,7 +81,7 @@ namespace BackEnd
                 }
             );
 
-            services.AddAutoMapper();
+            services.AddAutoMapper(config =>config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 

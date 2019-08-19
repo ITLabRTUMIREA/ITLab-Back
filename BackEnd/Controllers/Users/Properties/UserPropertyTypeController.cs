@@ -45,7 +45,7 @@ namespace BackEnd.Controllers.Users.Properties
         public async Task<ActionResult<List<UserPropertyTypeView>>> GetAsync()
             => await dbContext
                 .UserPropertyTypes
-                .ProjectTo<UserPropertyTypeView>()
+                .ProjectTo<UserPropertyTypeView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
 
@@ -63,7 +63,7 @@ namespace BackEnd.Controllers.Users.Properties
         {
             var targetType = await dbContext.UserPropertyTypes
                            .Where(upt => upt.Id == id)
-                           .ProjectTo<UserPropertyTypeView>()
+                           .ProjectTo<UserPropertyTypeView>(mapper.ConfigurationProvider)
                            .SingleOrDefaultAsync();
             if (targetType == null)
                 return NotFound();

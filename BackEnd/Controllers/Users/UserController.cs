@@ -15,6 +15,7 @@ using Models.People.Roles;
 using Models.PublicAPI.Requests.User;
 using System.Collections.Generic;
 using Models.People.UserProperties;
+using AutoMapper;
 
 namespace BackEnd.Controllers.Users
 {
@@ -25,15 +26,19 @@ namespace BackEnd.Controllers.Users
         private readonly DataBaseContext dbContext;
         private readonly IUserRegisterTokens registerTokens;
         private readonly IEmailSender emailSender;
+        private readonly IMapper mapper;
 
         public UserController(UserManager<User> userManager,
                               DataBaseContext dbContext,
                               IUserRegisterTokens registerTokens,
-                              IEmailSender emailSender) : base(userManager)
+                              IEmailSender emailSender,
+                              IMapper mapper
+            ) : base(userManager)
         {
             this.dbContext = dbContext;
             this.registerTokens = registerTokens;
             this.emailSender = emailSender;
+            this.mapper = mapper;
         }
         [HttpGet]
         public async Task<ActionResult<List<UserView>>> GetAsync(
@@ -47,7 +52,7 @@ namespace BackEnd.Controllers.Users
             int offset = 0)
             => await GetUsersByParams(email, firstname, lastname, middleName, vkId, match)
                 .If(count > 0, users => users.Skip(offset * count).Take(count))
-                .ProjectTo<UserView>()
+                .ProjectTo<UserView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
         [HttpGet("{id:guid}")]
@@ -55,7 +60,7 @@ namespace BackEnd.Controllers.Users
         {
             var userView = await UserManager
                        .Users
-                       .ProjectTo<UserView>()
+                       .ProjectTo<UserView>(mapper.ConfigurationProvider)
                        .SingleOrDefaultAsync(u => u.Id == id);
             if (userView == null)
                 return NotFound();
