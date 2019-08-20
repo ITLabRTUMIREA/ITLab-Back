@@ -1,7 +1,6 @@
 using BackEnd.DataBase;
 using IdentityServer.Services;
 using IdentityServer.Services.Configure;
-using IdentityServer.Services.News;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -87,8 +86,6 @@ namespace IdentityServer
 
             services.AddWebAppConfigure()
                 .AddTransientConfigure<DefaultUserConfigureWork>(Environment.IsDevelopment() && Configuration.GetValue<bool>("DEFAULT_USER"));
-
-            services.AddSingleton<INewsSource, DebugNewsSource>();
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
