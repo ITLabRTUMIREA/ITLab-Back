@@ -50,20 +50,18 @@ namespace BackEnd.Controllers
         /// <param name="userId">Id of user</param>
         /// <returns>List of roles</returns>
         /// <response code="200">Success get roles</response>
-        /// <response code="404">No roles for user</response>
         [HttpGet("{userId:guid}")]
         [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<List<RoleView>>> GetAsync(Guid userId)
         {
-            var roles = await dbContext
-                .Roles
+            var roleIds = await dbContext.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+            return await dbContext.Roles
+                .Where(r => roleIds.Contains(r.Id))
                 .ProjectTo<RoleView>(mapper.ConfigurationProvider)
                 .ToListAsync();
-            var roleIds = await dbContext.UserRoles.Where(ur => ur.UserId == userId).Select(ur => ur.RoleId).ToListAsync();
-            if (roleIds.Count == 0)
-                return NotFound();
-            return roles.Where(r => roleIds.Contains(r.Id)).ToList();
         }
 
         [HttpPost("{userId}/{roleId}")]
