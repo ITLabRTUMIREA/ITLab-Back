@@ -34,7 +34,8 @@ namespace IdentityServer.Services
             var claims = principal.Claims.ToList();
             claims.Add(new Claim("first_name", user.FirstName));
             claims.Add(new Claim("last_name", user.LastName));
-            claims.Add(new Claim("middle_name", user.MiddleName));
+			if (!string.IsNullOrEmpty(user.MiddleName))
+				claims.Add(new Claim("middle_name", user.MiddleName));
             context.IssuedClaims = claims;
         }
 
