@@ -32,7 +32,7 @@ namespace BackEnd.DataBase
         public DbSet<UserPropertyType> UserPropertyTypes { get; set; }
 
 
-        public DataBaseContext(DbContextOptions options) : base(options)
+        public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options)
         {
         }
 
