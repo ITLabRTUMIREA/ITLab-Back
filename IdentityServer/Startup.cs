@@ -12,6 +12,7 @@ using Models.People;
 using Models.People.Roles;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using WebApp.Configure.Models;
 
@@ -30,6 +31,7 @@ namespace IdentityServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            
             if (Configuration.GetValue<bool>("IN_MEMORY"))
             {
                 services.AddDbContext<DataBaseContext>(options =>
@@ -46,6 +48,7 @@ namespace IdentityServer
                 .AddDefaultTokenProviders();
 
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
+            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
 
             var builder = services.AddIdentityServer(options =>
@@ -56,9 +59,11 @@ namespace IdentityServer
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
             })
-                .AddInMemoryIdentityResources(Config.GetIdentityResources())
-                .AddInMemoryApiResources(Config.GetApis())
-                .AddInMemoryClients(Configuration.GetSection("Clients"))
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = b =>
+                        b.UseNpgsql(Configuration.GetConnectionString("ConfigurationDatabase"), sql => sql.MigrationsAssembly(migrationsAssembly));
+                })
                 .AddAspNetIdentity<User>()
                 .AddProfileService<IdentityProfileService>();
 
@@ -85,13 +90,16 @@ namespace IdentityServer
             });
 
             services.AddWebAppConfigure()
-                .AddTransientConfigure<DefaultUserConfigureWork>(Environment.IsDevelopment() && Configuration.GetValue<bool>("DEFAULT_USER"));
+                .AddTransientConfigure<DefaultUserConfigureWork>(Environment.IsDevelopment() && Configuration.GetValue<bool>("DEFAULT_USER"))
+                .AddTransientConfigure<FillConfigurationConfigureWork>()
+                .AddTransientConfigure<MigrateConfigureDatabaseWork>();
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
+
 
             //services.AddAuthentication()
             //    .AddGoogle(options =>
