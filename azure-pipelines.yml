@@ -9,6 +9,8 @@ variables:
 
 jobs:
 - job: Backend
+  pool:
+    name: Default
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet publish'
@@ -26,6 +28,8 @@ jobs:
       ArtifactName: 'itlab-back-build'
 
 - job: Identity
+  pool:
+    name: Default
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet publish'
@@ -43,6 +47,8 @@ jobs:
       ArtifactName: 'itlab-identity-build'
 
 - job: Nuget
+  pool:
+    name: Default
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet pack'
