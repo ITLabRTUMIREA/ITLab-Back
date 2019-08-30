@@ -27,6 +27,19 @@ jobs:
     inputs:
       ArtifactName: 'itlab-back-build'
 
+  - task: CopyFiles@2
+    displayName: Copy deploy folder
+    inputs:
+      SourceFolder: deploy/back/
+      Contents: '**'
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+      CleanTargetFolder: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: publish back deploy folder
+    inputs:
+      ArtifactName: 'itlab-back-deploy'
+
 - job: Identity
   pool:
     name: Default
@@ -45,6 +58,19 @@ jobs:
     displayName: 'Publish Artifact: itlab-identity-build'
     inputs:
       ArtifactName: 'itlab-identity-build'
+
+  - task: CopyFiles@2
+    displayName: Copy deploy folder
+    inputs:
+      SourceFolder: deploy/identity/
+      Contents: '**'
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+      CleanTargetFolder: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: publish identity deploy folder
+    inputs:
+      ArtifactName: 'itlab-identity-deploy'
 
 - job: Nuget
   pool:
