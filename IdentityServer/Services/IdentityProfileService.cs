@@ -32,11 +32,16 @@ namespace IdentityServer.Services
             }
             var principal = await _claimsFactory.CreateAsync(user);
             var claims = principal.Claims.ToList();
-            claims.Add(new Claim("first_name", user.FirstName));
-            claims.Add(new Claim("last_name", user.LastName));
-			if (!string.IsNullOrEmpty(user.MiddleName))
-				claims.Add(new Claim("middle_name", user.MiddleName));
+            AddClaim(claims, "first_name", user.FirstName);
+            AddClaim(claims, "last_name", user.LastName);
+            AddClaim(claims, "middle_name", user.MiddleName);
             context.IssuedClaims = claims;
+        }
+
+        private void AddClaim(List<Claim> claims, string key, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+                claims.Add(new Claim(key, value));
         }
 
         public async Task IsActiveAsync(IsActiveContext context)
