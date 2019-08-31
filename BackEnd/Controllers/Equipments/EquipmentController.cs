@@ -48,7 +48,7 @@ namespace BackEnd.Controllers.Equipments
         {
             var equipmentView = await dbContext
                                       .Equipments
-                                      .ProjectTo<EquipmentView>()
+                                      .ProjectTo<EquipmentView>(mapper.ConfigurationProvider)
                                       .SingleOrDefaultAsync(eq => eq.Id == id);
             if (equipmentView == null)
                 return NotFound();
@@ -77,7 +77,7 @@ namespace BackEnd.Controllers.Equipments
                         equipments2.Where(eq => eq.SerialNumber.ToUpper().Contains(token)
                                                 || eq.EquipmentType.Title.ToUpper().Contains(token)
                                                 || ints.Contains(eq.Number))))
-                .ProjectTo<CompactEquipmentView>()
+                .ProjectTo<CompactEquipmentView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
         /// <summary>

@@ -78,7 +78,7 @@ namespace BackEnd.Controllers
         [HttpGet("refresh")]
         public async Task<ActionResult<List<RefreshTokenView>>> RefreshList()
         => await jwtFactory.RefreshTokens(UserId)
-                     .ProjectTo<RefreshTokenView>()
+                     .ProjectTo<RefreshTokenView>(mapper.ConfigurationProvider)
                      .ToListAsync();
 
         [HttpDelete("refresh")]

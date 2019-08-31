@@ -36,16 +36,33 @@ namespace BackEnd.Controllers
         }
 
 
-        [HttpGet("{userId:guid?}")]
-        public async Task<ActionResult<List<RoleView>>> GetAsync(Guid? userId)
-            => await dbContext
-                .Roles
-                .If(userId.HasValue, rls =>
-                    rls.Variable(out var roleNames,
-                            () => UserManager.GetRolesAsync(GetUser(userId).Result).Result)
-                        .Where(r => roleNames.Contains(r.Name)))
-                .ProjectTo<RoleView>()
+        [HttpGet()]
+        public async Task<ActionResult<List<RoleView>>> GetAsync()
+        {
+            return await dbContext.Roles
+                .ProjectTo<RoleView>(mapper.ConfigurationProvider)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get roles for specific user
+        /// </summary>
+        /// <param name="userId">Id of user</param>
+        /// <returns>List of roles</returns>
+        /// <response code="200">Success get roles</response>
+        [HttpGet("{userId:guid}")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<List<RoleView>>> GetAsync(Guid userId)
+        {
+            var roleIds = await dbContext.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+            return await dbContext.Roles
+                .Where(r => roleIds.Contains(r.Id))
+                .ProjectTo<RoleView>(mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
 
         [HttpPost("{userId}/{roleId}")]
         public async Task<ActionResult<bool>> AttachToRole(Guid userId, Guid roleId)

@@ -39,6 +39,7 @@ using BackEnd.Exceptions;
 using System.Reflection;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using BackEnd.Formatting.MapperProfiles;
 
 namespace BackEnd
 {
@@ -81,7 +82,7 @@ namespace BackEnd
                 }
             );
 
-            services.AddAutoMapper();
+            services.AddAutoMapper(config =>config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
 
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
 
@@ -113,29 +114,23 @@ namespace BackEnd
                 ClockSkew = TimeSpan.Zero
             };
 
-            services.AddAuthentication(options =>
+            services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(configureOptions =>
-            {
-                configureOptions.ClaimsIssuer = jwtAppSettingOptions.Issuer;
-                configureOptions.TokenValidationParameters = tokenValidationParameters;
-                configureOptions.SaveToken = true;
+                options.Authority = Configuration.GetValue<string>("Authority");
+                options.RequireHttpsMetadata = false;
+                options.Audience = "api1";
             });
 
-            // add identity
+
             services.AddIdentity<User, Role>(identityOptions =>
             {
-                // configure identity options
                 identityOptions.Password.RequireDigit = false;
                 identityOptions.Password.RequireLowercase = false;
                 identityOptions.Password.RequireUppercase = false;
                 identityOptions.Password.RequireNonAlphanumeric = false;
                 identityOptions.Password.RequiredLength = 6;
+                identityOptions.User.RequireUniqueEmail = true;
             })
              .AddEntityFrameworkStores<DataBaseContext>()
              .AddDefaultTokenProviders();
@@ -143,6 +138,18 @@ namespace BackEnd
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "IT Lab develop API", Version = "v1" });
+                c.AddSecurityDefinition("Bearer",
+                    new ApiKeyScheme
+                    {
+                        In = "header",
+                        Description = "Please enter into field the word 'Bearer' following by space and JWT",
+                        Name = "Authorization",
+                        Type = "apiKey"
+                    });
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    { "Bearer", Enumerable.Empty<string>() }
+                });
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
@@ -162,14 +169,12 @@ namespace BackEnd
             services.AddSingleton<ISmsSender, SmsService>();
 
 
-            services.AddSingleton<IUserPropertiesConstants, InMemoryUserPropertiesConstants>();
             services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
 
 
             services.AddWebAppConfigure()
                 .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
                 .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
-                .AddTransientConfigure<LoadCustomPropertiesService>()
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 

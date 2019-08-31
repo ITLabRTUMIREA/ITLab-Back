@@ -13,6 +13,7 @@ using Models.People;
 using Models.People.UserProperties;
 using Models.PublicAPI.Requests.User.Properties.HardProperties;
 using Models.PublicAPI.Responses.People;
+using AutoMapper;
 
 namespace BackEnd.Controllers.Users.Properties.HardProperties
 {
@@ -20,42 +21,37 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
     public class VkPropertyController : AuthorizeController
     {
         private readonly IUserRegisterTokens registerTokens;
-        private readonly IOptions<NotifierSettings> config;
         private readonly DataBaseContext dbContext;
+        private readonly IMapper mapper;
 
         public VkPropertyController(
             UserManager<User> userManager,
             IUserRegisterTokens registerTokens,
-            IOptions<NotifierSettings> config,
-            DataBaseContext dbContext) 
+            DataBaseContext dbContext,
+            IMapper mapper) 
             : base(userManager)
         {
             this.registerTokens = registerTokens;
-            this.config = config;
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
         [HttpGet]
         public async Task<ActionResult<string>> GetVkToken()
             => $"L:{await registerTokens.AddVkToken(UserId)}";
 
+        // TODO use audience for VK
         [HttpPost]
-        [AllowAnonymous]
         public async Task<ActionResult<UserView>> VerifyToken(
             [FromBody] VkVerifyRequest request)
         {
-            if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var accessToken))
-                return Unauthorized();
-            if (accessToken != config.Value.AccessToken)
-                return Forbid();
             var userId = await registerTokens.CheckVkToken(request.Token);
             if (userId == null)
                 return BadRequest("Incorrect vk token");
 
-
             //TODO performance
             var vkPropType = await dbContext
                 .UserPropertyTypes
-                .SingleOrDefaultAsync(pt => pt.Name == UserPropertyNames.VKID.ToString());
+                .SingleOrDefaultAsync(pt => pt.InternalName == UserPropertyNames.VKID.ToString());
             var vkProp = await dbContext
                 .UserProperties
                 .Include(u => u.UserPropertyType)
@@ -79,7 +75,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             return await dbContext
                 .Users
                 .Where(u => u.Id == userId)
-                .ProjectTo<UserView>()
+                .ProjectTo<UserView>(mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }
     }

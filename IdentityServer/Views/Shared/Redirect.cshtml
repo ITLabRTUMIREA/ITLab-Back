@@ -1,0 +1,7 @@
+﻿@model RedirectViewModel
+
+<h1>Сейчас вы вернетесь на сайт.</h1>
+<p>После завершения вы можете закрыть эту вкладку</p>
+
+<meta http-equiv="refresh" content="0;url=@Model.RedirectUrl" data-url="@Model.RedirectUrl">
+<script src="~/js/signin-redirect.js"></script>

@@ -5,11 +5,22 @@ using System.Threading.Tasks;
 
 namespace BackEnd.Models.Settings
 {
+    /// <summary>
+    /// Settings for notify service
+    /// </summary>
     public class NotifierSettings
     {
+        /// <summary>
+        /// Host path for notify service
+        /// </summary>
         public string Host { get; set; }
-        public string AccessToken { get; set; }
+        /// <summary>
+        /// Change Host in runtime
+        /// </summary>
         public bool NeedChangeUrl { get; set; }
+        /// <summary>
+        /// Secret to send notify messages
+        /// </summary>
         public string NotifySecret { get; set; }
     }
 }

@@ -38,7 +38,7 @@ namespace BackEnd.Controllers.Equipments
             return await dataBaseContext
                 .Equipments
                 .Where(e => e.OwnerId == null)
-                .ProjectTo<EquipmentView>()
+                .ProjectTo<EquipmentView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
@@ -51,7 +51,7 @@ namespace BackEnd.Controllers.Equipments
             return await dataBaseContext
                 .Equipments
                 .Where(e => e.OwnerId == uId)
-                .ProjectTo<EquipmentView>()
+                .ProjectTo<EquipmentView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 

@@ -23,11 +23,14 @@ using System.Collections.Generic;
 
 namespace BackEnd.Controllers.Events
 {
-    [Produces("application/json")]
+    /// <summary>
+    /// Controller about events
+    /// </summary>
     [Route("api/Event")]
     public class EventController : AuthorizeController
     {
         private readonly IEventsManager eventsManager;
+        private readonly IMapper mapper;
 
         public EventController(
             UserManager<User> userManager,
@@ -36,8 +39,19 @@ namespace BackEnd.Controllers.Events
             IMapper mapper) : base(userManager)
         {
             this.eventsManager = eventsManager;
+            this.mapper = mapper;
         }
 
+        /// <summary>
+        /// Get events list
+        /// </summary>
+        /// <param name="begin">Biggest end time. If not defined end time equals infinity</param>
+        /// <param name="end">Smallest begin time. If not defined begin time equals zero</param>
+        /// <returns>List of events</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Incorrect begin or end parameter format</response>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
         [HttpGet]
         public async Task<ActionResult<List<CompactEventView>>> Get(DateTime? begin, DateTime? end)
         {
@@ -47,11 +61,46 @@ namespace BackEnd.Controllers.Events
                 .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
                 .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
-                .AttachUserId(UserId)
-                .ProjectTo<CompactEventView>()
+                .AttachUserId(mapper.ConfigurationProvider, UserId)
+                .ProjectTo<CompactEventView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Get events list for specific user
+        /// </summary>
+        /// <param name="userId">Id of finding user</param>
+        /// <param name="begin">Biggest end time. If not defined end time equals infinity</param>
+        /// <param name="end">Smallest begin time. If not defined begin time equals zero</param>
+        /// <returns>List of events</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Incorrect userId, begin or end parameter format</response>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [HttpGet("user/{userId:Guid}")]
+        public async Task<ActionResult<List<UsersEventsView>>> GetUsersEvents(Guid userId, DateTime? begin, DateTime? end)
+        {
+            end = end == DateTime.MinValue ? DateTime.MaxValue : end;
+            return await eventsManager
+                .Events
+                .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
+                .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
+                .OrderBy(cev => cev.BeginTime)
+                .SelectMany(e => e.Shifts)
+                .SelectMany(s => s.Places)
+                .SelectMany(p => p.PlaceUserEventRoles)
+                .Where(puer => puer.UserId == userId && puer.UserStatus == UserStatus.Accepted)
+                .ProjectTo<UsersEventsView>(mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get invites or wishes of authorized user
+        /// </summary>
+        /// <param name="requestType">type of request, "wishes" for wishes, "invitations" for invitations</param>
+        /// <returns>List of invites</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Success</response>
         [HttpGet("applications/{requestType}")]
         public async Task<ActionResult<List<EventApplicationView>>> GetInvites(string requestType)
             => await eventsManager
@@ -64,9 +113,14 @@ namespace BackEnd.Controllers.Events
             .SelectMany(s => s.Places)
             .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserId == UserId && pur.UserStatus == userStatus)
-            .ProjectTo<EventApplicationView>()
+            .ProjectTo<EventApplicationView>(mapper.ConfigurationProvider)
             .ToListAsync();
 
+        /// <summary>
+        /// Get all wishers
+        /// </summary>
+        /// <returns>List of ishers</returns>
+        /// <response code="200">Success</response>
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpGet("wishers")]
         public async Task<ActionResult<List<WisherEventView>>> GetWishers()
@@ -76,16 +130,22 @@ namespace BackEnd.Controllers.Events
             .SelectMany(s => s.Places)
             .SelectMany(p => p.PlaceUserEventRoles)
             .Where(pur => pur.UserStatus == UserStatus.Wisher)
-            .ProjectTo<WisherEventView>()
+            .ProjectTo<WisherEventView>(mapper.ConfigurationProvider)
             .ToListAsync();
 
-
+        /// <summary>
+        /// Get event information
+        /// </summary>
+        /// <returns>Event with specific id</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Event id is not GUID</response>
+        /// <response code="404">Event not found</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<EventView>> GetAsync(Guid id)
         {
             var targetEvent = await eventsManager
                            .Events
-                           .ProjectTo<EventView > ()
+                           .ProjectTo<EventView>(mapper.ConfigurationProvider)
                            .FirstOrDefaultAsync(ev => ev.Id == id);
             if (targetEvent == null) return NotFound();
             return targetEvent;
@@ -96,7 +156,7 @@ namespace BackEnd.Controllers.Events
         [HttpPost]
         public async Task<ActionResult<EventView>> PostAsync([FromBody] EventCreateRequest request)
             => await (await eventsManager.AddAsync(request))
-                .ProjectTo<EventView>()
+                .ProjectTo<EventView>(mapper.ConfigurationProvider)
                 .SingleAsync();
 
         [Notify(NotifyType.EventChange)]
@@ -104,7 +164,7 @@ namespace BackEnd.Controllers.Events
         [HttpPut]
         public async Task<ActionResult<EventView>> PutAsync([FromBody] EventEditRequest request)
             => await (await eventsManager.EditAsync(request))
-                .ProjectTo<EventView>()
+                .ProjectTo<EventView>(mapper.ConfigurationProvider)
                 .SingleAsync();
 
         [RequireRole(RoleNames.CanEditEvent)]
@@ -150,7 +210,7 @@ namespace BackEnd.Controllers.Events
         public async Task<ActionResult<WisherEventView>> AcceptWish(Guid placeId, Guid userId)
             => await (await eventsManager
                     .AcceptWish(placeId, userId))
-                    .ProjectTo<WisherEventView>()
+                    .ProjectTo<WisherEventView>(mapper.ConfigurationProvider)
                     .SingleOrDefaultAsync();
 
         [RequireRole(RoleNames.CanEditEvent)]
@@ -159,6 +219,6 @@ namespace BackEnd.Controllers.Events
         {
             await eventsManager.RejectWish(placeId, userId);
             return Ok();
+        }
     }
-}
 }

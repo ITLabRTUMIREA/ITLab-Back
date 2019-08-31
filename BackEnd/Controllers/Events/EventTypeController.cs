@@ -44,7 +44,7 @@ namespace BackEnd.Controllers.Events
                 .IfNotNull(match, types =>
                     types.Where(et => et.Title.ToUpper().Contains(match.ToUpper())))
                 .If(!all, types => types.Take(5))
-                .ProjectTo<EventTypeView>()
+                .ProjectTo<EventTypeView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
 
