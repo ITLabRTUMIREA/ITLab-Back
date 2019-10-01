@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace BackEnd.Services.Notify
 {
-    public class NotifierHostSaver
+    public class HttpNotifierHostSaver
     {
         public string Host { get; set; }
 
-        public NotifierHostSaver(IOptions<NotifierSettings> options)
+        public HttpNotifierHostSaver(IOptions<NotifierSettings> options)
         {
             Host = options.Value.Host;
         }

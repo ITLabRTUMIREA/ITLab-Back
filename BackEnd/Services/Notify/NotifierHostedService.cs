@@ -1,4 +1,5 @@
 ﻿using BackEnd.Models.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,36 +19,27 @@ namespace BackEnd.Services.Notify
 {
     public class NotifierHostedService : BackgroundService
     {
-        public const string HttpClientName = "KotlinNotifierHttpClient";
 
         private readonly INotifyMessagesQueue messagesQueue;
         private readonly ILogger<NotifierHostedService> logger;
-        private readonly IHttpClientFactory httpClientFactory;
-        private readonly IOptions<NotifierSettings> settings;
+        private readonly IServiceProvider serviceProvider;
         private TimeSpan delay = TimeSpan.FromSeconds(5);
-        private static readonly JsonSerializerSettings SerializeSettings = new JsonSerializerSettings
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc
-        };
+
 
         public NotifierHostedService(
             INotifyMessagesQueue messagesQueue,
             ILogger<NotifierHostedService> logger,
-            IHttpClientFactory httpClientFactory,
-            IOptions<NotifierSettings> settings)
+            IServiceProvider serviceProvider)
         {
             this.messagesQueue = messagesQueue;
             this.logger = logger;
-            this.httpClientFactory = httpClientFactory;
-            this.settings = settings;
+            this.serviceProvider = serviceProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var httpClient = httpClientFactory.CreateClient(HttpClientName);
                 if (!messagesQueue.TryGetMessage(out (NotifyType notifyType, object data) message))
                 {
                     await Task.Delay(delay);
@@ -55,23 +47,17 @@ namespace BackEnd.Services.Notify
                 }
                 try
                 {
-                    var content = JsonConvert.SerializeObject(new NotifyRequest<object>
+                    var notifySender = serviceProvider.GetRequiredService<INotifySender>();
+                    var success = await notifySender.TrySendNotify(message.notifyType, message.data);
+                    if (!success)
                     {
-                        Type = message.notifyType,
-                        Data = message.data,
-                        Secret = settings.Value.NotifySecret
-                    }, SerializeSettings);
-                    var result = await httpClient.PostAsync("", new StringContent(content, Encoding.UTF8, "application/json"));
-                    if (result.StatusCode != HttpStatusCode.OK)
-                    {
-                        logger.LogWarning($"error while send info to notify hub (bot) statusCode: {result.StatusCode}, base address: {httpClient.BaseAddress}, content: {content}");
                         messagesQueue.AddMessage(message);
                         await Task.Delay(delay);
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogWarning(ex, $"error while send info to notify hub (bot) base address: {httpClient.BaseAddress}");
+                    logger.LogWarning(ex, $"error while sending notify");
                     messagesQueue.AddMessage(message);
                     await Task.Delay(delay);
                 }
