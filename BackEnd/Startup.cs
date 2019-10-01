@@ -40,6 +40,7 @@ using System.Reflection;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using BackEnd.Formatting.MapperProfiles;
+using BackEnd.Services.Notify.Debug;
 
 namespace BackEnd
 {
@@ -177,26 +178,8 @@ namespace BackEnd
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;
 
+            ConfigureNotify(services);
 
-            if (Configuration.GetValue<bool>("UseConsoleLogger"))
-                services.AddTransient<INotifier, DebugLogNotifier>();
-            else
-            {
-                services.AddSingleton<NotifierHostSaver>();
-                services.AddHttpClient(NotifierHostedService.HttpClientName, (provider, client) =>
-                {
-                    var configs = provider.GetService<IOptions<NotifierSettings>>();
-                    var host = configs.Value.Host;
-                    if (configs.Value.NeedChangeUrl)
-                    {
-                        host = provider.GetService<NotifierHostSaver>().Host;
-                    }
-                    client.BaseAddress = new Uri(host);
-                });
-                services.AddSingleton<INotifyMessagesQueue, CuncurrentBagMessagesQueue>();
-                services.AddHostedService<NotifierHostedService>();
-                services.AddTransient<INotifier, MessageQueueNotifier>();
-            }
 
             var metrics = AppMetrics.CreateDefaultBuilder()
                 .OutputMetrics.AsPrometheusPlainText()
@@ -209,6 +192,38 @@ namespace BackEnd
             );
 
             services.AddSpaStaticFiles(spa => spa.RootPath = "wwwroot");
+        }
+
+        private void ConfigureNotify(IServiceCollection services)
+        {
+            services.AddSingleton<INotifyMessagesQueue, CuncurrentBagMessagesQueue>();
+            services.AddHostedService<NotifierHostedService>();
+            services.AddTransient<INotifier, MessageQueueNotifier>();
+
+            switch (Configuration.GetValue<string>("NotifyType"))
+            {
+                case "http":
+                    services.AddSingleton<HttpNotifierHostSaver>();
+                    services.AddHttpClient(HttpNotifySender.HttpClientName, (provider, client) =>
+                    {
+                        var configs = provider.GetService<IOptions<NotifierSettings>>();
+                        var host = configs.Value.Host;
+                        if (configs.Value.NeedChangeUrl)
+                        {
+                            host = provider.GetService<HttpNotifierHostSaver>().Host;
+                        }
+                        client.BaseAddress = new Uri(host);
+                    });
+                    services.AddTransient<INotifySender, HttpNotifySender>();
+                    break;
+                default:
+                    services.AddTransient<INotifySender, ConsoleNotifySender>();
+                    break;
+            }
+            if (Configuration.GetValue<bool>("UseRandomEventsGenerator"))
+            {
+                services.AddHostedService<RandomEventsGenerator>();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

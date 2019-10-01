@@ -18,7 +18,9 @@ namespace BackEnd.Services
         private const string AvailableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private static readonly Random Random = new Random();
         private static Expression<Func<RegisterTokenPair, bool>> EqualsChecker(string email, string token)
-            => rtp => rtp.Email == email && rtp.Token == token;
+        {
+            return rtp => rtp.Email == email && rtp.Token == token;
+        }
 
         public DbUserRegisterTokens(
             DataBaseContext dbContext,
