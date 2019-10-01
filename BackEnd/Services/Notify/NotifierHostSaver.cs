@@ -11,7 +11,7 @@ namespace BackEnd.Services.Notify
     {
         public string Host { get; set; }
 
-        public HttpNotifierHostSaver(IOptions<NotifierSettings> options)
+        public HttpNotifierHostSaver(IOptions<HttpNotifierSettings> options)
         {
             Host = options.Value.Host;
         }

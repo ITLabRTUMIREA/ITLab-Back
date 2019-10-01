@@ -22,11 +22,11 @@ namespace BackEnd.Controllers
     [Route("api/debug")]
     public class DebugController : Controller
     {
-        private readonly IOptions<NotifierSettings> options;
+        private readonly IOptions<HttpNotifierSettings> options;
         private readonly HttpNotifierHostSaver notifierHostSaver;
 
         public DebugController(
-            IOptions<NotifierSettings> options,
+            IOptions<HttpNotifierSettings> options,
             HttpNotifierHostSaver notifierUrlSaver)
         {
             this.options = options;

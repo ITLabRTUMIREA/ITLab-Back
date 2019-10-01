@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Models.PublicAPI.NotifyRequests;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,22 +12,17 @@ using System.Threading.Tasks;
 
 namespace BackEnd.Services.Notify
 {
-    public class HttpNotifySender : INotifySender
+    public class HttpNotifySender : JsonNotifySender
     {
         public const string HttpClientName = nameof(HttpNotifySender);
 
         private readonly ILogger<HttpNotifySender> logger;
         private readonly HttpClient httpClient;
-        private readonly IOptions<NotifierSettings> settings;
-        private static readonly JsonSerializerSettings SerializeSettings = new JsonSerializerSettings
-        {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc
-        };
+        private readonly IOptions<HttpNotifierSettings> settings;
 
         public HttpNotifySender(
             IHttpClientFactory httpClientFactory,
-            IOptions<NotifierSettings> settings,
+            IOptions<HttpNotifierSettings> settings,
             ILogger<HttpNotifySender> logger)
         {
             httpClient = httpClientFactory.CreateClient(HttpClientName);
@@ -37,16 +30,11 @@ namespace BackEnd.Services.Notify
             this.logger = logger;
         }
 
-        public async Task<bool> TrySendNotify(NotifyType notifyType, object data)
+        public override async Task<bool> TrySendNotify(NotifyType notifyType, object data)
         {
             try
             {
-                var content = JsonConvert.SerializeObject(new NotifyRequest<object>
-                {
-                    Type = notifyType,
-                    Data = data,
-                    Secret = settings.Value.NotifySecret
-                }, SerializeSettings);
+                var content = ToJson(notifyType, data, settings.Value.NotifySecret);
 
                 var result = await httpClient.PostAsync("", new StringContent(content, Encoding.UTF8, "application/json"));
                 if (result.StatusCode != HttpStatusCode.OK)

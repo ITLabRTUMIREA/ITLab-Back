@@ -62,7 +62,6 @@ namespace BackEnd
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
-            services.Configure<NotifierSettings>(Configuration.GetSection(nameof(NotifierSettings)));
             services.Configure<JwtIssuerOptions>(Configuration.GetSection(nameof(JwtIssuerOptions)));
 
             services.AddMvc(options =>
@@ -204,10 +203,11 @@ namespace BackEnd
             switch (Configuration.GetValue<string>("NotifyType"))
             {
                 case "http":
+                    services.Configure<HttpNotifierSettings>(Configuration.GetSection(nameof(HttpNotifierSettings)));
                     services.AddSingleton<HttpNotifierHostSaver>();
                     services.AddHttpClient(HttpNotifySender.HttpClientName, (provider, client) =>
                     {
-                        var configs = provider.GetService<IOptions<NotifierSettings>>();
+                        var configs = provider.GetService<IOptions<HttpNotifierSettings>>();
                         var host = configs.Value.Host;
                         if (configs.Value.NeedChangeUrl)
                         {
@@ -216,6 +216,10 @@ namespace BackEnd
                         client.BaseAddress = new Uri(host);
                     });
                     services.AddTransient<INotifySender, HttpNotifySender>();
+                    break;
+                case "redis":
+                    services.Configure<RedisNotifierSettings>(Configuration.GetSection(nameof(RedisNotifierSettings)));
+                    services.AddTransient<INotifySender, RedisNotifySender>();
                     break;
                 default:
                     services.AddTransient<INotifySender, ConsoleNotifySender>();

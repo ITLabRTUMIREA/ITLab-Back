@@ -23,7 +23,7 @@ namespace BackEnd.Services.Notify
         private readonly INotifyMessagesQueue messagesQueue;
         private readonly ILogger<NotifierHostedService> logger;
         private readonly IServiceProvider serviceProvider;
-        private TimeSpan delay = TimeSpan.FromSeconds(5);
+        private TimeSpan delay = TimeSpan.FromSeconds(0.5);
 
 
         public NotifierHostedService(
