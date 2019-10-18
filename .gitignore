@@ -268,3 +268,5 @@ BackEnd/Migrations/*
 IdentityServer/identityserver4_log\.txt
 
 IdentityServer/appsettings\.Secret\.json
+
+!Backend/Services/Notify/Debug
