@@ -13,7 +13,8 @@ using Models.PublicAPI.Responses;
 
 namespace BackEnd.Controllers
 {
-    public class AuthorizeController : Controller
+    [ApiController]
+    public class AuthorizeController : ControllerBase
     {
         protected readonly UserManager<User> UserManager;
 
@@ -26,7 +27,5 @@ namespace BackEnd.Controllers
             => await UserManager.FindByIdAsync(UserManager.GetUserId(User));
         protected async Task<User> GetUser(Guid? userId)
             => await UserManager.FindByIdAsync(userId.ToString());
-
-        protected static Exception NotFoundMyApi() => ResponseStatusCode.NotFound.ToApiException();
     };
 }

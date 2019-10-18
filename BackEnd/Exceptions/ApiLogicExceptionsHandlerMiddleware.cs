@@ -37,46 +37,22 @@ namespace BackEnd.Exceptions
             try
             {
                 await _next(context);
-
-                switch (context.Response.StatusCode)
-                {
-                    case StatusCodes.Status401Unauthorized:
-                        throw ResponseStatusCode.Unauthorized.ToApiException();
-                    case StatusCodes.Status403Forbidden:
-                        throw ResponseStatusCode.Forbidden.ToApiException();
-                    default:
-                        logger.LogTrace(context.Response.StatusCode.ToString());
-                        break;
-                }
+            }
+            catch (InvalidOperationException invalidOperationException) when (invalidOperationException.Message.Contains("SPA"))
+            {
+                context.Response.StatusCode = 404;
             }
             catch (Exception ex)
             {
-                context.Response.StatusCode = StatusCodes.Status200OK;
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(Content(ex));
+                logger.LogWarning(ex, "error in application");
+                context.Response.StatusCode = 500;
+                if (ex is ApiLogicException apiEx)
+                {
+                    context.Response.StatusCode = (int)apiEx.StatusCode;
+                }
+                await context.Response.WriteAsync(ex.Message);
             }
         }
-        private string Content(Exception ex)
-            => JsonConvert.SerializeObject(GetData(ex), Newtonsoft.Json.Formatting.Indented, jsonSerializerSettings);
-        private object GetData(Exception ex)
-        {
-            switch (ex)
-            {
-                case DbUpdateException dbUpdate:
-                    logger.LogInformation(dbUpdate, "error while update DB");
-                    return new ResponseBase(ResponseStatusCode.IncorrectRequestData);
-                case ApiLogicException api:
-                    logger.LogInformation(ex, $"exception in controller {api.ResponseModel.StatusCode}");
-                    return api.ResponseModel;
-                case NotImplementedException nie:
-                    logger.LogWarning(ex, "Not implement");
-                    return new ResponseBase(ResponseStatusCode.NotImplemented);
-                default:
-                    logger.LogWarning(ex, "Unknown exception");
-                    return new ResponseBase(ResponseStatusCode.Unknown);
-            }
-        }
-
     }
 
     // Extension method used to add the middleware to the HTTP request pipeline.

@@ -1,14 +1,8 @@
 ﻿using AutoMapper;
-using BackEnd.Exceptions;
-using BackEnd.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.People;
-using Models.PublicAPI.Requests;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.Exceptions;
-using Models.PublicAPI.Responses.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,36 +36,57 @@ namespace BackEnd.Controllers
         }
 
 
-        [HttpGet("{userId:guid?}")]
-        public async Task<ListResponse<RoleView>> GetAsync(Guid? userId)
-            => await dbContext
-                .Roles
-                .If(userId.HasValue, rls =>
-                    rls.Variable(out var roleNames,
-                            () => UserManager.GetRolesAsync(GetUser(userId).Result).Result)
-                        .Where(r => roleNames.Contains(r.Name)))
-                .ProjectTo<RoleView>()
+        [HttpGet()]
+        public async Task<ActionResult<List<RoleView>>> GetAsync()
+        {
+            return await dbContext.Roles
+                .ProjectTo<RoleView>(mapper.ConfigurationProvider)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get roles for specific user
+        /// </summary>
+        /// <param name="userId">Id of user</param>
+        /// <returns>List of roles</returns>
+        /// <response code="200">Success get roles</response>
+        [HttpGet("{userId:guid}")]
+        [ProducesResponseType(200)]
+        public async Task<ActionResult<List<RoleView>>> GetAsync(Guid userId)
+        {
+            var roleIds = await dbContext.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+            return await dbContext.Roles
+                .Where(r => roleIds.Contains(r.Id))
+                .ProjectTo<RoleView>(mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
 
         [HttpPost("{userId}/{roleId}")]
-        public async Task<OneObjectResponse<bool>> AttachToRole(Guid userId, Guid roleId)
+        public async Task<ActionResult<bool>> AttachToRole(Guid userId, Guid roleId)
         {
-            var role = await roleManager.FindByIdAsync(roleId.ToString()) ??
-                       throw ResponseStatusCode.NotFound.ToApiException();
-            var user = await UserManager.FindByIdAsync(userId.ToString()) ??
-                       throw ResponseStatusCode.NotFound.ToApiException();
+            var role = await roleManager.FindByIdAsync(roleId.ToString());
+            if (role == null)
+                return NotFound();
+            var user = await UserManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return NotFound();
 
             var addRoleResult = await UserManager.AddToRoleAsync(user, role.Name);
             return addRoleResult.Succeeded;
         }
 
         [HttpDelete("{userId}/{roleId}")]
-        public async Task<OneObjectResponse<bool>> DetachFromRole(Guid userId, Guid roleId)
+        public async Task<ActionResult<bool>> DetachFromRole(Guid userId, Guid roleId)
         {
-            var role = await roleManager.FindByIdAsync(roleId.ToString()) ??
-                       throw ResponseStatusCode.NotFound.ToApiException();
-            var user = await UserManager.FindByIdAsync(userId.ToString()) ??
-                       throw ResponseStatusCode.NotFound.ToApiException();
+            var role = await roleManager.FindByIdAsync(roleId.ToString());
+            if (role == null)
+                return NotFound();
+            var user = await UserManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return NotFound();
 
             var addRoleResult = await UserManager.RemoveFromRoleAsync(user, role.Name);
             return addRoleResult.Succeeded;

@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
-using BackEnd.Extensions;
 using BackEnd.Models.Settings;
 using BackEnd.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +12,8 @@ using Microsoft.Extensions.Options;
 using Models.People;
 using Models.People.UserProperties;
 using Models.PublicAPI.Requests.User.Properties.HardProperties;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.General;
 using Models.PublicAPI.Responses.People;
+using AutoMapper;
 
 namespace BackEnd.Controllers.Users.Properties.HardProperties
 {
@@ -25,41 +21,37 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
     public class VkPropertyController : AuthorizeController
     {
         private readonly IUserRegisterTokens registerTokens;
-        private readonly IOptions<NotifierSettings> config;
         private readonly DataBaseContext dbContext;
+        private readonly IMapper mapper;
 
         public VkPropertyController(
             UserManager<User> userManager,
             IUserRegisterTokens registerTokens,
-            IOptions<NotifierSettings> config,
-            DataBaseContext dbContext) 
+            DataBaseContext dbContext,
+            IMapper mapper) 
             : base(userManager)
         {
             this.registerTokens = registerTokens;
-            this.config = config;
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
         [HttpGet]
-        public async Task<OneObjectResponse<string>> GetVkToken()
+        public async Task<ActionResult<string>> GetVkToken()
             => $"L:{await registerTokens.AddVkToken(UserId)}";
 
+        // TODO use audience for VK
         [HttpPost]
-        [AllowAnonymous]
-        public async Task<OneObjectResponse<UserView>> VerifyToken(
+        public async Task<ActionResult<UserView>> VerifyToken(
             [FromBody] VkVerifyRequest request)
         {
-            if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var accessToken))
-                throw ResponseStatusCode.Unauthorized.ToApiException();
-            if (accessToken != config.Value.AccessToken)
-                throw ResponseStatusCode.Forbidden.ToApiException();
-            var userId = await registerTokens.CheckVkToken(request.Token)
-                       ?? throw ResponseStatusCode.IncorrectVkToken.ToApiException();
-
+            var userId = await registerTokens.CheckVkToken(request.Token);
+            if (userId == null)
+                return BadRequest("Incorrect vk token");
 
             //TODO performance
             var vkPropType = await dbContext
                 .UserPropertyTypes
-                .SingleOrDefaultAsync(pt => pt.Name == UserPropertyNames.VKID.ToString());
+                .SingleOrDefaultAsync(pt => pt.InternalName == UserPropertyNames.VKID.ToString());
             var vkProp = await dbContext
                 .UserProperties
                 .Include(u => u.UserPropertyType)
@@ -71,7 +63,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             {    vkProp = new UserProperty
                 {
                     UserPropertyTypeId = vkPropType.Id,
-                    UserId = userId,
+                    UserId = userId.Value,
                     Value = request.VkId.ToString(),
                     Status = UserPropertyStatus.Confirmed
                 };
@@ -83,7 +75,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
             return await dbContext
                 .Users
                 .Where(u => u.Id == userId)
-                .ProjectTo<UserView>()
+                .ProjectTo<UserView>(mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }
     }

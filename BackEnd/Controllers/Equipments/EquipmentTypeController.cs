@@ -4,23 +4,16 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
-using BackEnd.Exceptions;
-using BackEnd.Formatting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Models.Equipments;
 using Models.PublicAPI.Requests;
-using Models.PublicAPI.Requests.Equipment;
 using Models.PublicAPI.Requests.Equipment.EquipmentType;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.General;
 using Extensions;
 using Models.PublicAPI.Responses.Equipment;
 using System.Collections.Generic;
-using BackEnd.Extensions;
 using BackEnd.Models.Roles;
-using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.AspNetCore.Identity;
 using Models.People;
 using Models.People.Roles;
@@ -48,24 +41,26 @@ namespace BackEnd.Controllers.Equipments
             this.dbContext = dbContext;
         }
         [HttpGet]
-        public async Task<ListResponse<CompactEquipmentTypeView>> GetAsync(string match, bool all = false)
+        public async Task<ActionResult<List<CompactEquipmentTypeView>>> GetAsync(string match, bool all = false)
             => await dbContext
                 .EquipmentTypes
                 .WhereIf(!all, t => t.ParentId == null)
                 .WhereIf(!string.IsNullOrEmpty(match), eq => eq.Title.ToUpper().Contains(match.ToUpper()))
                 .If(!all, types => types.Take(5))
-                .ProjectTo<CompactEquipmentTypeView>()
+                .ProjectTo<CompactEquipmentTypeView>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
 
         [HttpGet("{id}")]
-        public async Task<OneObjectResponse<EquipmentTypeView>> GetAsync(Guid id)
+        public async Task<ActionResult<EquipmentTypeView>> GetAsync(Guid id)
         {
             var one = await dbContext
                       .EquipmentTypes
                       .Where(eqt => eqt.Id == id)
-                      .SingleOrDefaultAsync()
-                      ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+                      .SingleOrDefaultAsync();
+            if (one == null)
+                return NotFound();
+
             var targetRootId = one.RootId ?? one.Id;
             var all = await dbContext
                       .EquipmentTypes
@@ -78,15 +73,16 @@ namespace BackEnd.Controllers.Equipments
 
         [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpPost]
-        public async Task<OneObjectResponse<EquipmentTypeView>> Post([FromBody]EquipmentTypeCreateRequest request)
+        public async Task<ActionResult<EquipmentTypeView>> Post([FromBody]EquipmentTypeCreateRequest request)
         {
             var equipmentType = mapper.Map<EquipmentType>(request);
             if (request.ParentId.HasValue)
             {
                 var parent = await dbContext
                     .EquipmentTypes
-                    .SingleOrDefaultAsync(et => et.Id == request.ParentId)
-                    ?? throw NotFoundMyApi();
+                    .SingleOrDefaultAsync(et => et.Id == request.ParentId);
+                if (parent == null)
+                    return NotFound();
                 equipmentType.Deep = parent.Deep + 1;
                 equipmentType.RootId = parent.RootId ?? parent.Id;
             }
@@ -97,7 +93,7 @@ namespace BackEnd.Controllers.Equipments
 
         [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpPut]
-        public async Task<ListResponse<EquipmentTypeView>> Put([FromBody]List<EquipmentTypeEditRequest> request)
+        public async Task<ActionResult<List<EquipmentTypeView>>> Put([FromBody]List<EquipmentTypeEditRequest> request)
         {
             var ids = request
                 .SelectMany(editRequest => (editRequest.Id, editRequest.ParentId))
@@ -127,22 +123,26 @@ namespace BackEnd.Controllers.Equipments
             return await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
-                .ProjectTo<EquipmentTypeView>()
+                .ProjectTo<EquipmentTypeView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
 
         [RequireRole(RoleNames.CanEditEquipmentType)]
         [HttpDelete]
-        public async Task<OneObjectResponse<Guid>> Delete([FromBody]IdRequest request)
+        public async Task<ActionResult<Guid>> Delete([FromBody]IdRequest request)
         {
             var now = await dbContext
                           .EquipmentTypes
                           .Where(et => et.Id == request.Id)
                           .Select(et => new { equipmentType = et, childsCount = et.Children.Count, equipmentCount = et.Equipment.Count })
-                          .SingleOrDefaultAsync() ?? throw ApiLogicException.Create(ResponseStatusCode.NotFound);
+                          .SingleOrDefaultAsync();
+            if (now == null)
+                return NotFound();
+
             if (now.childsCount != 0 || now.equipmentCount != 0)
-                throw ResponseStatusCode.ChildrenExists.ToApiException();
+                return Conflict("Children exists");//TODO meta
+
             dbContext.EquipmentTypes.Remove(now.equipmentType);
             await dbContext.SaveChangesAsync();
             return now.equipmentType.Id;

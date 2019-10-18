@@ -6,11 +6,10 @@ Status | master | develop
 Build |  [![Build Status][build-master-image]][build-master-link] | [![Build Status][build-dev-image]][build-dev-link]
 Public API | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/RTUITLab.ITLab.Models.PublicAPI.svg)](https://www.nuget.org/packages/RTUITLab.ITLab.Models.PublicAPI/) | ---
 
-
-[build-dev-image]: https://dev.azure.com/rtuitlab/ITLab/_apis/build/status/itlab/ITLab-Back-develop?branchName=develop
-[build-dev-link]: https://dev.azure.com/rtuitlab/ITLab/_build/latest?definitionId=39&branchName=develop
-[build-master-image]: https://dev.azure.com/rtuitlab/ITLab/_apis/build/status/itlab/ITLab-Back-master?branchName=master
-[build-master-link]: https://dev.azure.com/rtuitlab/ITLab/_build/latest?definitionId=38&branchName=master
+[build-dev-image]: https://dev.azure.com/rtuitlab/RTU%20IT%20Lab/_apis/build/status/ITLab-Back?branchName=develop
+[build-dev-link]: https://dev.azure.com/rtuitlab/RTU%20IT%20Lab/_build/latest?definitionId=65&branchName=develop
+[build-master-image]: https://dev.azure.com/rtuitlab/RTU%20IT%20Lab/_apis/build/status/ITLab-Back?branchName=master
+[build-master-link]: https://dev.azure.com/rtuitlab/RTU%20IT%20Lab/_build/latest?definitionId=65&branchName=master
 
 ## Prerequriments
 

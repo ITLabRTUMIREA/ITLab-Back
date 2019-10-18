@@ -1,39 +1,93 @@
 trigger:
   - master
-name: $(BuildID)
+  - develop
+
+pool:
+  vmImage: ubuntu-16.04
+
+name: $(BuildID)-$(Build.SourceBranchName)
 
 variables:
   nuget_package_number: '1.1.$(Build.BuildId)'
 
-pool:
-  name: Default
-steps:
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet publish'
-  inputs:
-    command: publish
-    publishWebProjects: false
-    projects: BackEnd/BackEnd.csproj
-    arguments: '-o $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: false
-    modifyOutputPath: false
+jobs:
+- job: Backend
+  pool:
+    name: Default
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet publish'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: BackEnd/BackEnd.csproj
+      arguments: '-o $(Build.ArtifactStagingDirectory)'
+      zipAfterPublish: false
+      modifyOutputPath: false
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: itlab-back-master'
-  inputs:
-    ArtifactName: 'itlab-back-master'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: itlab-back-build'
+    inputs:
+      ArtifactName: 'itlab-back-build'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet pack'
-  inputs:
-    command: pack
-    packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
-    versioningScheme: byEnvVar
-    versionEnvVar: nuget_package_number
+  - task: CopyFiles@2
+    displayName: Copy deploy folder
+    inputs:
+      SourceFolder: deploy/back/
+      Contents: '**'
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+      CleanTargetFolder: true
 
-- task: NuGetCommand@2
-  displayName: 'Push to Nuget.org'
-  inputs:
-    command: push
-    nuGetFeedType: external
-    publishFeedCredentials: 'Nuget org'
+  - task: PublishBuildArtifacts@1
+    displayName: publish back deploy folder
+    inputs:
+      ArtifactName: 'itlab-back-deploy'
+
+- job: Identity
+  pool:
+    name: Default
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet publish'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: IdentityServer/IdentityServer.csproj
+      arguments: '-o $(Build.ArtifactStagingDirectory)'
+      zipAfterPublish: false
+      modifyOutputPath: false
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: itlab-identity-build'
+    inputs:
+      ArtifactName: 'itlab-identity-build'
+
+  - task: CopyFiles@2
+    displayName: Copy deploy folder
+    inputs:
+      SourceFolder: deploy/identity/
+      Contents: '**'
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+      CleanTargetFolder: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: publish identity deploy folder
+    inputs:
+      ArtifactName: 'itlab-identity-deploy'
+
+- job: Nuget
+  pool:
+    name: Default
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet pack'
+    inputs:
+      command: pack
+      packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
+      versioningScheme: byEnvVar
+      versionEnvVar: nuget_package_number
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: itlab-back-nuget'
+    inputs:
+      ArtifactName: 'itlab-back-nuget'

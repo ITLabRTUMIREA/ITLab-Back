@@ -1,17 +1,16 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using BackEnd.DataBase;
-using BackEnd.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.People;
-using Models.PublicAPI.Responses;
-using Models.PublicAPI.Responses.General;
 using Newtonsoft.Json;
 using Extensions;
 using Models.PublicAPI.Responses.People;
 using AutoMapper.QueryableExtensions;
+using System.Collections.Generic;
+using AutoMapper;
 
 namespace BackEnd.Controllers.Users
 {
@@ -19,32 +18,41 @@ namespace BackEnd.Controllers.Users
     public class UserSettingsController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;
+        private readonly IMapper mapper;
 
-        public UserSettingsController(UserManager<User> userManager,
-                              DataBaseContext dbContext) : base(userManager)
+        public UserSettingsController(
+            UserManager<User> userManager,
+            DataBaseContext dbContext,
+            IMapper mapper
+        ) : base(userManager)
         {
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
         [HttpGet]
-        public async Task<ListResponse<UserSettingPresent>> GetSettingsAsync()
+        public async Task<ActionResult<List<UserSettingPresent>>> GetSettingsAsync()
         => await dbContext
                 .UserSettings
                 .Where(s => s.UserId == UserId)
-                .ProjectTo<UserSettingPresent>()
+                .ProjectTo<UserSettingPresent>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
         [HttpGet("{settingName}")]
-        public async Task<OneObjectResponse<object>> GetSettingAsync(string settingName)
-            => (await dbContext
-                .UserSettings
-                .Where(s => s.UserId == UserId)
-                .Where(s => s.Title == settingName)
-                .SingleOrDefaultAsync())
-                ?.Value.ParseToJson()
-                ?? throw ResponseStatusCode.NotFound.ToApiException();
+        public async Task<ActionResult<object>> GetSettingAsync(string settingName)
+        {
+            var settings = (await dbContext
+                           .UserSettings
+                           .Where(s => s.UserId == UserId)
+                           .Where(s => s.Title == settingName)
+                           .SingleOrDefaultAsync())
+                           ?.Value.ParseToJson();
+            if (settings == null)
+                return NotFound();
+            return settings;
+        }
 
         [HttpPost("{settingName}")]
-        public async Task<OneObjectResponse<object>> SetSettingAsync(
+        public async Task<ActionResult<object>> SetSettingAsync(
             string settingName,
             [FromBody] object settingsValue)
         {
@@ -63,15 +71,16 @@ namespace BackEnd.Controllers.Users
             return settingsValue;
         }
         [HttpDelete("{settingName}")]
-        public async Task<OneObjectResponse<object>> DeleteSettingAsync(
+        public async Task<ActionResult<object>> DeleteSettingAsync(
             string settingName)
         {
             var current = await dbContext
                   .UserSettings
                   .Where(s => s.UserId == UserId)
                   .Where(s => s.Title == settingName)
-                  .SingleOrDefaultAsync()
-                  ?? throw ResponseStatusCode.NotFound.ToApiException();
+                  .SingleOrDefaultAsync();
+            if (current == null)
+                return NotFound();
             dbContext.UserSettings.Remove(current);
             await dbContext.SaveChangesAsync();
             return current.Value;

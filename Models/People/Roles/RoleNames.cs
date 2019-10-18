@@ -9,6 +9,7 @@
         CanEditEvent,
         CanEditEventType,
         CanInviteToSystem,
-        CanDeleteEventRole
+        CanDeleteEventRole,
+        CanEditUserPropertyTypes
     }
 }

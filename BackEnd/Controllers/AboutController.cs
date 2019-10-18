@@ -8,29 +8,30 @@ using Models.PublicAPI.Responses;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 using BackEnd.Models.Settings;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackEnd.Controllers
 {
+    /// <summary>
+    /// Controller for some information about server
+    /// </summary>
+    [AllowAnonymous]
     [Route("api/about")]
     public class AboutController : Controller
     {
-        // GET: api/values
-        [HttpGet]
-        public object Get()
-        {
+        private readonly IOptions<BuildInformation> buildInfo;
 
-            return new
-            {
-                StatusCode = Enum.GetNames(typeof(ResponseStatusCode))
-                                 .Select(n => new { name = n, code = (int)Enum.Parse(typeof(ResponseStatusCode), n) })
-            };
+        public AboutController(IOptions<BuildInformation> buildInfo)
+        {
+            this.buildInfo = buildInfo;
         }
+        /// <summary>
+        /// Get build information
+        /// </summary>
         [HttpGet("build")]
-        public BuildInformation GetBuild(
-            [FromServices]IOptions<BuildInformation> buildInfo)
+        public ActionResult<BuildInformation> GetBuild()
         {
             return buildInfo.Value;
         }
-
     }
 }

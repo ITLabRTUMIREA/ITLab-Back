@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "JSON Schema for build.json file",
+
+  "type": "object",
+  "properties": {
+    "BuildInformation": {
+      "type": "object",
+      "properties": {
+        "BuildId": { "type": "string" },
+        "BuildDateString": { "type": "string" }
+      },
+      "required": [ "BuildId", "BuildDateString" ]
+    }
+  },
+  "required": [ "BuildInformation" ]
+}
