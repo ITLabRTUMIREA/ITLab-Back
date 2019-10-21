@@ -1,7 +1,8 @@
 FROM microsoft/dotnet:2.1-aspnetcore-runtime
 
-RUN apt install libc6-dev 
-RUN apt install libgdiplus
+RUN apt-get update
+RUN apt-get install libc6-dev -y
+RUN apt-get install libgdiplus -y
 
 WORKDIR /app
 
