@@ -8,7 +8,7 @@ namespace BackEnd.Models.Settings
     /// <summary>
     /// Settings for notify service
     /// </summary>
-    public class NotifierSettings
+    public class HttpNotifierSettings
     {
         /// <summary>
         /// Host path for notify service

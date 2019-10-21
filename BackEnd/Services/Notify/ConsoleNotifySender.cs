@@ -8,19 +8,22 @@ using Newtonsoft.Json.Serialization;
 
 namespace BackEnd.Services.Notify
 {
-    class DebugLogNotifier : INotifier
+    class ConsoleNotifySender : INotifySender
     {
-        private readonly ILogger<DebugLogNotifier> logger;
+        private static readonly Task<bool> succesResult = Task.FromResult(true);
+        private readonly ILogger<ConsoleNotifySender> logger;
 
-        public DebugLogNotifier(ILogger<DebugLogNotifier> logger)
+        public ConsoleNotifySender(ILogger<ConsoleNotifySender> logger)
         {
             this.logger = logger;
         }
-        public void Notify(NotifyType notifyType, object data)
+
+        public Task<bool> TrySendNotify(NotifyType notifyType, object data)
         {
             var message = "Event Add New Event, content: \n"
                 + JsonConvert.SerializeObject(new { notifyType, data }, Newtonsoft.Json.Formatting.Indented);
             logger.LogInformation(message);
+            return succesResult;
         }
     }
 }
