@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using WebApp.Configure.Models.Configure.Interfaces;
 using Microsoft.Extensions.Options;
 using BackEnd.Models.Settings;
 using Models.People;
@@ -10,6 +9,7 @@ using Newtonsoft.Json;
 using Models.People.Roles;
 using System.Linq;
 using BackEnd.DataBase;
+using RTUITLab.AspNetCore.Configure.Configure.Interfaces;
 
 namespace BackEnd.Services.ConfigureServices
 {

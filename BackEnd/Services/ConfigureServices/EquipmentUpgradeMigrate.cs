@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using BackEnd.DataBase;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
-using WebApp.Configure.Models.Configure.Interfaces;
+using RTUITLab.AspNetCore.Configure.Configure.Interfaces;
 
 namespace BackEnd.Services.ConfigureServices
 {

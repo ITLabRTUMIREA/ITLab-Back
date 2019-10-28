@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.5" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.3.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
+    <PackageReference Include="RTUITLab.AspNetCore.Configure" Version="1.0.0.2" />
     <PackageReference Include="ServiceStack.Redis" Version="5.7.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="3.0.0" />
   </ItemGroup>
@@ -32,7 +33,6 @@
     <ProjectReference Include="..\Extensions\Extensions.csproj" />
     <ProjectReference Include="..\Models.PublicAPI\Models.PublicAPI.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
-    <ProjectReference Include="..\WebApp.Configure\WebApp.Configure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".DS_Store" />

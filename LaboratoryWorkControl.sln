@@ -18,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Configure", "WebApp.Configure\WebApp.Configure.csproj", "{CD724AC9-52D5-44CF-9460-BC4CFE22781F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{F81E39F1-CA68-41B1-AE3F-F095E66C6446}"
 EndProject
 Global
@@ -44,10 +42,6 @@ Global
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Release|Any CPU.ActiveCfg = Release|Any CPU
