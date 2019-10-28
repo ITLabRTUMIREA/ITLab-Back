@@ -73,9 +73,10 @@ namespace IdentityServer
             }
             else
             {
-                builder.AddSigningCredential(new X509Certificate2(
+                using var certificate = new X509Certificate2(
                     Configuration.GetValue<string>("ISKeyPath"),
-                    Configuration.GetValue<string>("ISKeyPassword")));
+                    Configuration.GetValue<string>("ISKeyPassword"));
+                builder.AddSigningCredential(certificate);
             }
 
             var corsOrigins = Configuration.GetSection("CORS:Origins").AsEnumerable().Skip(1).Select(kvp => kvp.Value).ToArray();
@@ -119,7 +120,6 @@ namespace IdentityServer
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {
