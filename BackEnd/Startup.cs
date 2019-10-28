@@ -24,11 +24,9 @@ using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
 using BackEnd.Models.Settings;
 using Models.People.Roles;
-using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
 using BackEnd.Services.Email;
 using BackEnd.Services.Notify;
-using WebApp.Configure.Models.Invokations;
 using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
@@ -41,6 +39,8 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using BackEnd.Formatting.MapperProfiles;
 using BackEnd.Services.Notify.Debug;
+using RTUITLab.AspNetCore.Configure.Configure;
+using RTUITLab.AspNetCore.Configure.Invokations;
 
 namespace BackEnd
 {
@@ -221,6 +221,7 @@ namespace BackEnd
                     services.Configure<RedisNotifierSettings>(Configuration.GetSection(nameof(RedisNotifierSettings)));
                     services.AddTransient<INotifySender, RedisNotifySender>();
                     break;
+                case "console":
                 default:
                     services.AddTransient<INotifySender, ConsoleNotifySender>();
                     break;

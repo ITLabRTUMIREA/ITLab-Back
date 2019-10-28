@@ -83,10 +83,10 @@ namespace BackEnd.Controllers.Events
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
                 .Events
+                .SelectMany(e => e.Shifts)
                 .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
                 .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
-                .SelectMany(e => e.Shifts)
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserEventRoles)
                 .Where(puer => puer.UserId == userId && puer.UserStatus == UserStatus.Accepted)

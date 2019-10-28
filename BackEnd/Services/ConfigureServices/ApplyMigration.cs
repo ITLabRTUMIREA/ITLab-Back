@@ -2,12 +2,12 @@
 using BackEnd.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RTUITLab.AspNetCore.Configure.Configure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using WebApp.Configure.Models.Configure.Interfaces;
 
 namespace BackEnd.Services.ConfigureServices
 {
