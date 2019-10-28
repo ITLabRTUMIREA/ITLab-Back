@@ -71,20 +71,3 @@ jobs:
     displayName: publish identity deploy folder
     inputs:
       ArtifactName: 'itlab-identity-deploy'
-
-- job: Nuget
-  pool:
-    name: Default
-  steps:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet pack'
-    inputs:
-      command: pack
-      packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
-      versioningScheme: byEnvVar
-      versionEnvVar: nuget_package_number
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: itlab-back-nuget'
-    inputs:
-      ArtifactName: 'itlab-back-nuget'
