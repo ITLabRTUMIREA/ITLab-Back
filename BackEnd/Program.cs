@@ -17,6 +17,7 @@ namespace BackEnd
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.ConfigureKestrel(options => options.AllowSynchronousIO = true);//TODO disallow
                     webBuilder.UseStartup<Startup>();
                 })
                 .UseConfigFile("appsettings.Secret.json")
