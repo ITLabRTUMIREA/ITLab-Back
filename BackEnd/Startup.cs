@@ -41,6 +41,7 @@ using BackEnd.Formatting.MapperProfiles;
 using BackEnd.Services.Notify.Debug;
 using RTUITLab.AspNetCore.Configure.Configure;
 using RTUITLab.AspNetCore.Configure.Invokations;
+using Microsoft.OpenApi.Models;
 
 namespace BackEnd
 {
@@ -73,13 +74,13 @@ namespace BackEnd
                      .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
                 options.Filters.Add(new ProducesAttribute("application/json"));
-            }).AddJsonOptions(options =>
+            }).AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                }
+                } 
             );
 
             services.AddAutoMapper(config =>config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
@@ -115,12 +116,12 @@ namespace BackEnd
             };
 
             services.AddAuthentication("Bearer")
-            .AddJwtBearer("Bearer", options =>
-            {
-                options.Authority = Configuration.GetValue<string>("Authority");
-                options.RequireHttpsMetadata = false;
-                options.Audience = "api1";
-            });
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = Configuration.GetValue<string>("Authority");
+                    options.RequireHttpsMetadata = false;
+                    options.Audience = "api1";
+                });
 
 
             services.AddIdentity<User, Role>(identityOptions =>
@@ -137,19 +138,19 @@ namespace BackEnd
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "IT Lab develop API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "IT Lab develop API", Version = "v1" });
                 c.AddSecurityDefinition("Bearer",
-                    new ApiKeyScheme
+                    new OpenApiSecurityScheme
                     {
-                        In = "header",
+                        In = ParameterLocation.Header,
                         Description = "Please enter into field the word 'Bearer' following by space and JWT",
                         Name = "Authorization",
-                        Type = "apiKey"
+                        Type = SecuritySchemeType.ApiKey
                     });
-                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                {
-                    { "Bearer", Enumerable.Empty<string>() }
-                });
+                //c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                //{
+                //    { "Bearer", Enumerable.Empty<string>() }
+                //});
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
@@ -239,8 +240,7 @@ namespace BackEnd
             app.UseCors(config =>
                 config.AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowAnyOrigin()
-                    .AllowCredentials());
+                    .AllowAnyOrigin());
             app.UseMetricsAllEndpoints();
             app.UseMetricsAllMiddleware();
             app.UseWebAppConfigure();
@@ -251,8 +251,12 @@ namespace BackEnd
                 c.RoutePrefix = "api";
             });
             app.UseExceptionHandlerMiddleware();
+            
+            app.UseRouting();
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
             app.UseSpaStaticFiles();
             app.UseSpa(spa => { });
         }

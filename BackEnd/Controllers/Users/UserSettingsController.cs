@@ -11,6 +11,7 @@ using Models.PublicAPI.Responses.People;
 using AutoMapper.QueryableExtensions;
 using System.Collections.Generic;
 using AutoMapper;
+using Newtonsoft.Json.Linq;
 
 namespace BackEnd.Controllers.Users
 {
@@ -40,12 +41,13 @@ namespace BackEnd.Controllers.Users
         [HttpGet("{settingName}")]
         public async Task<ActionResult<object>> GetSettingAsync(string settingName)
         {
-            var settings = (await dbContext
+            var settingsString = await dbContext
                            .UserSettings
                            .Where(s => s.UserId == UserId)
                            .Where(s => s.Title == settingName)
-                           .SingleOrDefaultAsync())
-                           ?.Value.ParseToJson();
+                           .Select(s => s.Value)
+                           .SingleOrDefaultAsync();
+            var settings = JToken.Parse(settingsString);
             if (settings == null)
                 return NotFound();
             return settings;

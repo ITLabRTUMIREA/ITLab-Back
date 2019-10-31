@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace BackEnd
 {
@@ -9,16 +10,16 @@ namespace BackEnd
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            CreateHostBuilder(args).Build().Run();
         }
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                })
                 .UseConfigFile("appsettings.Secret.json")
-                .UseConfigFile("build.json", true)
-                .ConfigureAppConfiguration(config => config
-                                           .AddCommandLine(args)
-                                           .AddEnvironmentVariables())
-                .UseStartup<Startup>()
-                .Build();
+                .UseConfigFile("build.json", true);
     }
 }

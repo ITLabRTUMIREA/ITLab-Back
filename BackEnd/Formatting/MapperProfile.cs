@@ -22,6 +22,7 @@ using BackEnd.Models;
 using Models.Events.Roles;
 using Models.People.Roles;
 using Models.PublicAPI.Responses.Event.Invitations;
+using Newtonsoft.Json.Linq;
 
 namespace BackEnd.Formatting
 {
@@ -119,7 +120,7 @@ namespace BackEnd.Formatting
                 .ForAllMembers(opt => opt.Condition(a =>
                     a.GetType().GetProperty(opt.DestinationMember.Name)?.GetValue(a) != null));
             CreateMap<UserSetting, UserSettingPresent>()
-                .ForMember(usp => usp.Value, map => map.MapFrom(us => us.Value.ParseToJson()));
+                .ForMember(usp => usp.Value, map => map.MapFrom(us => JToken.Parse(us.Value)));
         }
 
         private void EventEditMaps()

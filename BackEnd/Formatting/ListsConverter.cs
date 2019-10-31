@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Models.PublicAPI.Requests;
-using StackExchange.Redis;
 
 namespace BackEnd.Formatting
 {

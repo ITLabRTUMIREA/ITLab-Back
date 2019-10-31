@@ -6,9 +6,13 @@
 
   <ItemGroup>
     <Content Remove="appsettings.Secret.Example.json" />
+    <Content Remove="appsettings.Secret.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="appsettings.Secret.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
     <None Include="appsettings.Secret.Example.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
