@@ -78,8 +78,9 @@ namespace BackEnd.Controllers
                         personRow.CreateCell(columnNum++).SetCellValue("-");
                     else
                     {
-                        var role = puers.Select(puer => puer.EventRole.Title).Single();
-                        personRow.CreateCell(columnNum++).SetCellValue(role[0].ToString());
+                        var roles = puers.Select(puer => puer.EventRole.Title).ToList();
+                        var textForCell = roles.Count > 1 ? "ERROR" : roles[0].ToString();
+                        personRow.CreateCell(columnNum++).SetCellValue(textForCell);
                     }
                     rolesTableSheet.AutoSizeColumn(columnNum);
                 }
