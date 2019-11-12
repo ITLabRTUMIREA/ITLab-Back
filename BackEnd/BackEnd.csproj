@@ -26,7 +26,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.6.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.1" />
-    <PackageReference Include="RTUITLab.AspNetCore.Configure" Version="1.0.0.2" />
+    <PackageReference Include="RTUITLab.AspNetCore.Configure" Version="1.1.0.2" />
     <PackageReference Include="ServiceStack.Redis" Version="5.7.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />

@@ -174,7 +174,6 @@ namespace BackEnd
 
 
             services.AddWebAppConfigure()
-                .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
                 .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
                 .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
                 ;

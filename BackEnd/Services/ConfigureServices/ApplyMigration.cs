@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BackEnd.Services.ConfigureServices
@@ -25,7 +26,7 @@ namespace BackEnd.Services.ConfigureServices
             this.dbContext = dbContext;
             this.logger = logger;
         }
-        public async Task Configure()
+        public async Task Configure(CancellationToken cancellationToken)
         {
             try
             {
@@ -40,7 +41,7 @@ namespace BackEnd.Services.ConfigureServices
                 logger.LogWarning(ex, "Error while apply migrations");
                 tryCount--;
                 await Task.Delay(tryPeriod);
-                await Configure();
+                await Configure(cancellationToken);
             }
         }
     }

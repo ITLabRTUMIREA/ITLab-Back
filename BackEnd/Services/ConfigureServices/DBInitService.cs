@@ -10,6 +10,7 @@ using Models.People.Roles;
 using System.Linq;
 using BackEnd.DataBase;
 using RTUITLab.AspNetCore.Configure.Configure.Interfaces;
+using System.Threading;
 
 namespace BackEnd.Services.ConfigureServices
 {
@@ -35,7 +36,7 @@ namespace BackEnd.Services.ConfigureServices
             this.logger = logger;
         }
 
-        public async Task Configure()
+        public async Task Configure(CancellationToken cancellationToken)
         {
             if (options.Users?.Any() == true)
                 await CreateUsers();
