@@ -71,7 +71,7 @@ namespace BackEnd.Services.ConfigureServices
             foreach (var userPropertyName in Enum.GetValues(typeof(UserPropertyNames)).Cast<UserPropertyNames>())
             {
                 var internalName = userPropertyName.ToString();
-                var existing = dbContext.UserPropertyTypes.FirstOrDefaultAsync(upt => upt.InternalName == internalName);
+                var existing = await dbContext.UserPropertyTypes.FirstOrDefaultAsync(upt => upt.InternalName == internalName);
                 if (existing == null)
                 {
                     var newType = new UserPropertyType
@@ -94,7 +94,10 @@ namespace BackEnd.Services.ConfigureServices
                 var targetUser = await userManager.FindByEmailAsync(wantPair.Email);
                 var targetRole = await roleManager.FindByNameAsync(wantPair.RoleName);
                 if (targetUser == null || targetRole == null)
-                    throw new Exception($"Can't find user {wantPair.Email} or role {wantPair.RoleName}");
+                {
+                    logger.LogWarning($"Can't find user \"{wantPair.Email}\" or role \"{wantPair.RoleName}\"");
+                    continue;
+                }
                 if (await userManager.IsInRoleAsync(targetUser, targetRole.Name)) continue;
                 var result = await userManager.AddToRoleAsync(targetUser, targetRole.Name);
                 logger.LogInformation(JsonConvert.SerializeObject(result));
