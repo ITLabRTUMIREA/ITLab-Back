@@ -174,8 +174,8 @@ namespace BackEnd
 
 
             services.AddWebAppConfigure()
-                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
-                .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
+                .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"), 0)
+                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"), 1)
                 ;
 
             ConfigureNotify(services);
