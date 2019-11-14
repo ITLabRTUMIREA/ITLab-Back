@@ -84,8 +84,6 @@ namespace BackEnd.Services.ConfigureServices
                     var saved = await dbContext.SaveChangesAsync();
                     logger.LogInformation($"Added user property type {internalName}, saved: {saved}");
                 }
-                var result = await roleManager.CreateAsync(new Role { Name = userPropertyName.ToString() });
-                logger.LogInformation(JsonConvert.SerializeObject(result));
             }
         }
 
