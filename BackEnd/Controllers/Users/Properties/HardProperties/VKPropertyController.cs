@@ -54,6 +54,7 @@ namespace BackEnd.Controllers.Users.Properties.HardProperties
                 .SingleOrDefaultAsync(pt => pt.InternalName == UserPropertyNames.VKID.ToString());
             var vkProp = await dbContext
                 .UserProperties
+                .Where(up => up.UserPropertyTypeId == vkPropType.Id)
                 .Include(u => u.UserPropertyType)
                 .SingleOrDefaultAsync(up => up.UserId == userId);
 
