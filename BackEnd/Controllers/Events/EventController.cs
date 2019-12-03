@@ -213,6 +213,7 @@ namespace BackEnd.Controllers.Events
                     .ProjectTo<WisherEventView>(mapper.ConfigurationProvider)
                     .SingleOrDefaultAsync();
 
+        [Notify(NotifyType.EventReject)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/reject")]
         public async Task<ActionResult> RejectWish(Guid placeId, Guid userId)

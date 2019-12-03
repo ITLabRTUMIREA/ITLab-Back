@@ -8,6 +8,7 @@ namespace Models.PublicAPI.NotifyRequests
     {
         EventNew,
         EventChange,
-        EventConfirm
+        EventConfirm,
+        EventReject
     }
 }
