@@ -10,7 +10,7 @@ variables:
 jobs:
 - job: Backend
   pool:
-    name: Default
+    vmImage: 'ubuntu-latest'
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet publish'
@@ -42,7 +42,7 @@ jobs:
 
 - job: Identity
   pool:
-    name: Default
+    vmImage: 'ubuntu-latest'
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet publish'
