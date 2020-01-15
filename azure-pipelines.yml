@@ -26,7 +26,7 @@ jobs:
     displayName: 'fill build.json'
     inputs:
       fileoverwrite: true
-      filepath: 'BackEnd/build.json'
+      filepath: '$(Build.ArtifactStagingDirectory)/build.json'
       filecontent: |
         {
           "BuildInformation": {
