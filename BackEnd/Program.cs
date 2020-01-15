@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Extensions;
 using Microsoft.Extensions.Hosting;
+using BackEnd.Services.Interfaces;
 
 namespace BackEnd
 {

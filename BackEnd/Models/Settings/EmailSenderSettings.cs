@@ -3,6 +3,7 @@ namespace BackEnd.Models.Settings
 {
     public class EmailSenderSettings
     {
+        public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
         public string InvitationTemplateUrl { get; set; }

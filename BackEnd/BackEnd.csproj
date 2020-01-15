@@ -17,6 +17,7 @@
     <PackageReference Include="App.Metrics.Formatters.Prometheus" Version="3.2.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="DotNetCore.NPOI" Version="1.2.2" />
+    <PackageReference Include="MailKit" Version="2.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
