@@ -12,12 +12,20 @@ namespace BackEnd.Services.Email
 {
     public class EmailService : MailKitEmailService
     {
-        public EmailService(IOptions<EmailSenderSettings> options) : base(options)
+        private readonly ILogger<EmailService> logger;
+
+        public EmailService(
+            IOptions<EmailSenderSettings> options,
+            ILogger<EmailService> logger,
+            ILogger<MailKitEmailService> baseLogger
+            ) : base(options, baseLogger)
         {
+            this.logger = logger;
         }
 
         public override async Task SendInvitationEmail(string email, string url, string accessToken)
         {
+            logger.LogInformation($"Sending invitation email to {email}");
             var template = (await GetInvitationTemplate())
                 .Replace("%email%", email)
                 .Replace("%url%", url)
@@ -27,6 +35,7 @@ namespace BackEnd.Services.Email
 
         public override async Task SendResetPasswordEmail(string email, string url, string resetPassToken)
         {
+            logger.LogInformation($"Sending reset password email to {email}");
             var template = (await GetResetPasswordTemplate())
                 .Replace("%email%", email)
                 .Replace("%url%", url)

@@ -1,6 +1,7 @@
 ﻿using BackEnd.Models.Settings;
 using BackEnd.Services.Interfaces;
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using System;
@@ -13,10 +14,14 @@ namespace BackEnd.Services.Email
     public abstract class MailKitEmailService : IEmailSender
     {
         protected readonly EmailSenderSettings options;
+        private readonly ILogger<MailKitEmailService> logger;
 
-        public MailKitEmailService(IOptions<EmailSenderSettings> options)
+        public MailKitEmailService(
+            IOptions<EmailSenderSettings> options,
+            ILogger<MailKitEmailService> logger)
         {
             this.options = options.Value;
+            this.logger = logger;
         }
         public async Task SendEmailAsync(string email, string subject, string message)
         {
@@ -34,12 +39,16 @@ namespace BackEnd.Services.Email
 
             using (var client = new SmtpClient())
             {
-             //   client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                logger.LogDebug($"Connecting to smtp {options.SmtpHost}:{options.SmtpPort}");
+                //client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                 client.Connect(options.SmtpHost, options.SmtpPort, true);
+                logger.LogDebug($"Connected");
 
-                client.Authenticate(options.Email, options.Password);
+                await client.AuthenticateAsync(options.Email, options.Password);
+                logger.LogDebug($"Authenticated");
 
                 await client.SendAsync(mailMessage);
+                logger.LogDebug($"Sended");
                 await client.DisconnectAsync(true);
             }
         }
