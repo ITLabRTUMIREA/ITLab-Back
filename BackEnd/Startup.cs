@@ -268,16 +268,20 @@ namespace BackEnd
         }
         private Action<DbContextOptionsBuilder> GetOptionsBuilder(DbType dbType)
         {
+            var migrationAssymply = typeof(DataBaseContext).GetTypeInfo().Assembly.GetName().Name;
             switch (dbType)
             {
                 case DbType.SQL_SERVER_REMOTE:
-                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_REMOTE)));
+                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_REMOTE)),
+                        builder => builder.MigrationsAssembly(migrationAssymply));
                 case DbType.SQL_SERVER_LOCAL:
-                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_LOCAL)));
+                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_LOCAL)),
+                        builder => builder.MigrationsAssembly(migrationAssymply));
                 case DbType.IN_MEMORY:
                     return options => options.UseInMemoryDatabase(nameof(DbType.IN_MEMORY));
                 case DbType.POSTGRES_LOCAL:
-                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES_LOCAL)));
+                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES_LOCAL)),
+                        builder => builder.MigrationsAssembly(migrationAssymply));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
             }
