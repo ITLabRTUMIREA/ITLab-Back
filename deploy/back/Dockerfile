@@ -12,7 +12,7 @@ COPY ITLab-Front/itlab-front-build ./wwwroot/
 # For NPOI
 RUN apt-get update && apt-get install -y --allow-unauthenticated libgdiplus libc6-dev libx11-dev xvfb && ln -s /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 ENV DISPLAY :10
-COPY xvfb.init /etc/init.d/xvfb
+COPY ITLab-Back/itlab-back-deploy/xvfb.init /etc/init.d/xvfb
 # Removes any windows line endings because linux can`t start the service in this case
 RUN sed -i -e 's/\r//g' /etc/init.d/xvfb
 RUN chmod +x /etc/init.d/xvfb
