@@ -18,4 +18,4 @@ RUN sed -i -e 's/\r//g' /etc/init.d/xvfb
 RUN chmod +x /etc/init.d/xvfb
 RUN update-rc.d xvfb defaults
 
-CMD ["service xvfb start;", "dotnet", "BackEnd.dll"]
+CMD service xvfb start ; dotnet BackEnd.dll
