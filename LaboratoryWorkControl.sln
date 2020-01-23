@@ -11,28 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "Extensions\Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29A07F1F-4893-45FE-80B8-968FAC4C062D}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		azure-pipelines.yml = azure-pipelines.yml
-		README.md = README.md
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{F81E39F1-CA68-41B1-AE3F-F095E66C6446}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{D5165ED4-6BCB-4EE5-86B3-D1F960C9BD0F}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "back", "back", "{A9E501C7-391E-4226-8C6C-528F5672AFC2}"
-	ProjectSection(SolutionItems) = preProject
-		deploy\back\Dockerfile = deploy\back\Dockerfile
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "identity", "identity", "{ABF006EB-75D3-4470-B71C-EA9CB39DF5CC}"
-	ProjectSection(SolutionItems) = preProject
-		deploy\identity\Dockerfile = deploy\identity\Dockerfile
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{69600FAD-629C-4302-B00D-1824D583C0E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{69600FAD-629C-4302-B00D-1824D583C0E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,11 +48,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{D5165ED4-6BCB-4EE5-86B3-D1F960C9BD0F} = {29A07F1F-4893-45FE-80B8-968FAC4C062D}
-		{A9E501C7-391E-4226-8C6C-528F5672AFC2} = {D5165ED4-6BCB-4EE5-86B3-D1F960C9BD0F}
-		{ABF006EB-75D3-4470-B71C-EA9CB39DF5CC} = {D5165ED4-6BCB-4EE5-86B3-D1F960C9BD0F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0F4058AD-9454-4569-A0BC-4CE525EC7702}
