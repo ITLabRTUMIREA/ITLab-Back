@@ -8,6 +8,25 @@ variables:
   nuget_package_number: '1.1.$(Build.BuildId)'
 
 jobs:
+
+- job: Database
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'pack'
+      packagesToPack: 'Database/Database.csproj'
+      versioningScheme: 'byPrereleaseNumber'
+      majorVersion: '1'
+      minorVersion: '0'
+      patchVersion: '0'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'itlab-database-nuget'
+      publishLocation: 'Container'
+
 - job: Backend
   pool:
     vmImage: 'ubuntu-latest'
