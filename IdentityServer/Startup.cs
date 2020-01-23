@@ -40,7 +40,8 @@ namespace IdentityServer
             else
             {
                 services.AddDbContext<DataBaseContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                        builder => builder.MigrationsAssembly(nameof(DataBase))));
             }
 
             services.AddIdentity<User, Role>()
