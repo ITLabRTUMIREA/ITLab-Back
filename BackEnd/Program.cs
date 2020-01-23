@@ -22,7 +22,7 @@ namespace BackEnd
                     webBuilder.ConfigureKestrel(options => options.AllowSynchronousIO = true);//TODO disallow
                     webBuilder.UseStartup<Startup>();
                 })
-                .UseConfigFile("appsettings.Secret.json")
+                .UseConfigFile("appsettings.Secret.json", optional: true)
                 .UseConfigFile("build.json", true);
     }
 }
