@@ -40,8 +40,8 @@ namespace IdentityServer
             else
             {
                 services.AddDbContext<DataBaseContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
-                        builder => builder.MigrationsAssembly(nameof(DataBase))));
+                    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
+                        builder => builder.MigrationsAssembly(nameof(BackEnd.DataBase))));
             }
 
             services.AddIdentity<User, Role>()

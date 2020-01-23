@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace DataBase.Migrations.Production
+namespace Database.Migrations.Postgres
 {
-    public partial class SelectEvents : Migration
+    public partial class PostgresMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,9 +13,9 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ConcurrencyStamp = table.Column<string>(nullable: true),
                     Name = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(maxLength: 256, nullable: true)
+                    NormalizedName = table.Column<string>(maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -28,22 +27,23 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false),
-                    ConcurrencyStamp = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(nullable: false),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    LockoutEnabled = table.Column<bool>(nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    UserName = table.Column<string>(maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(nullable: false),
                     PasswordHash = table.Column<string>(nullable: true),
+                    SecurityStamp = table.Column<string>(nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
-                    SecurityStamp = table.Column<string>(nullable: true),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
-                    UserName = table.Column<string>(maxLength: 256, nullable: true)
+                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
+                    LockoutEnabled = table.Column<bool>(nullable: false),
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    FirstName = table.Column<string>(nullable: true),
+                    LastName = table.Column<string>(nullable: true),
+                    MiddleName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,12 +55,42 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    ShortTitle = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Title = table.Column<string>(nullable: true)
+                    LastNumber = table.Column<int>(nullable: false),
+                    RootId = table.Column<Guid>(nullable: true),
+                    ParentId = table.Column<Guid>(nullable: true),
+                    Deep = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EquipmentTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EquipmentTypes_EquipmentTypes_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "EquipmentTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_EquipmentTypes_EquipmentTypes_RootId",
+                        column: x => x.RootId,
+                        principalTable: "EquipmentTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EventRoles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EventRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -68,8 +98,8 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    Title = table.Column<string>(nullable: true)
+                    Title = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -77,14 +107,42 @@ namespace DataBase.Migrations.Production
                 });
 
             migrationBuilder.CreateTable(
+                name: "RegisterTokenPairs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Email = table.Column<string>(nullable: true),
+                    Token = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RegisterTokenPairs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserPropertyTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    InternalName = table.Column<string>(nullable: false),
+                    PublicName = table.Column<string>(nullable: false, defaultValue: "Не определено"),
+                    Description = table.Column<string>(nullable: true),
+                    DefaultStatus = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPropertyTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoleId = table.Column<Guid>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
-                    ClaimValue = table.Column<string>(nullable: true),
-                    RoleId = table.Column<Guid>(nullable: false)
+                    ClaimValue = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -102,10 +160,10 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
-                    ClaimValue = table.Column<string>(nullable: true),
-                    UserId = table.Column<Guid>(nullable: false)
+                    ClaimValue = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -183,13 +241,34 @@ namespace DataBase.Migrations.Production
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Token = table.Column<string>(nullable: true),
+                    CreateTime = table.Column<DateTime>(nullable: false),
+                    UserAgent = table.Column<string>(nullable: true),
+                    UserId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserSettings",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Title = table.Column<string>(nullable: true),
-                    UserId = table.Column<Guid>(nullable: false),
-                    Value = table.Column<string>(nullable: true)
+                    Value = table.Column<string>(nullable: true),
+                    UserId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,9 +286,12 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    SerialNumber = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Number = table.Column<int>(nullable: false),
+                    ParentId = table.Column<Guid>(nullable: true),
                     EquipmentTypeId = table.Column<Guid>(nullable: false),
-                    OwnerId = table.Column<Guid>(nullable: true),
-                    SerialNumber = table.Column<string>(nullable: true)
+                    OwnerId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -226,6 +308,12 @@ namespace DataBase.Migrations.Production
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Equipments_Equipments_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Equipments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -234,10 +322,11 @@ namespace DataBase.Migrations.Production
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Address = table.Column<string>(nullable: true),
-                    BeginTime = table.Column<DateTime>(nullable: false),
+                    Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    EventTypeId = table.Column<Guid>(nullable: false),
-                    Title = table.Column<string>(nullable: true)
+                    BeginTime = table.Column<DateTime>(nullable: false),
+                    EndTime = table.Column<DateTime>(nullable: false),
+                    EventTypeId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -251,12 +340,40 @@ namespace DataBase.Migrations.Production
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserProperties",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Value = table.Column<string>(nullable: true),
+                    Status = table.Column<int>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    UserPropertyTypeId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProperties", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserProperties_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserProperties_UserPropertyTypes_UserPropertyTypeId",
+                        column: x => x.UserPropertyTypeId,
+                        principalTable: "UserPropertyTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Shift",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     BeginTime = table.Column<DateTime>(nullable: false),
                     EndTime = table.Column<DateTime>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
                     EventId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
@@ -275,8 +392,9 @@ namespace DataBase.Migrations.Production
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ShiftId = table.Column<Guid>(nullable: false),
-                    TargetParticipantsCount = table.Column<int>(nullable: false)
+                    TargetParticipantsCount = table.Column<int>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    ShiftId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -293,8 +411,8 @@ namespace DataBase.Migrations.Production
                 name: "PlaceEquipment",
                 columns: table => new
                 {
-                    EquipmentId = table.Column<Guid>(nullable: false),
-                    PlaceId = table.Column<Guid>(nullable: false)
+                    PlaceId = table.Column<Guid>(nullable: false),
+                    EquipmentId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -314,30 +432,33 @@ namespace DataBase.Migrations.Production
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaceUserRole",
+                name: "PlaceUserEventRole",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(nullable: false),
                     PlaceId = table.Column<Guid>(nullable: false),
-                    RoleId = table.Column<Guid>(nullable: false)
+                    UserId = table.Column<Guid>(nullable: false),
+                    EventRoleId = table.Column<Guid>(nullable: false),
+                    UserStatus = table.Column<int>(nullable: false),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    DoneTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlaceUserRole", x => new { x.UserId, x.PlaceId });
+                    table.PrimaryKey("PK_PlaceUserEventRole", x => new { x.UserId, x.PlaceId });
                     table.ForeignKey(
-                        name: "FK_PlaceUserRole_Place_PlaceId",
+                        name: "FK_PlaceUserEventRole_EventRoles_EventRoleId",
+                        column: x => x.EventRoleId,
+                        principalTable: "EventRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PlaceUserEventRole_Place_PlaceId",
                         column: x => x.PlaceId,
                         principalTable: "Place",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlaceUserRole_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PlaceUserRole_AspNetUsers_UserId",
+                        name: "FK_PlaceUserEventRole_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -353,8 +474,7 @@ namespace DataBase.Migrations.Production
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -380,8 +500,7 @@ namespace DataBase.Migrations.Production
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Equipments_EquipmentTypeId",
@@ -392,6 +511,21 @@ namespace DataBase.Migrations.Production
                 name: "IX_Equipments_OwnerId",
                 table: "Equipments",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Equipments_ParentId",
+                table: "Equipments",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EquipmentTypes_ParentId",
+                table: "EquipmentTypes",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EquipmentTypes_RootId",
+                table: "EquipmentTypes",
+                column: "RootId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Events_EventTypeId",
@@ -409,19 +543,40 @@ namespace DataBase.Migrations.Production
                 column: "PlaceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaceUserRole_PlaceId",
-                table: "PlaceUserRole",
+                name: "IX_PlaceUserEventRole_EventRoleId",
+                table: "PlaceUserEventRole",
+                column: "EventRoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaceUserEventRole_PlaceId",
+                table: "PlaceUserEventRole",
                 column: "PlaceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaceUserRole_RoleId",
-                table: "PlaceUserRole",
-                column: "RoleId");
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shift_EventId",
                 table: "Shift",
                 column: "EventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserProperties_UserId",
+                table: "UserProperties",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserProperties_UserPropertyTypeId",
+                table: "UserProperties",
+                column: "UserPropertyTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPropertyTypes_InternalName",
+                table: "UserPropertyTypes",
+                column: "InternalName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSettings_UserId",
@@ -450,19 +605,34 @@ namespace DataBase.Migrations.Production
                 name: "PlaceEquipment");
 
             migrationBuilder.DropTable(
-                name: "PlaceUserRole");
+                name: "PlaceUserEventRole");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "RegisterTokenPairs");
+
+            migrationBuilder.DropTable(
+                name: "UserProperties");
 
             migrationBuilder.DropTable(
                 name: "UserSettings");
 
             migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
                 name: "Equipments");
+
+            migrationBuilder.DropTable(
+                name: "EventRoles");
 
             migrationBuilder.DropTable(
                 name: "Place");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "UserPropertyTypes");
 
             migrationBuilder.DropTable(
                 name: "EquipmentTypes");
