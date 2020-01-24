@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>RTUITLab.ITLab.Extensions</PackageId>
-    <Authors>CAPCHIK</Authors>
+    <PackageId>RTUITLab.ITLabBack.Extensions</PackageId>
+    <Authors>RTRUITLab</Authors>
     <PackageProjectUrl>https://github.com/ITLabRTUMIREA/ITLab-Back</PackageProjectUrl>
     <Title>RTUITLab.ITLab.Extensions</Title>
-    <Description>Extensions library with cool features</Description>
+    <Description></Description>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
