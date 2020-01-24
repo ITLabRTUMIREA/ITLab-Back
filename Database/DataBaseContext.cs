@@ -14,10 +14,11 @@ using Models.People;
 using Models.Events.Roles;
 using Models.People.Roles;
 using Models.People.UserProperties;
+using Models.Identity;
 
 namespace BackEnd.DataBase
 {
-    public class DataBaseContext : IdentityDbContext<User, Role, Guid>
+    public class DataBaseContext : IdentityDbContext<User, Role, Guid, UserIdentityUserClaim, UserIdentityUserRole, UserIdentityUserLogin, UserIdentityRoleClaim, UserIdentityUserToken>
     {
         public DbSet<EquipmentType> EquipmentTypes { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
