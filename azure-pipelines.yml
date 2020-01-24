@@ -16,7 +16,7 @@ jobs:
   - task: DotNetCoreCLI@2
     inputs:
       command: 'pack'
-      packagesToPack: 'Database/Database.csproj'
+      packagesToPack: 'Database/Database.csproj;Models/Models.csproj;Extensions/Extensions.csproj'
       versioningScheme: 'byPrereleaseNumber'
       majorVersion: '1'
       minorVersion: '0'
