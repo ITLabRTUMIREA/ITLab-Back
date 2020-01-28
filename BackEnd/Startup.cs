@@ -71,6 +71,7 @@ namespace BackEnd
                 var policy = new AuthorizationPolicyBuilder()
                      .RequireAuthenticatedUser()
                      .AddAuthenticationSchemes("Bearer")
+                     .RequireClaim("scope", "itlab.events")
                      .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
                 options.Filters.Add(new ProducesAttribute("application/json"));
@@ -120,7 +121,7 @@ namespace BackEnd
                 {
                     options.Authority = Configuration.GetValue<string>("Authority");
                     options.RequireHttpsMetadata = false;
-                    options.Audience = "api1";
+                    options.Audience = "itlab";
                 });
 
 
