@@ -83,10 +83,10 @@ namespace BackEnd.Controllers.Events
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
                 .Events
+                .SelectMany(e => e.Shifts)
                 .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
                 .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
-                .SelectMany(e => e.Shifts)
                 .SelectMany(s => s.Places)
                 .SelectMany(p => p.PlaceUserEventRoles)
                 .Where(puer => puer.UserId == userId && puer.UserStatus == UserStatus.Accepted)
@@ -213,6 +213,7 @@ namespace BackEnd.Controllers.Events
                     .ProjectTo<WisherEventView>(mapper.ConfigurationProvider)
                     .SingleOrDefaultAsync();
 
+        [Notify(NotifyType.EventReject)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost("wish/{placeId:guid}/{userId:guid}/reject")]
         public async Task<ActionResult> RejectWish(Guid placeId, Guid userId)

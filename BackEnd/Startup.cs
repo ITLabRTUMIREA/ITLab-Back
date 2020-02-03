@@ -24,11 +24,9 @@ using Newtonsoft.Json.Serialization;
 using BackEnd.Models;
 using BackEnd.Models.Settings;
 using Models.People.Roles;
-using WebApp.Configure.Models;
 using BackEnd.Services.ConfigureServices;
 using BackEnd.Services.Email;
 using BackEnd.Services.Notify;
-using WebApp.Configure.Models.Invokations;
 using BackEnd.Services.UserProperties;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
@@ -41,6 +39,9 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using BackEnd.Formatting.MapperProfiles;
 using BackEnd.Services.Notify.Debug;
+using RTUITLab.AspNetCore.Configure.Configure;
+using RTUITLab.AspNetCore.Configure.Invokations;
+using Microsoft.OpenApi.Models;
 
 namespace BackEnd
 {
@@ -70,16 +71,17 @@ namespace BackEnd
                 var policy = new AuthorizationPolicyBuilder()
                      .RequireAuthenticatedUser()
                      .AddAuthenticationSchemes("Bearer")
+                     .RequireClaim("scope", "itlab.events")
                      .Build();
                 options.Filters.Add(new AuthorizeFilter(policy));
                 options.Filters.Add(new ProducesAttribute("application/json"));
-            }).AddJsonOptions(options =>
+            }).AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                }
+                } 
             );
 
             services.AddAutoMapper(config =>config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
@@ -115,12 +117,12 @@ namespace BackEnd
             };
 
             services.AddAuthentication("Bearer")
-            .AddJwtBearer("Bearer", options =>
-            {
-                options.Authority = Configuration.GetValue<string>("Authority");
-                options.RequireHttpsMetadata = false;
-                options.Audience = "api1";
-            });
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = Configuration.GetValue<string>("Authority");
+                    options.RequireHttpsMetadata = false;
+                    options.Audience = "itlab";
+                });
 
 
             services.AddIdentity<User, Role>(identityOptions =>
@@ -137,19 +139,19 @@ namespace BackEnd
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "IT Lab develop API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "IT Lab develop API", Version = "v1" });
                 c.AddSecurityDefinition("Bearer",
-                    new ApiKeyScheme
+                    new OpenApiSecurityScheme
                     {
-                        In = "header",
+                        In = ParameterLocation.Header,
                         Description = "Please enter into field the word 'Bearer' following by space and JWT",
                         Name = "Authorization",
-                        Type = "apiKey"
+                        Type = SecuritySchemeType.ApiKey
                     });
-                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                {
-                    { "Bearer", Enumerable.Empty<string>() }
-                });
+                //c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                //{
+                //    { "Bearer", Enumerable.Empty<string>() }
+                //});
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
@@ -173,9 +175,8 @@ namespace BackEnd
 
 
             services.AddWebAppConfigure()
-                .AddTransientConfigure<EquipmentUpgradeMigrate>(Configuration.GetValue<bool>(EquipmentUpgradeMigrate.ConditionKey))
-                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"))
-                .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"))
+                .AddTransientConfigure<ApplyMigration>(Configuration.GetValue<bool>("MIGRATE"), 0)
+                .AddTransientConfigure<DBInitService>(Configuration.GetValue<bool>("DB_INIT"), 1)
                 ;
 
             ConfigureNotify(services);
@@ -221,6 +222,7 @@ namespace BackEnd
                     services.Configure<RedisNotifierSettings>(Configuration.GetSection(nameof(RedisNotifierSettings)));
                     services.AddTransient<INotifySender, RedisNotifySender>();
                     break;
+                case "console":
                 default:
                     services.AddTransient<INotifySender, ConsoleNotifySender>();
                     break;
@@ -238,8 +240,7 @@ namespace BackEnd
             app.UseCors(config =>
                 config.AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowAnyOrigin()
-                    .AllowCredentials());
+                    .AllowAnyOrigin());
             app.UseMetricsAllEndpoints();
             app.UseMetricsAllMiddleware();
             app.UseWebAppConfigure();
@@ -250,8 +251,12 @@ namespace BackEnd
                 c.RoutePrefix = "api";
             });
             app.UseExceptionHandlerMiddleware();
+            
+            app.UseRouting();
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
             app.UseSpaStaticFiles();
             app.UseSpa(spa => { });
         }
@@ -264,16 +269,20 @@ namespace BackEnd
         }
         private Action<DbContextOptionsBuilder> GetOptionsBuilder(DbType dbType)
         {
+            var migrationAssymply = typeof(DataBaseContext).GetTypeInfo().Assembly.GetName().Name;
             switch (dbType)
             {
                 case DbType.SQL_SERVER_REMOTE:
-                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_REMOTE)));
+                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_REMOTE)),
+                        builder => builder.MigrationsAssembly(migrationAssymply));
                 case DbType.SQL_SERVER_LOCAL:
-                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_LOCAL)));
+                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_LOCAL)),
+                        builder => builder.MigrationsAssembly(migrationAssymply));
                 case DbType.IN_MEMORY:
                     return options => options.UseInMemoryDatabase(nameof(DbType.IN_MEMORY));
                 case DbType.POSTGRES_LOCAL:
-                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES_LOCAL)));
+                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES_LOCAL)),
+                        builder => builder.MigrationsAssembly(migrationAssymply));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
             }

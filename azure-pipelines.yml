@@ -8,9 +8,28 @@ variables:
   nuget_package_number: '1.1.$(Build.BuildId)'
 
 jobs:
+
+- job: Database
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'pack'
+      packagesToPack: 'Database/Database.csproj;Models/Models.csproj;Extensions/Extensions.csproj'
+      versioningScheme: 'byPrereleaseNumber'
+      majorVersion: '1'
+      minorVersion: '0'
+      patchVersion: '0'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'itlab-database-nuget'
+      publishLocation: 'Container'
+
 - job: Backend
   pool:
-    name: Default
+    vmImage: 'ubuntu-latest'
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'dotnet publish'
@@ -21,6 +40,19 @@ jobs:
       arguments: '-o $(Build.ArtifactStagingDirectory)'
       zipAfterPublish: false
       modifyOutputPath: false
+
+  - task: file-creator@5
+    displayName: 'fill build.json'
+    inputs:
+      fileoverwrite: true
+      filepath: '$(Build.ArtifactStagingDirectory)/build.json'
+      filecontent: |
+        {
+          "BuildInformation": {
+            "BuildId": "$(Build.BuildId)",
+            "BuildDateString": "01.07.2019"
+          }
+        }
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: itlab-back-build'
@@ -40,51 +72,3 @@ jobs:
     inputs:
       ArtifactName: 'itlab-back-deploy'
 
-- job: Identity
-  pool:
-    name: Default
-  steps:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet publish'
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: IdentityServer/IdentityServer.csproj
-      arguments: '-o $(Build.ArtifactStagingDirectory)'
-      zipAfterPublish: false
-      modifyOutputPath: false
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: itlab-identity-build'
-    inputs:
-      ArtifactName: 'itlab-identity-build'
-
-  - task: CopyFiles@2
-    displayName: Copy deploy folder
-    inputs:
-      SourceFolder: deploy/identity/
-      Contents: '**'
-      TargetFolder: $(Build.ArtifactStagingDirectory)
-      CleanTargetFolder: true
-
-  - task: PublishBuildArtifacts@1
-    displayName: publish identity deploy folder
-    inputs:
-      ArtifactName: 'itlab-identity-deploy'
-
-- job: Nuget
-  pool:
-    name: Default
-  steps:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet pack'
-    inputs:
-      command: pack
-      packagesToPack: '**/Models.PublicAPI.csproj;**/Extensions.csproj'
-      versioningScheme: byEnvVar
-      versionEnvVar: nuget_package_number
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: itlab-back-nuget'
-    inputs:
-      ArtifactName: 'itlab-back-nuget'

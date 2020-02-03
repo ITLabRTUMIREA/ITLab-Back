@@ -1,45 +1,31 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using BackEnd.Models.Settings;
 using BackEnd.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace BackEnd.Services.Email
 {
-    public class EmailService : IEmailSender
+    public class EmailService : MailKitEmailService
     {
-        private readonly EmailSenderSettings options;
+        private readonly ILogger<EmailService> logger;
 
-        public EmailService(IOptions<EmailSenderSettings> options)
+        public EmailService(
+            IOptions<EmailSenderSettings> options,
+            ILogger<EmailService> logger,
+            ILogger<MailKitEmailService> baseLogger
+            ) : base(options, baseLogger)
         {
-            this.options = options.Value;
+            this.logger = logger;
         }
 
-        public async Task SendEmailAsync(string email, string subject, string message)
+        public override async Task SendInvitationEmail(string email, string url, string accessToken)
         {
-            MailMessage mail = new MailMessage
-            {
-                From = new MailAddress(options.Email),
-                IsBodyHtml = true
-            };
-            mail.To.Add(new MailAddress(email));
-            mail.Subject = subject;
-            mail.Body = message;
-
-            SmtpClient client = new SmtpClient
-            {
-                Host = options.SmtpHost,
-                Port = options.SmtpPort,
-                EnableSsl = true,
-                Credentials = new NetworkCredential(options.Email, options.Password)
-            };
-            
-            await client.SendMailAsync(mail);
-        }
-        public async Task SendInvitationEmail(string email, string url, string accessToken)
-        {
+            logger.LogInformation($"Sending invitation email to {email}");
             var template = (await GetInvitationTemplate())
                 .Replace("%email%", email)
                 .Replace("%url%", url)
@@ -47,8 +33,9 @@ namespace BackEnd.Services.Email
             await SendEmailAsync(email, "Приглашение на регистрацию", template);
         }
 
-        public async Task SendResetPasswordEmail(string email, string url, string resetPassToken)
+        public override async Task SendResetPasswordEmail(string email, string url, string resetPassToken)
         {
+            logger.LogInformation($"Sending reset password email to {email}");
             var template = (await GetResetPasswordTemplate())
                 .Replace("%email%", email)
                 .Replace("%url%", url)

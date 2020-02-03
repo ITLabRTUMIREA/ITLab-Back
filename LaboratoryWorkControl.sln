@@ -11,16 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "Extensions\Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29A07F1F-4893-45FE-80B8-968FAC4C062D}"
-	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
-		azure-pipelines.yml = azure-pipelines.yml
-		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Configure", "WebApp.Configure\WebApp.Configure.csproj", "{CD724AC9-52D5-44CF-9460-BC4CFE22781F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{F81E39F1-CA68-41B1-AE3F-F095E66C6446}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{69600FAD-629C-4302-B00D-1824D583C0E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,14 +37,14 @@ Global
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD724AC9-52D5-44CF-9460-BC4CFE22781F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69600FAD-629C-4302-B00D-1824D583C0E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69600FAD-629C-4302-B00D-1824D583C0E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69600FAD-629C-4302-B00D-1824D583C0E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69600FAD-629C-4302-B00D-1824D583C0E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
