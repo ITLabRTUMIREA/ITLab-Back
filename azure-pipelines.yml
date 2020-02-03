@@ -72,34 +72,3 @@ jobs:
     inputs:
       ArtifactName: 'itlab-back-deploy'
 
-- job: Identity
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet publish'
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: IdentityServer/IdentityServer.csproj
-      arguments: '-o $(Build.ArtifactStagingDirectory)'
-      zipAfterPublish: false
-      modifyOutputPath: false
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: itlab-identity-build'
-    inputs:
-      ArtifactName: 'itlab-identity-build'
-
-  - task: CopyFiles@2
-    displayName: Copy deploy folder
-    inputs:
-      SourceFolder: deploy/identity/
-      Contents: '**'
-      TargetFolder: $(Build.ArtifactStagingDirectory)
-      CleanTargetFolder: true
-
-  - task: PublishBuildArtifacts@1
-    displayName: publish identity deploy folder
-    inputs:
-      ArtifactName: 'itlab-identity-deploy'
