@@ -67,6 +67,29 @@ namespace BackEnd.Controllers.Events
         }
 
         /// <summary>
+        /// Get events ids list
+        /// </summary>
+        /// <param name="begin">Biggest end time. If not defined end time equals infinity</param>
+        /// <param name="end">Smallest begin time. If not defined begin time equals zero</param>
+        /// <returns>List of events</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Incorrect begin or end parameter format</response>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [HttpGet("ids")]
+        public async Task<ActionResult<List<Guid>>> GetIds(DateTime? begin, DateTime? end)
+        {
+            end = end == DateTime.MinValue ? DateTime.MaxValue : end;
+            return await eventsManager
+                .Events
+                .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
+                .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
+                .Select(ev => ev.Id)
+                .ToListAsync();
+        }
+
+
+        /// <summary>
         /// Get events list for specific user
         /// </summary>
         /// <param name="userId">Id of finding user</param>
