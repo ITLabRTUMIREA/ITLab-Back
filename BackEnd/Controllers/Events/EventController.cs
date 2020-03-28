@@ -20,6 +20,7 @@ using Models.People.Roles;
 using Models.PublicAPI.NotifyRequests;
 using Models.PublicAPI.Responses.Event.Invitations;
 using System.Collections.Generic;
+using Models.PublicAPI.Responses.Event.CreateEdit;
 
 namespace BackEnd.Controllers.Events
 {
@@ -174,20 +175,30 @@ namespace BackEnd.Controllers.Events
             return targetEvent;
         }
 
+        /// <summary>
+        /// Create new event
+        /// </summary>
+        /// <param name="request">New event information</param>
+        /// <returns></returns>
         [Notify(NotifyType.EventNew)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost]
-        public async Task<ActionResult<EventView>> PostAsync([FromBody] EventCreateRequest request)
+        public async Task<ActionResult<CreateEditEventView>> PostAsync([FromBody] EventCreateRequest request)
             => await (await eventsManager.AddAsync(request))
-                .ProjectTo<EventView>(mapper.ConfigurationProvider)
+                .ProjectTo<CreateEditEventView>(mapper.ConfigurationProvider)
                 .SingleAsync();
 
+        /// <summary>
+        /// Edit exists event
+        /// </summary>
+        /// <param name="request">New info about event</param>
+        /// <returns></returns>
         [Notify(NotifyType.EventChange)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPut]
-        public async Task<ActionResult<EventView>> PutAsync([FromBody] EventEditRequest request)
+        public async Task<ActionResult<CreateEditEventView>> PutAsync([FromBody] EventEditRequest request)
             => await (await eventsManager.EditAsync(request))
-                .ProjectTo<EventView>(mapper.ConfigurationProvider)
+                .ProjectTo<CreateEditEventView>(mapper.ConfigurationProvider)
                 .SingleAsync();
 
         [RequireRole(RoleNames.CanEditEvent)]

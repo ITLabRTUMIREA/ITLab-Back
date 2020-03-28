@@ -6,6 +6,7 @@ namespace Models.PublicAPI.Requests.Events.Event.Create
 {
     public class PlaceCreateRequest
     {
+        public int ClientId { get; set; }
         [CompareWith(0, Criterion.MoreOrEqual)]
         public int TargetParticipantsCount { get; set; }
         public List<Guid> Equipment { get; set; } = new List<Guid>();

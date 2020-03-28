@@ -1,23 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json.Serialization;
 
-namespace Models.Events
+namespace Models.PublicAPI.Responses.Event.CreateEdit
 {
-    public class Shift
+    public class CreateEditShiftView
     {
         public Guid Id { get; set; }
         public int ClientId { get; set; }
         public DateTime BeginTime { get; set; }
         public DateTime EndTime { get; set; }
-
-        public List<Place> Places { get; set; }
-            = new List<Place>();
-
         public string Description { get; set; }
 
-        public Event Event { get; set; }
-        public Guid EventId { get; set; }
+        public List<CreateEditPlaceView> Places { get; set; }
     }
 }

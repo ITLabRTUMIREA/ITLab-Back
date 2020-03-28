@@ -7,6 +7,7 @@ namespace Models.PublicAPI.Requests.Events.Event.Edit
 {
     public class PlaceEditRequest : DeletableRequest
     {
+        public int ClientId { get; set; }
         [CompareWith(0, Criterion.MoreOrEqual)]
         public int TargetParticipantsCount { get; set; }
         public List<DeletableRequest> Equipment { get; set; } = new List<DeletableRequest>();
