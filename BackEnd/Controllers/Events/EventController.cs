@@ -88,13 +88,9 @@ namespace BackEnd.Controllers.Events
             DateTime? begin,
             DateTime? end)
         {
-            if (!HttpContext.Request.Headers.TryGetValue("DocsGenKey", out var token))
+            if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var token) || token != options.Value.AccessToken)
             {
                 return Unauthorized("Need documents generation secret string");
-            }
-            if (token != options.Value.AccessToken)
-            {
-                return Forbid("Invalid access token");
             }
             end = end == DateTime.MinValue ? DateTime.MaxValue : end;
             return await eventsManager
