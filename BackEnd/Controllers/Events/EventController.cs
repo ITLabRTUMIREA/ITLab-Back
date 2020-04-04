@@ -98,7 +98,6 @@ namespace BackEnd.Controllers.Events
                 .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
                 .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
                 .OrderBy(cev => cev.BeginTime)
-                .AttachUserId(mapper.ConfigurationProvider, UserId)
                 .ProjectTo<EventView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
