@@ -21,6 +21,10 @@ using Models.PublicAPI.NotifyRequests;
 using Models.PublicAPI.Responses.Event.Invitations;
 using System.Collections.Generic;
 using Models.PublicAPI.Responses.Event.CreateEdit;
+using Microsoft.AspNetCore.Authorization;
+using System.Runtime.InteropServices.WindowsRuntime;
+using BackEnd.Models.Settings;
+using Microsoft.Extensions.Options;
 
 namespace BackEnd.Controllers.Events
 {
@@ -64,6 +68,42 @@ namespace BackEnd.Controllers.Events
                 .OrderBy(cev => cev.BeginTime)
                 .AttachUserId(mapper.ConfigurationProvider, UserId)
                 .ProjectTo<CompactEventView>(mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get events list
+        /// </summary>
+        /// <param name="begin">Biggest end time. If not defined end time equals infinity</param>
+        /// <param name="end">Smallest begin time. If not defined begin time equals zero</param>
+        /// <returns>List of events</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Incorrect begin or end parameter format</response>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [HttpGet("docsGen")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<EventView>>> GetForDocsGenerator(
+            [FromServices] IOptions<DocsGeneratorSettings> options,
+            DateTime? begin,
+            DateTime? end)
+        {
+            if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var token))
+            {
+                return Unauthorized("Need documents generation secret string");
+            }
+            if (token != options.Value.AccessToken)
+            {
+                return Forbid("Invalid access token");
+            }
+            end = end == DateTime.MinValue ? DateTime.MaxValue : end;
+            return await eventsManager
+                .Events
+                .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
+                .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
+                .OrderBy(cev => cev.BeginTime)
+                .AttachUserId(mapper.ConfigurationProvider, UserId)
+                .ProjectTo<EventView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
@@ -174,6 +214,10 @@ namespace BackEnd.Controllers.Events
             if (targetEvent == null) return NotFound();
             return targetEvent;
         }
+
+
+        
+
 
         /// <summary>
         /// Create new event

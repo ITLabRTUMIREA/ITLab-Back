@@ -164,6 +164,7 @@ namespace BackEnd
                 ;
 
             ConfigureNotify(services);
+            services.Configure<DocsGeneratorSettings>(Configuration.GetSection(nameof(DocsGeneratorSettings)));
 
 
             var metrics = AppMetrics.CreateDefaultBuilder()
