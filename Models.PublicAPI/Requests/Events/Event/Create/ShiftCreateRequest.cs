@@ -6,6 +6,7 @@ namespace Models.PublicAPI.Requests.Events.Event.Create
 {
     public class ShiftCreateRequest
     {
+        public int ClientId { get; set; }
         [CompareWith(nameof(EndTime), Criterion.LessOrEqual)]
         public DateTime BeginTime { get; set; }
         [CompareWith(nameof(BeginTime), Criterion.MoreOrEqual)]

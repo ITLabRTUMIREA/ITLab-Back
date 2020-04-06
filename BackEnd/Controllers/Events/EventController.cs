@@ -20,6 +20,7 @@ using Models.People.Roles;
 using Models.PublicAPI.NotifyRequests;
 using Models.PublicAPI.Responses.Event.Invitations;
 using System.Collections.Generic;
+using Models.PublicAPI.Responses.Event.CreateEdit;
 
 namespace BackEnd.Controllers.Events
 {
@@ -65,6 +66,29 @@ namespace BackEnd.Controllers.Events
                 .ProjectTo<CompactEventView>(mapper.ConfigurationProvider)
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Get events ids list
+        /// </summary>
+        /// <param name="begin">Biggest end time. If not defined end time equals infinity</param>
+        /// <param name="end">Smallest begin time. If not defined begin time equals zero</param>
+        /// <returns>List of events</returns>
+        /// <response code="200">Success</response>
+        /// <response code="400">Incorrect begin or end parameter format</response>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [HttpGet("ids")]
+        public async Task<ActionResult<List<Guid>>> GetIds(DateTime? begin, DateTime? end)
+        {
+            end = end == DateTime.MinValue ? DateTime.MaxValue : end;
+            return await eventsManager
+                .Events
+                .IfNotNull(begin, events => events.Where(e => e.EndTime >= begin))
+                .IfNotNull(end, events => events.Where(e => e.BeginTime <= end))
+                .Select(ev => ev.Id)
+                .ToListAsync();
+        }
+
 
         /// <summary>
         /// Get events list for specific user
@@ -151,20 +175,30 @@ namespace BackEnd.Controllers.Events
             return targetEvent;
         }
 
+        /// <summary>
+        /// Create new event
+        /// </summary>
+        /// <param name="request">New event information</param>
+        /// <returns></returns>
         [Notify(NotifyType.EventNew)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPost]
-        public async Task<ActionResult<EventView>> PostAsync([FromBody] EventCreateRequest request)
+        public async Task<ActionResult<CreateEditEventView>> PostAsync([FromBody] EventCreateRequest request)
             => await (await eventsManager.AddAsync(request))
-                .ProjectTo<EventView>(mapper.ConfigurationProvider)
+                .ProjectTo<CreateEditEventView>(mapper.ConfigurationProvider)
                 .SingleAsync();
 
+        /// <summary>
+        /// Edit exists event
+        /// </summary>
+        /// <param name="request">New info about event</param>
+        /// <returns></returns>
         [Notify(NotifyType.EventChange)]
         [RequireRole(RoleNames.CanEditEvent)]
         [HttpPut]
-        public async Task<ActionResult<EventView>> PutAsync([FromBody] EventEditRequest request)
+        public async Task<ActionResult<CreateEditEventView>> PutAsync([FromBody] EventEditRequest request)
             => await (await eventsManager.EditAsync(request))
-                .ProjectTo<EventView>(mapper.ConfigurationProvider)
+                .ProjectTo<CreateEditEventView>(mapper.ConfigurationProvider)
                 .SingleAsync();
 
         [RequireRole(RoleNames.CanEditEvent)]

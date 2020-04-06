@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Extensions", "Extensions\Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "IdentityServer\IdentityServer.csproj", "{F81E39F1-CA68-41B1-AE3F-F095E66C6446}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Database.csproj", "{69600FAD-629C-4302-B00D-1824D583C0E1}"
 EndProject
 Global
@@ -37,10 +35,6 @@ Global
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F79CAEFE-08DC-4CD0-9725-C2A1558D3892}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F81E39F1-CA68-41B1-AE3F-F095E66C6446}.Release|Any CPU.Build.0 = Release|Any CPU
 		{69600FAD-629C-4302-B00D-1824D583C0E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69600FAD-629C-4302-B00D-1824D583C0E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69600FAD-629C-4302-B00D-1824D583C0E1}.Release|Any CPU.ActiveCfg = Release|Any CPU

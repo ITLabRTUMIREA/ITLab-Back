@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
-using BackEnd.Authorize;
 using BackEnd.DataBase;
 using BackEnd.Formatting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -63,7 +62,6 @@ namespace BackEnd
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
-            services.Configure<JwtIssuerOptions>(Configuration.GetSection(nameof(JwtIssuerOptions)));
 
             services.AddMvc(options =>
             {
@@ -85,36 +83,6 @@ namespace BackEnd
             );
 
             services.AddAutoMapper(config =>config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
-
-            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions)).Get<JwtIssuerOptions>();
-
-            services.AddTransient<IJwtFactory, JwtFactory>();
-
-            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
-                jwtAppSettingOptions.SecretKey));
-
-            services.Configure<JwtIssuerOptions>(options =>
-            {
-                options.Issuer = jwtAppSettingOptions.Issuer;
-                options.Audience = jwtAppSettingOptions.Audience;
-                options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            });
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = jwtAppSettingOptions.Issuer,
-
-                ValidateAudience = true,
-                ValidAudience = jwtAppSettingOptions.Audience,
-
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = signingKey,
-
-                RequireExpirationTime = false,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
 
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
@@ -140,18 +108,34 @@ namespace BackEnd
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IT Lab develop API", Version = "v1" });
-                c.AddSecurityDefinition("Bearer",
-                    new OpenApiSecurityScheme
+
+                var securotyScheme = new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter into field the word 'Bearer' following by space and JWT",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                };
+
+                c.AddSecurityDefinition("Bearer", securotyScheme);
+
+
+                var requirement = new OpenApiSecurityRequirement
+                {
                     {
-                        In = ParameterLocation.Header,
-                        Description = "Please enter into field the word 'Bearer' following by space and JWT",
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.ApiKey
-                    });
-                //c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                //{
-                //    { "Bearer", Enumerable.Empty<string>() }
-                //});
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                };
+                c.AddSecurityRequirement(requirement);
+
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);

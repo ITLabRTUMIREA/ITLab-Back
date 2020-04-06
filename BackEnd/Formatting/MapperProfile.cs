@@ -59,38 +59,9 @@ namespace BackEnd.Formatting
             CreateMap<EventTypeCreateRequest, EventType>();
             CreateMap<EventType, EventTypeView>();
             CreateMap<EventCreateRequest, Event>();
-            CreateMap<Event, EventView>();
-            Guid userId = default;
-            CreateMap<Event, EventAndUserId>()
-                .ForMember(evuid => evuid.UserId, map => map.MapFrom(ev => userId));
-
-            CreateMap<EventAndUserId, CompactEventView>()
-                .ForMember(cev => cev.ShiftsCount, map => map.MapFrom(ev => ev.Shifts.Count))
-                .ForMember(cev => cev.EndTime, map => map.MapFrom(ev =>
-                    ev
-                        .Shifts
-                        .Select(s => s.EndTime)
-                        .Max()))
-                .ForMember(cev => cev.CurrentParticipantsCount, map => map.MapFrom(ev =>
-                    ev.Shifts
-                        .SelectMany(s => s.Places)
-                        .SelectMany(p => p.PlaceUserEventRoles)
-                        .Count(pur => pur.UserStatus == UserStatus.Accepted)))
-                .ForMember(cev => cev.TargetParticipantsCount, map => map.MapFrom(ev =>
-                    ev.Shifts
-                        .SelectMany(s => s.Places)
-                        .Sum(p => p.TargetParticipantsCount)))
-                .ForMember(cev => cev.Participating, map => map.MapFrom(evuid =>
-                    evuid
-                        .Shifts
-                        .SelectMany(s => s.Places)
-                        .SelectMany(p => p.PlaceUserEventRoles)
-                        .Where(pur => pur.UserStatus == UserStatus.Accepted)
-                        .Any(pur => pur.UserId == evuid.UserId)));
-
 
             CreateMap<ShiftCreateRequest, Shift>();
-            CreateMap<Shift, ShiftView>();
+
 
 
             CreateMap<Guid, PlaceUserEventRole>()
@@ -100,19 +71,6 @@ namespace BackEnd.Formatting
             CreateMap<PlaceCreateRequest, Place>()
                 .ForMember(p => p.PlaceEquipments, map => map.MapFrom(s => s.Equipment))
                 .ForMember(p => p.PlaceUserEventRoles, map => map.MapFrom(pcr => pcr.Invited));
-
-            CreateMap<Place, PlaceView>()
-                .ForMember(p => p.Equipment, map => map.MapFrom(p =>
-                    p.PlaceEquipments.Select(pe => pe.Equipment)
-                ))
-                .ForMember(p => p.Participants, map => map.MapFrom(p => p.PlaceUserEventRoles
-                                                                   .Where(pur => pur.UserStatus == UserStatus.Accepted)))
-                .ForMember(p => p.Invited, map => map.MapFrom(p => p.PlaceUserEventRoles
-                                                               .Where(pur => pur.UserStatus == UserStatus.Invited)))
-                .ForMember(p => p.Wishers, map => map.MapFrom(p => p.PlaceUserEventRoles
-                                                              .Where(pur => pur.UserStatus == UserStatus.Wisher)))
-                .ForMember(p => p.Unknowns, map => map.MapFrom(p => p.PlaceUserEventRoles
-                                                               .Where(pur => pur.UserStatus == UserStatus.Unknown)));
 
             CreateMap<PlaceUserEventRole, UserAndEventRole>();
 

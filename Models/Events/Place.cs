@@ -9,7 +9,7 @@ namespace Models.Events
     public class Place
     {
         public Guid Id { get; set; }
-
+        public int ClientId { get; set; }
 
         public int TargetParticipantsCount { get; set; }
         public List<PlaceEquipment> PlaceEquipments { get; set; }
