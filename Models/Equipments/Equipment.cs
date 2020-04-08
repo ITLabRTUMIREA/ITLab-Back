@@ -14,6 +14,7 @@ namespace Models.Equipments
         public int Number { get; set; }
         // For many to many links, not ideal model
         public List<PlaceEquipment> PlaceEquipments { get; set; }
+        public List<EquipmentOwnerChangeRecord> EquipmentOwnerChangeRecords { get; set; }
 
         public Guid? ParentId { get; set; }
         public Equipment Parent { get; set; }

@@ -22,6 +22,7 @@ namespace BackEnd.DataBase
     {
         public DbSet<EquipmentType> EquipmentTypes { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
+        public DbSet<EquipmentOwnerChangeRecord> EquipmentOwnerChanges { get; set; }
         public DbSet<EventType> EventTypes { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
@@ -44,8 +45,25 @@ namespace BackEnd.DataBase
             ConfigurePlaceUserEventRole(builder);
             ConfigureEquipmentType(builder);
             ConfigureUserProperties(builder);
+
+            ConfigureEquipmentOwnerHistory(builder);
         }
 
+        private static void ConfigureEquipmentOwnerHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EquipmentOwnerChangeRecord>()
+               .HasKey(t => new { t.EquipmentId, t.ChangeOwnerTime });
+
+            modelBuilder.Entity<EquipmentOwnerChangeRecord>()
+                .HasOne(pe => pe.Equipment)
+                .WithMany(pl => pl.EquipmentOwnerChangeRecords)
+                .HasForeignKey(pl => pl.EquipmentId);
+
+            modelBuilder.Entity<EquipmentOwnerChangeRecord>()
+                .HasOne(pe => pe.NewOwner)
+                .WithMany(eq => eq.EquipmentOwnerChangeRecords)
+                .HasForeignKey(pe => pe.NewOwnerId);
+        }
 
         private static void ConfigurePlaceEquipment(ModelBuilder modelBuilder)
         {

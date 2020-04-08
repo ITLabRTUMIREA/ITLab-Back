@@ -14,6 +14,7 @@ namespace Models.People
         public string MiddleName { get; set; }
         public List<UserSetting> UserSettings { get; set; }
         public List<Equipment> Equipment  { get; set; }
+        public List<EquipmentOwnerChangeRecord> EquipmentOwnerChangeRecords { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; }
         public List<PlaceUserEventRole> PlaceUserEventRoles { get; set; }
         public List<UserProperty> UserProperties { get; set; }
