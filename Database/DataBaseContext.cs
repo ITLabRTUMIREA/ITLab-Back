@@ -52,17 +52,22 @@ namespace BackEnd.DataBase
         private static void ConfigureEquipmentOwnerHistory(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<EquipmentOwnerChangeRecord>()
-               .HasKey(t => new { t.EquipmentId, t.ChangeOwnerTime });
+               .HasKey(eocr => new { eocr.EquipmentId, eocr.ChangeOwnerTime });
 
             modelBuilder.Entity<EquipmentOwnerChangeRecord>()
-                .HasOne(pe => pe.Equipment)
-                .WithMany(pl => pl.EquipmentOwnerChangeRecords)
-                .HasForeignKey(pl => pl.EquipmentId);
-
-            modelBuilder.Entity<EquipmentOwnerChangeRecord>()
-                .HasOne(pe => pe.NewOwner)
+                .HasOne(eocr => eocr.Equipment)
                 .WithMany(eq => eq.EquipmentOwnerChangeRecords)
-                .HasForeignKey(pe => pe.NewOwnerId);
+                .HasForeignKey(eocr => eocr.EquipmentId);
+
+            modelBuilder.Entity<EquipmentOwnerChangeRecord>()
+                .HasOne(eocr => eocr.NewOwner)
+                .WithMany(u => u.EquipmentOwnerChangeRecords)
+                .HasForeignKey(eocr => eocr.NewOwnerId);
+
+            modelBuilder.Entity<EquipmentOwnerChangeRecord>()
+                .HasOne(eocr => eocr.Granter)
+                .WithMany(u => u.EquipmentOwnerChangeRecordGrants)
+                .HasForeignKey(eocr => eocr.GranterId);
         }
 
         private static void ConfigurePlaceEquipment(ModelBuilder modelBuilder)

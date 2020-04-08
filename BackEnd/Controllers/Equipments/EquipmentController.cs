@@ -125,6 +125,7 @@ namespace BackEnd.Controllers.Equipments
                 await dbContext.EquipmentOwnerChanges.AddAsync(new EquipmentOwnerChangeRecord
                 {
                     NewOwnerId = null,
+                    GranterId = UserId,
                     ChangeOwnerTime = DateTime.UtcNow,
                     Equipment = newEquipment
                 });

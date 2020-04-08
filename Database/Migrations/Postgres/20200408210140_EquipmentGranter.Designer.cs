@@ -3,15 +3,17 @@ using System;
 using BackEnd.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Database.Migrations.Postgres
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextPostgresModelSnapshot : ModelSnapshot
+    [Migration("20200408210140_EquipmentGranter")]
+    partial class EquipmentGranter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
