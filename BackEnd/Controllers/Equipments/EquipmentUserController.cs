@@ -80,7 +80,8 @@ namespace BackEnd.Controllers.Equipments
             {
                 ChangeOwnerTime = DateTime.UtcNow,
                 Equipment = targetEquipment,
-                NewOwnerId = targetEquipment.OwnerId
+                NewOwnerId = targetEquipment.OwnerId,
+                GranterId = UserId
             });
             await dataBaseContext.SaveChangesAsync();
             return mapper.Map<EquipmentView>(targetEquipment);
@@ -108,7 +109,8 @@ namespace BackEnd.Controllers.Equipments
             {
                 ChangeOwnerTime = DateTime.UtcNow,
                 Equipment = targetEquipment,
-                NewOwnerId = targetEquipment.OwnerId
+                NewOwnerId = targetEquipment.OwnerId,
+                GranterId = UserId
             });
             await dataBaseContext.SaveChangesAsync();
             return mapper.Map<EquipmentView>(targetEquipment);

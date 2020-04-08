@@ -30,5 +30,13 @@ namespace Models.Equipments
         /// New owner
         /// </summary>
         public User NewOwner { get; set; }
+        /// <summary>
+        /// Id of person who grant access to equipment
+        /// </summary>
+        public Guid GranterId { get; set; }
+        /// <summary>
+        /// Person who grant access to equipment
+        /// </summary>
+        public User Granter { get; set; }
     }
 }
