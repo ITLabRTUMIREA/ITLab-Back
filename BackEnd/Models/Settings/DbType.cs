@@ -5,11 +5,18 @@ using System.Threading.Tasks;
 
 namespace BackEnd.Models.Settings
 {
+    /// <summary>
+    /// Enum, which describe current db type
+    /// </summary>
     public enum DbType
     {
-        SQL_SERVER_REMOTE,
-        SQL_SERVER_LOCAL,
+        /// <summary>
+        /// Use debug in memory database
+        /// </summary>
         IN_MEMORY,
-        POSTGRES_LOCAL
+        /// <summary>
+        /// Use postgres database
+        /// </summary>
+        POSTGRES
     }
 }

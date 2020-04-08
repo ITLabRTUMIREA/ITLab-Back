@@ -10,20 +10,29 @@ using Microsoft.Extensions.Options;
 
 namespace BackEnd.Services.Email
 {
-    public class EmailService : MailKitEmailService
+    public class EmailService : IEmailSender
     {
         private readonly ILogger<EmailService> logger;
+        private readonly EmailTemplateSettings options;
+        private readonly RTUITLab.EmailService.Client.IEmailSender rtuItLabEmailSender;
 
         public EmailService(
-            IOptions<EmailSenderSettings> options,
             ILogger<EmailService> logger,
-            ILogger<MailKitEmailService> baseLogger
-            ) : base(options, baseLogger)
+            IOptions<EmailTemplateSettings> options,
+            RTUITLab.EmailService.Client.IEmailSender rtuItLabEmailSender
+            )
         {
             this.logger = logger;
+            this.options = options.Value;
+            this.rtuItLabEmailSender = rtuItLabEmailSender;
         }
 
-        public override async Task SendInvitationEmail(string email, string url, string accessToken)
+        public Task SendEmailAsync(string email, string subject, string message)
+        {
+            return rtuItLabEmailSender.SendEmailAsync(email, subject, message);
+        }
+
+        public async Task SendInvitationEmail(string email, string url, string accessToken)
         {
             logger.LogInformation($"Sending invitation email to {email}");
             var template = (await GetInvitationTemplate())
@@ -33,7 +42,7 @@ namespace BackEnd.Services.Email
             await SendEmailAsync(email, "Приглашение на регистрацию", template);
         }
 
-        public override async Task SendResetPasswordEmail(string email, string url, string resetPassToken)
+        public async Task SendResetPasswordEmail(string email, string url, string resetPassToken)
         {
             logger.LogInformation($"Sending reset password email to {email}");
             var template = (await GetResetPasswordTemplate())

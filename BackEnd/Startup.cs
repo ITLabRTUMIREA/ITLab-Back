@@ -41,6 +41,8 @@ using BackEnd.Services.Notify.Debug;
 using RTUITLab.AspNetCore.Configure.Configure;
 using RTUITLab.AspNetCore.Configure.Invokations;
 using Microsoft.OpenApi.Models;
+using RTUITLab.EmailService.Client;
+using LocalInterfaces = BackEnd.Services.Interfaces;
 
 namespace BackEnd
 {
@@ -60,7 +62,7 @@ namespace BackEnd
             services.Configure<JsonSerializerSettings>(Configuration.GetSection(nameof(JsonSerializerSettings)));
             services.Configure<DBInitializeSettings>(Configuration.GetSection(nameof(DBInitializeSettings)));
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
-            services.Configure<EmailSenderSettings>(Configuration.GetSection(nameof(EmailSenderSettings)));
+            services.Configure<EmailTemplateSettings>(Configuration.GetSection(nameof(EmailTemplateSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
 
             services.AddMvc(options =>
@@ -79,10 +81,10 @@ namespace BackEnd
                     options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                } 
+                }
             );
 
-            services.AddAutoMapper(config =>config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(config => config.AddBackendProfiles(), Assembly.GetExecutingAssembly());
 
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
@@ -145,14 +147,20 @@ namespace BackEnd
 
 
             if (Configuration.GetValue<bool>("UseDebugEmailSender"))
-                services.AddTransient<IEmailSender, DebugEmailService>();
+            {
+                services.AddTransient<LocalInterfaces.IEmailSender, DebugEmailService>();
+            }
             else
-                services.AddTransient<IEmailSender, EmailService>();
+            {
+                services.AddEmailSender(Configuration
+                    .GetSection(nameof(EmailSenderOptions))
+                    .Get<EmailSenderOptions>());
+                services.AddTransient<LocalInterfaces.IEmailSender, EmailService>();
+            }
 
 
             services.AddTransient<IUserRegisterTokens, DbUserRegisterTokens>();
             services.AddTransient<IEventsManager, EventsManager>();
-            services.AddSingleton<ISmsSender, SmsService>();
 
 
             services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
@@ -236,7 +244,7 @@ namespace BackEnd
                 c.RoutePrefix = "api";
             });
             app.UseExceptionHandlerMiddleware();
-            
+
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -257,16 +265,10 @@ namespace BackEnd
             var migrationAssymply = typeof(DataBaseContext).GetTypeInfo().Assembly.GetName().Name;
             switch (dbType)
             {
-                case DbType.SQL_SERVER_REMOTE:
-                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_REMOTE)),
-                        builder => builder.MigrationsAssembly(migrationAssymply));
-                case DbType.SQL_SERVER_LOCAL:
-                    return options => options.UseSqlServer(Configuration.GetConnectionString(nameof(DbType.SQL_SERVER_LOCAL)),
-                        builder => builder.MigrationsAssembly(migrationAssymply));
                 case DbType.IN_MEMORY:
                     return options => options.UseInMemoryDatabase(nameof(DbType.IN_MEMORY));
-                case DbType.POSTGRES_LOCAL:
-                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES_LOCAL)),
+                case DbType.POSTGRES:
+                    return options => options.UseNpgsql(Configuration.GetConnectionString(nameof(DbType.POSTGRES)),
                         builder => builder.MigrationsAssembly(migrationAssymply));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dbType));
