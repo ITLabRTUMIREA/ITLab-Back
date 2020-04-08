@@ -13,6 +13,7 @@ using Models.PublicAPI.Requests;
 using AutoMapper;
 using BackEnd.Models.Roles;
 using Models.People.Roles;
+using Models.Equipments;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -71,9 +72,16 @@ namespace BackEnd.Controllers.Equipments
                 return NotFound();
 
             if (targetEquipment.OwnerId.HasValue && targetEquipment.OwnerId != uId)
-                return Conflict("Equipment reserved"); // TODO meta
+                return Conflict("Equipment reserved");
+
 
             targetEquipment.OwnerId = uId;
+            dataBaseContext.EquipmentOwnerChanges.Add(new EquipmentOwnerChangeRecord
+            {
+                ChangeOwnerTime = DateTime.UtcNow,
+                Equipment = targetEquipment,
+                NewOwnerId = targetEquipment.OwnerId
+            });
             await dataBaseContext.SaveChangesAsync();
             return mapper.Map<EquipmentView>(targetEquipment);
         }
@@ -93,7 +101,15 @@ namespace BackEnd.Controllers.Equipments
                 .SingleOrDefaultAsync();
             if (targetEquipment == null)
                 return NotFound();
+
+
             targetEquipment.OwnerId = null;
+            dataBaseContext.EquipmentOwnerChanges.Add(new EquipmentOwnerChangeRecord
+            {
+                ChangeOwnerTime = DateTime.UtcNow,
+                Equipment = targetEquipment,
+                NewOwnerId = targetEquipment.OwnerId
+            });
             await dataBaseContext.SaveChangesAsync();
             return mapper.Map<EquipmentView>(targetEquipment);
         }
