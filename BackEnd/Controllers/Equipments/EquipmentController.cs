@@ -18,6 +18,7 @@ using Models.PublicAPI.Requests;
 using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses.Equipment;
 using System.Threading;
+using NPOI.SS.Formula.Functions;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -103,7 +104,7 @@ namespace BackEnd.Controllers.Equipments
 
                 var type = await dbContext.EquipmentTypes.FindAsync(request.EquipmentTypeId);
                 if (type == null)
-                    return NotFound();
+                    return NotFound($"equipment type {request.EquipmentTypeId} not found");
 
                 if (await CheckExist(request.SerialNumber))
                     return Conflict("Serial number exists");
@@ -121,8 +122,20 @@ namespace BackEnd.Controllers.Equipments
                     return BadRequest("Incorrect equipment ids");
 
                 await dbContext.Equipments.AddAsync(newEquipment);
+                await dbContext.EquipmentOwnerChanges.AddAsync(new EquipmentOwnerChangeRecord
+                {
+                    NewOwnerId = null,
+                    ChangeOwnerTime = DateTime.UtcNow,
+                    Equipment = newEquipment
+                });
+
                 await dbContext.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetAsync), mapper.Map<EquipmentView>(newEquipment));
+                return Ok(mapper.Map<EquipmentView>(newEquipment));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "error while adding equipment");
+                throw;
             }
             finally
             {
