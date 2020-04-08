@@ -11,42 +11,40 @@ Public API | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/
 [build-master-image]: https://dev.azure.com/rtuitlab/RTU%20IT%20Lab/_apis/build/status/ITLab-Back?branchName=master
 [build-master-link]: https://dev.azure.com/rtuitlab/RTU%20IT%20Lab/_build/latest?definitionId=65&branchName=master
 
-## Prerequriments
+## Requriments
 
-.Net Core 2.1
+.Net Core 3.0
 
 ## Configuration
 
-```appsettings.Secret.json``` must be placed to the BackEnd folder
+```appsettings.json```
 
-```json
+```appsettings.Secret.json``` can be placed to the BackEnd folder
+
+```js
 {
-    "DB_TYPE": "IN_MEMORY",
+    "Authority": "autority host of identity server 4",
+    "DB_TYPE": "IN_MEMORY" | "POSTGRES",
     "ConnectionStrings" : {
-        "SQL_SERVER_LOCAL": "ms sql server connection string if DB_TYPE == SQL_SERVER_LOCAL",
-        "SQL_SERVER_REMOTE": "ms sql server connection string if DB_TYPE == SQL_SERVER_LOCAL",
-        "POSTGRES_LOCAL": "postgres connection string if DB_TYPE == POSTGRES_LOCAL"
+        "POSTGRES": "postgres connection string if DB_TYPE == POSTGRES"
     },
-    "JwtIssuerOptions": {
-        "SecretKey": "some random key for JWT"
-    },
-    "RegisterTokenPair": [
+    "RegisterTokenPair": [ // Use for register first user
         {
             "Email": "test1@test.com",
             "Token": "ABCDEFG"
         }
     ],
-	"UseDebugEmailSender": true,
-    "EmailSenderSettings": {
-        "Email": "sender email",
-        "Password": "password for sender email",
+    "UseDebugEmailSender": true | false, // true for using console email sender
+    "EmailSenderOptions": { // used when UseDebugEmailSender == false
+        "BaseAddress": "base address of email sender service",
+        "Key": "access token for sendind emails"
+    },
+    "EmailTemplateSettings": {
         "InvitationTemplateUrl": "direct link to invitation email template",
         "ResetPasswordTemplateUrl": "direct link to reset password template",
-        "SmtpHost": "smtp host for sender email",
-        "SmtpPort": "smtp port for sender email"
     },
-    "DB_INIT": true,
-    "DBInitializeSettings": {
+    "DB_INIT": true, // true for activate initializer service, cread default roles and users from DBInitializeSettings section
+    "DBInitializeSettings": { // section for db initializer service
         "Users" : [
             {
                 "UserName": "user name for one of default users",
@@ -64,26 +62,36 @@ Public API | [![RTUITLab.ITLab.Models.PublicAPI](https://img.shields.io/nuget/v/
             }
         ]
     },
-    "UseConsoleLogger": true,
-    "NotifierSettings": {
-        "Host": "link to notifier service",
-        "AccessToken": "token for access that service from notifier service",
+    "NotifyType" : "http" | "redis" | "console" // type of used notify service
+    "HttpNotifierSettings": { // used for NotifyType == "http"
+        "Host": "host of notifier service",
+        "NeedChangeUrl": true | false, // change notify service host in runtime capability activator
         "NotifySecret": "token for access notifier service from that service"
-    }
+    },
+    "RedisNotifierSettings": { // used for NotifyType == "redis"
+        "ConnectionString": "connection string to redis instance",
+        "CnhannelName": "channel name for publishing messages"
+    },
+    "UseRandomEventsGenerator": true | false, // true for spawn random events, use only for debug
+
 }
 ```
 
-**DB_TYPE** - type of the database which will be used
-
-**UseDebugEmailSender** - if true app will use a debug email service
-
-**DB_INIT** - if true - database will be initialized from DBInitializeSettings section
-
-**UseConsoleLogger** - if true - all notifications will be print in logger. If false - notifications will be send via notifier service
 
 ## Run
 ```bash
 cd ./Backend
 dotnet run
 ```
-API will be available on [localhost:5000](http://localhost:5000)
+
+Swagger API will be available on [localhost:5500](http://localhost:5500)
+
+## Work with database
+
+To use ```dotnet ef``` commands go to Database project, and with all commands use ```--startup-project ../Backend``` parameter
+
+For fast work with migrations use PowerShell scripts in folder Database/Scripts. For example, add migration:
+```bash
+cd Database
+./Scripts/AddMigration.ps1
+```
