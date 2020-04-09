@@ -46,7 +46,23 @@ namespace BackEnd.DataBase
             ConfigureEquipmentType(builder);
             ConfigureUserProperties(builder);
 
+            ConfigureEquipment(builder);
             ConfigureEquipmentOwnerHistory(builder);
+        }
+
+        private void ConfigureEquipment(ModelBuilder builder)
+        {
+            builder.Entity<Equipment>()
+                .HasIndex(eq => eq.EquipmentTypeId)
+                .IsUnique(false);
+
+            builder.Entity<Equipment>()
+                .HasIndex(eq => eq.SerialNumber)
+                .IsUnique(true);
+
+            builder.Entity<Equipment>()
+                .HasIndex(eq => new { eq.EquipmentTypeId, eq.Number })
+                .IsUnique(true);
         }
 
         private static void ConfigureEquipmentOwnerHistory(ModelBuilder modelBuilder)
