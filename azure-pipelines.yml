@@ -62,7 +62,7 @@ jobs:
   - task: CopyFiles@2
     displayName: Copy deploy folder
     inputs:
-      SourceFolder: deploy/back/
+      SourceFolder: deploy
       Contents: '**'
       TargetFolder: $(Build.ArtifactStagingDirectory)
       CleanTargetFolder: true

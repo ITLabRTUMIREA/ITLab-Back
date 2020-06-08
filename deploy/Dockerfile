@@ -6,8 +6,7 @@ RUN apt-get install libgdiplus -y
 
 WORKDIR /app
 
-COPY ITLab-Back/itlab-back-build .
-COPY ITLab-Front/itlab-front-build ./wwwroot/
+COPY ITLab-Back .
 
 # For NPOI
 RUN apt-get update && apt-get install -y --allow-unauthenticated libgdiplus libc6-dev libx11-dev xvfb && ln -s /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
