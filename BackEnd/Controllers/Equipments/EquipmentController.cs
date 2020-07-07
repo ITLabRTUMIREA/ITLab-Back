@@ -19,6 +19,9 @@ using Models.PublicAPI.Requests.Equipment.Equipment;
 using Models.PublicAPI.Responses.Equipment;
 using System.Threading;
 using NPOI.SS.Formula.Functions;
+using BackEnd.Services.EquipmentServices;
+using Exceptions.EquipmentExceptions;
+using Exceptions.EquipmentTypeExceptions;
 
 namespace BackEnd.Controllers.Equipments
 {
@@ -27,13 +30,13 @@ namespace BackEnd.Controllers.Equipments
     public class EquipmentController : AuthorizeController
     {
         private readonly DataBaseContext dbContext;
-        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
-
+        private readonly EquipmentService equipmentService;
         private readonly ILogger<EquipmentTypeController> logger;
         private readonly IMapper mapper;
 
         public EquipmentController(
             DataBaseContext dbContext,
+            EquipmentService equipmentService,
             ILogger<EquipmentTypeController> logger,
             IMapper mapper,
             UserManager<User> userManager) : base(userManager)
@@ -41,6 +44,7 @@ namespace BackEnd.Controllers.Equipments
             this.logger = logger;
             this.mapper = mapper;
             this.dbContext = dbContext;
+            this.equipmentService = equipmentService;
         }
 
 
@@ -100,47 +104,24 @@ namespace BackEnd.Controllers.Equipments
         {
             try
             {
-                await semaphore.WaitAsync();
-
-                var type = await dbContext.EquipmentTypes.FindAsync(request.EquipmentTypeId);
-                if (type == null)
-                    return NotFound($"equipment type {request.EquipmentTypeId} not found");
-
-                if (await CheckExist(request.SerialNumber))
-                    return Conflict("Serial number exists");
-
                 var newEquipment = mapper.Map<Equipment>(request);
-                newEquipment.Number = type.LastNumber++;
-                if (request.Children?.Count > 0)
-                    newEquipment.Children =
-                        await dbContext
-                        .Equipments
-                        .Where(eq => request.Children.Contains(eq.Id))
-                        .ToListAsync();
 
-                if (newEquipment.Children?.Count != request.Children?.Count)
-                    return BadRequest("Incorrect equipment ids");
+                newEquipment = await equipmentService.AddEquipment(newEquipment, request.Children, UserId);
 
-                await dbContext.Equipments.AddAsync(newEquipment);
-                await dbContext.EquipmentOwnerChanges.AddAsync(new EquipmentOwnerChangeRecord
-                {
-                    NewOwnerId = null,
-                    GranterId = UserId,
-                    ChangeOwnerTime = DateTime.UtcNow,
-                    Equipment = newEquipment
-                });
-
-                await dbContext.SaveChangesAsync();
                 return Ok(mapper.Map<EquipmentView>(newEquipment));
+            }
+            catch (EquipmentUpdateException sex)
+            {
+                return Conflict(sex.Message);
+            }
+            catch (EquipmentTypeFindException sex)
+            {
+                return NotFound(sex.Message);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "error while adding equipment");
                 throw;
-            }
-            finally
-            {
-                semaphore.Release();
             }
         }
         /// <summary>

@@ -43,6 +43,7 @@ using RTUITLab.AspNetCore.Configure.Invokations;
 using Microsoft.OpenApi.Models;
 using RTUITLab.EmailService.Client;
 using LocalInterfaces = BackEnd.Services.Interfaces;
+using BackEnd.Services.EquipmentServices;
 
 namespace BackEnd
 {
@@ -160,7 +161,8 @@ namespace BackEnd
 
 
             services.AddTransient<IUserRegisterTokens, DbUserRegisterTokens>();
-            services.AddTransient<IEventsManager, EventsManager>();
+            services.AddScoped<IEventsManager, EventsManager>();
+            services.AddScoped<EquipmentService>();
 
 
             services.AddTransient<IUserPropertiesManager, UserPropertiesManager>();
