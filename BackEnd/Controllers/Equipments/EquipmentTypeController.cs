@@ -104,7 +104,7 @@ namespace BackEnd.Controllers.Equipments
             var forEdits = await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
-                .SelectMany(et => et.Id, et => et.RootId)
+                .Select(et => et.RootId)
                 .Distinct()
                 .ToListAsync();
             ids.AddRange(forEdits.Where(id => id.HasValue).Select(id => id.Value));
