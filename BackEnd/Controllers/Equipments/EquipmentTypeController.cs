@@ -105,11 +105,9 @@ namespace BackEnd.Controllers.Equipments
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
                 .SelectMany(et => et.Id, et => et.RootId)
-                .Where(id => id.HasValue)
-                .Select(id => id.Value)
                 .Distinct()
                 .ToListAsync();
-            ids.AddRange(forEdits);
+            ids.AddRange(forEdits.Where(id => id.HasValue).Select(id => id.Value));
             ids = ids.Distinct().ToList();
             var forEdit = await dbContext
                 .EquipmentTypes
@@ -119,7 +117,6 @@ namespace BackEnd.Controllers.Equipments
             mapper.Map(request, forEdit);
             BuildTree(forEdit);
             var result = await dbContext.SaveChangesAsync();
-            logger.LogDebug($"saved {result} items");
             return await dbContext
                 .EquipmentTypes
                 .Where(et => ids.Contains(et.Id))
