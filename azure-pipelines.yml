@@ -14,6 +14,6 @@ stages:
 
   - job: Backend
     steps:
-    - script: ./build.sh --target publish --build-id $(Build.BuildId)
+    - script: ./build.sh --build-id $(Build.BuildId)
     - publish: deploy
       artifact: itlab-back

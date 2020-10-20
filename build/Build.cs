@@ -35,11 +35,13 @@ class Build : NukeBuild
     [Solution] 
     readonly Solution Solution;
 
+    readonly AbsolutePath deployTarget = RootDirectory / "deploy" / "ITLab-Back";
+
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
         {
-            EnsureCleanDirectory("deploy/ITLab-Back");
+            EnsureCleanDirectory(deployTarget);
         });
 
     Target Restore => _ => _
@@ -65,8 +67,8 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetPublish(s => s
-                .SetProject("BackEnd/BackEnd.csproj")
-                .SetOutput("deploy/ITLab-Back")
+                .SetProject(Solution.GetProject("BackEnd"))
+                .SetOutput(deployTarget)
                 .SetConfiguration(Configuration)
                 .EnableNoRestore());
         });
@@ -74,7 +76,7 @@ class Build : NukeBuild
         .Requires(() => BuildId)
         .Executes(() =>
         {
-            System.IO.File.WriteAllText("deploy/ITLab-Back/build.json", JsonSerializer.Serialize(new BuildInformation
+            System.IO.File.WriteAllText(deployTarget / "build.json", JsonSerializer.Serialize(new BuildInformation
             {
                 BuildDateString = DateTimeOffset.UtcNow,
                 BuildId = BuildId
