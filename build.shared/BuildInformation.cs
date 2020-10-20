@@ -1,5 +1,5 @@
 ﻿using System;
-namespace BackEnd.Models.Settings
+namespace _build.shared
 {
     /// <summary>
     /// Information about the build
@@ -13,6 +13,6 @@ namespace BackEnd.Models.Settings
         /// <summary>
         /// Build Data
         /// </summary>
-        public string BuildDateString { get; set; }
+        public DateTimeOffset BuildDateString { get; set; }
     }
 }

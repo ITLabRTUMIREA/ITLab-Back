@@ -44,6 +44,7 @@ using Microsoft.OpenApi.Models;
 using RTUITLab.EmailService.Client;
 using LocalInterfaces = BackEnd.Services.Interfaces;
 using BackEnd.Services.EquipmentServices;
+using _build.shared;
 
 namespace BackEnd
 {

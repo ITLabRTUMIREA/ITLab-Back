@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using _build.shared;
 using Nuke.Common;
 using Nuke.Common.CI.AzurePipelines;
 using Nuke.Common.Execution;
@@ -26,7 +28,10 @@ class Build : NukeBuild
 
     [Parameter("Packs version postfix")]
     readonly string PackVersionPostfix;
-    
+
+    [Parameter("Build id")]
+    readonly string BuildId = "local build";
+
     [Solution] 
     readonly Solution Solution;
 
@@ -53,8 +58,10 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .EnableNoRestore());
         });
+
     Target Publish => _ => _
         .DependsOn(Compile, Clean)
+        .Triggers(FillBiuldInfo)
         .Executes(() =>
         {
             DotNetPublish(s => s
@@ -63,7 +70,16 @@ class Build : NukeBuild
                 .SetConfiguration(Configuration)
                 .EnableNoRestore());
         });
-
+    Target FillBiuldInfo => _ => _
+        .Requires(() => BuildId)
+        .Executes(() =>
+        {
+            System.IO.File.WriteAllText("deploy/ITLab-Back/build.json", JsonSerializer.Serialize(new BuildInformation
+            {
+                BuildDateString = DateTimeOffset.UtcNow,
+                BuildId = BuildId
+            }));
+        });
     Target PackDb => _ => _
         .Requires(() => PackVersionPostfix)
         .Executes(() =>

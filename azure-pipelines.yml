@@ -1,14 +1,10 @@
-trigger:
-  - master
-  - develop
-
 name: $(BuildID)-$(Build.SourceBranchName)
 
 pool:
   vmImage: 'ubuntu-latest'
+
 stages:
 - stage: Build
-
   jobs:
   - job: Database
     steps:
@@ -17,47 +13,7 @@ stages:
       artifact: itlab-database-nuget
 
   - job: Backend
-    pool:
-      vmImage: 'ubuntu-latest'
     steps:
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet publish'
-      inputs:
-        command: publish
-        publishWebProjects: false
-        projects: BackEnd/BackEnd.csproj
-        arguments: '-o $(Build.ArtifactStagingDirectory)'
-        zipAfterPublish: false
-        modifyOutputPath: false
-
-    - task: file-creator@5
-      displayName: 'fill build.json'
-      inputs:
-        fileoverwrite: true
-        filepath: '$(Build.ArtifactStagingDirectory)/build.json'
-        filecontent: |
-          {
-            "BuildInformation": {
-              "BuildId": "$(Build.BuildId)",
-              "BuildDateString": "01.07.2019"
-            }
-          }
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: itlab-back-build'
-      inputs:
-        ArtifactName: 'itlab-back-build'
-
-    - task: CopyFiles@2
-      displayName: Copy deploy folder
-      inputs:
-        SourceFolder: deploy
-        Contents: '**'
-        TargetFolder: $(Build.ArtifactStagingDirectory)
-        CleanTargetFolder: true
-
-    - task: PublishBuildArtifacts@1
-      displayName: publish back deploy folder
-      inputs:
-        ArtifactName: 'itlab-back-deploy'
-
+    - script: ./build.sh --target publish --build-id $(Build.BuildId)
+    - publish: deploy
+      artifact: itlab-back
