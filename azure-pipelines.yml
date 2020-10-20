@@ -17,3 +17,21 @@ stages:
     - script: ./build.sh --build-id $(Build.BuildId)
     - publish: deploy
       artifact: itlab-back
+- stage: packInDocker
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - job: packApi
+    steps:
+      - checkout: none
+      - download: current
+        artifact: itlab-back
+      - task: Docker@2
+        inputs:
+          containerRegistry: 'rtuitlab connection by admin'
+          repository: 'rtuitlab/itlab-back'
+          command: 'buildAndPush'
+          Dockerfile: '$(Pipeline.Workspace)/itlab-back/Dockerfile'
+          buildContext: '$(Pipeline.Workspace)/itlab-back'
+          tags: |
+            $(Build.BuildId)
+            latest
