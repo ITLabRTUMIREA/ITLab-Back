@@ -5,6 +5,7 @@
     <PackageId>RTUITLab.ITLabBack.Database</PackageId>
     <Authors>RTUITLab</Authors>
     <Product>ITLabBack.Database</Product>
+    <Description>ITLab service database package</Description>
   </PropertyGroup>
 
   <ItemGroup>
