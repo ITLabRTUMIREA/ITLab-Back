@@ -17,5 +17,5 @@ RUN update-rc.d xvfb defaults
 
 COPY ITLab-Back .
 
-ENV ASPNETCORE_URLS=http://*:5502 
+ENV ASPNETCORE_URLS=http://*:5503
 CMD service xvfb start ; dotnet BackEnd.dll
