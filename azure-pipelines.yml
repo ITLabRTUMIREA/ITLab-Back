@@ -35,3 +35,21 @@ stages:
           tags: |
             $(Build.BuildId)
             latest
+- stage: UpdateService
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: none
+            - task: SSH@0
+              inputs:
+                sshEndpoint: 'swarm manager'
+                runOptions: 'commands'
+                commands: 'docker service update --image rtuitlab/itlab-back:$(tag) itlab_back'
+                readyTimeout: '20000'
