@@ -1,7 +1,35 @@
+trigger:
+  - master
+  - develop
+
 name: $(BuildID)-$(Build.SourceBranchName)
 
 pool:
   vmImage: 'ubuntu-latest'
+
+variables:
+  ${{ if notIn(variables['Build.SourceBranchName'], 'master', 'develop') }}:
+    buildImage: false
+    deployService: false
+    deployEnvironment: 'no'
+    imageTags: 'no'
+    serviceName: 'no'
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
+    buildImage: true
+    deployService: true
+    deployEnvironment: development
+    imageTags: |
+      $(Build.BuildId)
+      develop
+    serviceName: itlab_back-develop
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    buildImage: true
+    deployService: true
+    deployEnvironment: production
+    imageTags: |
+      $(Build.BuildId)
+      latest
+    serviceName: itlab_back
 
 stages:
 - stage: Build
@@ -18,7 +46,7 @@ stages:
     - publish: deploy
       artifact: itlab-back
 - stage: packInDocker
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), ${{variables.buildImage}})
   jobs:
   - job: packApi
     steps:
@@ -32,16 +60,14 @@ stages:
           command: 'buildAndPush'
           Dockerfile: '$(Pipeline.Workspace)/itlab-back/Dockerfile'
           buildContext: '$(Pipeline.Workspace)/itlab-back'
-          tags: |
-            $(Build.BuildId)
-            latest
+          tags: ${{variables.imageTags}}
 - stage: UpdateService
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), ${{variables.deployService}})
   jobs:
   - deployment: Deploy
     pool:
       vmImage: 'ubuntu-latest'
-    environment: 'production'
+    environment: deployEnvironment
     strategy:
       runOnce:
         deploy:
@@ -51,5 +77,5 @@ stages:
               inputs:
                 sshEndpoint: 'swarm manager'
                 runOptions: 'commands'
-                commands: 'docker service update --image rtuitlab/itlab-back:$(Build.BuildId) itlab_back'
+                commands: 'docker service update --image rtuitlab/itlab-back:$(Build.BuildId) ${{variables.serviceName}}'
                 readyTimeout: '20000'
