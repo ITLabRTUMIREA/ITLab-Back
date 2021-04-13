@@ -1,74 +1,55 @@
-trigger:
-  - master
-  - develop
-
 name: $(BuildID)-$(Build.SourceBranchName)
 
-variables:
-  nuget_package_number: '1.1.$(Build.BuildId)'
+pool:
+  vmImage: 'ubuntu-latest'
 
-jobs:
+stages:
+- stage: Build
+  jobs:
+  - job: Database
+    steps:
+    - script: ./build.sh --target pack-db --pack-version-postfix $(Build.BuildId)
+    - publish: packs
+      artifact: itlab-database-nuget
 
-- job: Database
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: DotNetCoreCLI@2
-    inputs:
-      command: 'pack'
-      packagesToPack: 'Database/Database.csproj;Models/Models.csproj;Extensions/Extensions.csproj'
-      versioningScheme: 'byPrereleaseNumber'
-      majorVersion: '1'
-      minorVersion: '0'
-      patchVersion: '0'
-  - task: PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'itlab-database-nuget'
-      publishLocation: 'Container'
-
-- job: Backend
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet publish'
-    inputs:
-      command: publish
-      publishWebProjects: false
-      projects: BackEnd/BackEnd.csproj
-      arguments: '-o $(Build.ArtifactStagingDirectory)'
-      zipAfterPublish: false
-      modifyOutputPath: false
-
-  - task: file-creator@5
-    displayName: 'fill build.json'
-    inputs:
-      fileoverwrite: true
-      filepath: '$(Build.ArtifactStagingDirectory)/build.json'
-      filecontent: |
-        {
-          "BuildInformation": {
-            "BuildId": "$(Build.BuildId)",
-            "BuildDateString": "01.07.2019"
-          }
-        }
-
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: itlab-back-build'
-    inputs:
-      ArtifactName: 'itlab-back-build'
-
-  - task: CopyFiles@2
-    displayName: Copy deploy folder
-    inputs:
-      SourceFolder: deploy/back/
-      Contents: '**'
-      TargetFolder: $(Build.ArtifactStagingDirectory)
-      CleanTargetFolder: true
-
-  - task: PublishBuildArtifacts@1
-    displayName: publish back deploy folder
-    inputs:
-      ArtifactName: 'itlab-back-deploy'
-
+  - job: Backend
+    steps:
+    - script: ./build.sh --build-id $(Build.BuildId)
+    - publish: deploy
+      artifact: itlab-back
+- stage: packInDocker
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - job: packApi
+    steps:
+      - checkout: none
+      - download: current
+        artifact: itlab-back
+      - task: Docker@2
+        inputs:
+          containerRegistry: 'rtuitlab connection by admin'
+          repository: 'rtuitlab/itlab-back'
+          command: 'buildAndPush'
+          Dockerfile: '$(Pipeline.Workspace)/itlab-back/Dockerfile'
+          buildContext: '$(Pipeline.Workspace)/itlab-back'
+          tags: |
+            $(Build.BuildId)
+            latest
+- stage: UpdateService
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: none
+            - task: SSH@0
+              inputs:
+                sshEndpoint: 'swarm manager'
+                runOptions: 'commands'
+                commands: 'docker service update --image rtuitlab/itlab-back:$(Build.BuildId) itlab_back'
+                readyTimeout: '20000'

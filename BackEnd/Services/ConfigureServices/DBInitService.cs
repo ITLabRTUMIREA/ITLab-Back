@@ -59,9 +59,12 @@ namespace BackEnd.Services.ConfigureServices
 
         private async Task CreateRoles()
         {
-            foreach (var roleName in Enum.GetValues(typeof(RoleNames)).Cast<RoleNames>())
+            foreach (var roleName in Enum.GetValues(typeof(RoleNames))
+                .Cast<RoleNames>()
+                .Select(n => n.ToString())
+                .Concat(new string[] { "Administrator" })) // Administrator for identity service
             {
-                var result = await roleManager.CreateAsync(new Role { Name = roleName.ToString() });
+                var result = await roleManager.CreateAsync(new Role { Name = roleName });
                 logger.LogInformation(JsonConvert.SerializeObject(result));
             }
         }
