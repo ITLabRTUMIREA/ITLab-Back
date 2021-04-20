@@ -38,7 +38,10 @@ namespace BackEnd.Controllers.Users
             user.EmailConfirmed = true;
             var result = await UserManager.CreateAsync(user, account.Password);
             if (result.Succeeded)
+            {
                 await registerTokens.RemoveToken(account.Email);
+                await UserManager.AddClaimAsync(user, new System.Security.Claims.Claim("itlab", "user"));
+            }
 
             return Ok();
         }
