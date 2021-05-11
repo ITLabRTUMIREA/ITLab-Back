@@ -66,6 +66,7 @@ namespace BackEnd
             services.Configure<List<RegisterTokenPair>>(Configuration.GetSection(nameof(RegisterTokenPair)));
             services.Configure<EmailTemplateSettings>(Configuration.GetSection(nameof(EmailTemplateSettings)));
             services.Configure<BuildInformation>(Configuration.GetSection(nameof(BuildInformation)));
+            services.Configure<AuthHeaderSettings>(Configuration.GetSection(nameof(AuthHeaderSettings)));
 
             services.AddMvc(options =>
             {

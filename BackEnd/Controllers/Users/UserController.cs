@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper.QueryableExtensions;
 using BackEnd.DataBase;
+using BackEnd.Models.Settings;
 using BackEnd.Models.Roles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,8 @@ using Models.PublicAPI.Requests.User;
 using System.Collections.Generic;
 using Models.People.UserProperties;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 
 namespace BackEnd.Controllers.Users
 {
@@ -27,11 +30,13 @@ namespace BackEnd.Controllers.Users
         private readonly IUserRegisterTokens registerTokens;
         private readonly IEmailSender emailSender;
         private readonly IMapper mapper;
+        private readonly string authKeyForNotifyService;
 
         public UserController(UserManager<User> userManager,
                               DataBaseContext dbContext,
                               IUserRegisterTokens registerTokens,
                               IEmailSender emailSender,
+                              IOptions<AuthHeaderSettings> options,
                               IMapper mapper
             ) : base(userManager)
         {
@@ -39,6 +44,7 @@ namespace BackEnd.Controllers.Users
             this.registerTokens = registerTokens;
             this.emailSender = emailSender;
             this.mapper = mapper;
+            this.authKeyForNotifyService = options.Value.Key;
         }
         [HttpGet]
         public async Task<ActionResult<List<UserView>>> GetAsync(
@@ -54,6 +60,22 @@ namespace BackEnd.Controllers.Users
                 .If(count > 0, users => users.Skip(offset * count).Take(count))
                 .ProjectTo<UserView>(mapper.ConfigurationProvider)
                 .ToListAsync();
+
+        [HttpGet("all")]
+        [AllowAnonymous]
+        public async Task<ActionResult<List<UserView>>> GetAllUsersByHeaderKeyAsync()
+        {
+            if (Request.Headers.TryGetValue("Key", out var value)) {
+                if (value.Equals(authKeyForNotifyService)) {
+                    var users = await UserManager
+                        .Users
+                        .ProjectTo<UserView>(mapper.ConfigurationProvider)
+                        .ToListAsync();
+                    return users;
+                }
+            } 
+            return NotFound();
+        }
 
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<UserView>> GetAsync(Guid id)
