@@ -63,10 +63,21 @@ namespace BackEnd.Controllers.Users
 
         [HttpGet("all")]
         [AllowAnonymous]
-        public async Task<ActionResult<List<UserView>>> GetAllUsersByHeaderKeyAsync()
+        public async Task<ActionResult<List<UserView>>> GetAllUsersByHeaderKeyAsync(string claimType = "", string claimValue = "")
         {
             if (Request.Headers.TryGetValue("Key", out var value)) {
                 if (value.Equals(authKeyForNotifyService)) {
+                    System.Console.WriteLine($"Claim type = ${claimType}");
+                    System.Console.WriteLine($"Claim value = ${claimValue}");
+                    if (!string.IsNullOrEmpty(claimType) && !string.IsNullOrEmpty(claimValue))
+                    {
+                        var usersWithClaim = await UserManager
+                            .GetUsersForClaimAsync(new System.Security.Claims.Claim(claimType, claimValue));
+
+                        return await usersWithClaim.AsQueryable()
+                            .ProjectTo<UserView>(mapper.ConfigurationProvider)
+                            .ToListAsync();
+                    }
                     var users = await UserManager
                         .Users
                         .ProjectTo<UserView>(mapper.ConfigurationProvider)
