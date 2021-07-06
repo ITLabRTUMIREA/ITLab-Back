@@ -71,12 +71,21 @@ namespace BackEnd.Controllers.Users
                     System.Console.WriteLine($"Claim value = ${claimValue}");
                     if (!string.IsNullOrEmpty(claimType) && !string.IsNullOrEmpty(claimValue))
                     {
-                        var usersWithClaim = await UserManager
-                            .GetUsersForClaimAsync(new System.Security.Claims.Claim(claimType, claimValue));
+                        var usersWithClaim = (await UserManager
+                            .GetUsersForClaimAsync(new System.Security.Claims.Claim(claimType, claimValue)))
+                            .Select(user =>
+                            new UserView
+                            {
+                                Id = user.Id,
+                                Email = user.Email,
+                                FirstName = user.FirstName,
+                                LastName = user.LastName,
+                                MiddleName = user.MiddleName,
+                                PhoneNumber = user.PhoneNumber
+                            })
+                            .ToList();
 
-                        return await usersWithClaim.AsQueryable()
-                            .ProjectTo<UserView>(mapper.ConfigurationProvider)
-                            .ToListAsync();
+                        return usersWithClaim;
                     }
                     var users = await UserManager
                         .Users
